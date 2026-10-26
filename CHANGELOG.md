@@ -7,6 +7,10 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 
 ## [Unreleased]
 
+### Fixed
+
+- `fusible build`: a firmware build command whose program is not installed (for example `cargo` on a machine without Rust) now fails with `firmware build tool not found: cargo` and a hint to install it and fix the PATH, instead of the generic "check firmware build configuration".
+
 ## [0.20.9] - 2026-10-25
 
 ### Fixed

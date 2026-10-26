@@ -20,6 +20,12 @@ pub enum BuildError {
     #[diagnostic(help("check firmware build configuration and dependencies"))]
     FirmwareFailed(String),
 
+    #[error("firmware build tool not found: {0}")]
+    #[diagnostic(help(
+        "install it and make sure it is on your PATH, then open a new terminal (Rust: https://rustup.rs)"
+    ))]
+    ToolMissing(String),
+
     #[error("firmware build execution failed: {0}")]
     #[diagnostic(help("ensure your shell and build tools are properly installed"))]
     ExecutionFailed(String),
@@ -69,9 +75,19 @@ fn build_firmware(name: &str, fw: &FirmwareConfig) -> Result<(), BuildError> {
     let status = execute_shell(cmd, fw.path.as_deref())
         .map_err(|e| BuildError::ExecutionFailed(e.to_string()))?;
     if !status.success() {
-        return Err(BuildError::FirmwareFailed(cmd.clone()));
+        return Err(match missing_tool(cmd, status.code()) {
+            Some(tool) => BuildError::ToolMissing(tool),
+            None => BuildError::FirmwareFailed(cmd.clone()),
+        });
     }
     Ok(())
+}
+
+/// Names the program of `cmd` when the shell exit code says it was not found
+/// (127 for `sh`, 9009 for `cmd`).
+pub(crate) fn missing_tool(cmd: &str, code: Option<i32>) -> Option<String> {
+    matches!(code, Some(127 | 9009))
+        .then(|| cmd.split_whitespace().next().unwrap_or(cmd).to_string())
 }
 
 /// Runs `cmd` through the platform shell, inside `work_dir` when given.
@@ -94,4 +110,23 @@ pub(crate) fn execute_shell(
     }
 
     command.status()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::missing_tool;
+
+    #[test]
+    fn a_not_found_exit_code_names_the_program() {
+        assert_eq!(
+            missing_tool("cargo test", Some(9009)).as_deref(),
+            Some("cargo")
+        );
+        assert_eq!(
+            missing_tool("cargo test", Some(127)).as_deref(),
+            Some("cargo")
+        );
+        assert_eq!(missing_tool("cargo test", Some(101)), None);
+        assert_eq!(missing_tool("cargo test", None), None);
+    }
 }
