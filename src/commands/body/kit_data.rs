@@ -5,7 +5,10 @@ use std::collections::HashMap;
 use serde::Serialize;
 
 use super::edges::edge_contacts;
-use super::kit_levels::{component_heights, keep_out, level_of, warnings, KitKeepOut};
+use super::kit_levels::{
+    component_heights, keep_out, level_of, verified_top, warnings, KitKeepOut,
+};
+use super::kit_parts::PartFacts;
 use super::spec::open_ring;
 use super::{BodyError, CLEARANCE, DEFAULT_BOARD_THICKNESS, EDGE_TOLERANCE, NOTCH_MARGIN};
 use crate::gerber::layers::{PcbComponentElm, PcbPoint};
@@ -145,18 +148,37 @@ fn label(component: &PcbComponentElm, names: &HashMap<String, String>) -> String
         .unwrap_or_else(|| "component".into())
 }
 
+/// What one board scan shares between its components.
+struct Scan<'a> {
+    outline: &'a [PcbPoint],
+    names: HashMap<String, String>,
+    heights: HashMap<String, (f64, f64)>,
+    facts: PartFacts,
+    half: f64,
+}
+
+/// The bottom and height of `c`, with a verified top applied to a top-side part.
+fn level(c: &PcbComponentElm, scan: &Scan) -> Option<(f64, f64)> {
+    let measured = level_of(c, &scan.heights);
+    let on_top = c.layer.as_deref().unwrap_or("top") == "top";
+    let Some(top) = verified_top(scan.facts.part_ids(c)).filter(|_| on_top) else {
+        return measured;
+    };
+    let bottom = measured.map_or(scan.half, |(z, _)| z);
+    Some((bottom, scan.half + top - bottom))
+}
+
 /// A component's kit entry and the wall openings it needs, or `None` without a footprint.
-fn entry(
-    c: &PcbComponentElm,
-    outline: &[PcbPoint],
-    names: &HashMap<String, String>,
-    heights: &HashMap<String, (f64, f64)>,
-) -> Option<(KitComponent, Vec<KitOpening>)> {
+///
+/// Only a connector gets openings; any other part at the edge stays in `components` alone.
+fn entry(c: &PcbComponentElm, scan: &Scan) -> Option<(KitComponent, Vec<KitOpening>)> {
     let (center, w, h) = (c.center?, c.width?, c.height?);
-    let name = label(c, names);
-    let contacts = edge_contacts(c, outline);
+    let name = label(c, &scan.names);
+    let contacts = edge_contacts(c, scan.outline);
+    let wanted = scan.facts.is_connector(c);
     let openings: Vec<KitOpening> = contacts
         .iter()
+        .filter(|_| wanted)
         .map(|k| KitOpening {
             component: name.clone(),
             edge: k.edge,
@@ -166,7 +188,7 @@ fn entry(
             to: k.span[1],
         })
         .collect();
-    let level = level_of(c, heights);
+    let level = level(c, scan);
     let component = KitComponent {
         z: level.map(|(z, _)| z),
         height: level.map(|(_, h)| h),
@@ -185,6 +207,7 @@ fn entry(
 pub(crate) fn build_kit(json: &str, board: Option<String>) -> Result<Kit, BodyError> {
     let names = component_names(json)?;
     let heights = component_heights(json)?;
+    let facts = PartFacts::parse(json)?;
     let model = PcbModel::parse(json);
     let elm = model.boards.first().ok_or(BodyError::NoBoard)?;
     let outline = open_ring(elm.outline_points());
@@ -192,10 +215,15 @@ pub(crate) fn build_kit(json: &str, board: Option<String>) -> Result<Kit, BodyEr
         return Err(BodyError::NoBoard);
     }
     let (holes, skipped) = holes(&model);
-    let entries = model
-        .components
-        .iter()
-        .filter_map(|c| entry(c, &outline, &names, &heights));
+    let thickness = elm.thickness.unwrap_or(DEFAULT_BOARD_THICKNESS);
+    let scan = Scan {
+        outline: &outline,
+        names,
+        heights,
+        facts,
+        half: thickness / 2.0,
+    };
+    let entries = model.components.iter().filter_map(|c| entry(c, &scan));
     let (components, openings): (Vec<_>, Vec<_>) = entries.unzip();
     let keep_out = keep_out(&components);
     let unmeasured = components.len() - keep_out.len();
@@ -204,7 +232,7 @@ pub(crate) fn build_kit(json: &str, board: Option<String>) -> Result<Kit, BodyEr
         units: "mm",
         frame: "pcb coordinates, Z-up; the enclosure generator uses the same X/Y",
         outline: outline.iter().map(|p| [p.x, p.y]).collect(),
-        thickness: elm.thickness.unwrap_or(DEFAULT_BOARD_THICKNESS),
+        thickness,
         holes,
         components,
         keep_out,
