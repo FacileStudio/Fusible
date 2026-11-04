@@ -1,0 +1,6 @@
+#!/bin/sh
+printf '%s\n' "$*" >> "$FAKE_LOG"
+case "$1 $2" in
+  "task add") printf '{"id":"task-%s"}\n' "$$" ;;
+  *) printf '{}\n' ;;
+esac
