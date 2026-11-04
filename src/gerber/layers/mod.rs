@@ -10,7 +10,10 @@ mod font;
 mod geometry;
 mod holes;
 mod math;
+mod nets;
 mod parse;
+mod pour;
+mod pour_shape;
 mod rounded;
 mod shapes;
 mod sites;
@@ -20,8 +23,8 @@ use thiserror::Error;
 
 pub use copper::CopperLayer;
 pub use elements::{
-    PcbBoardElm, PcbComponentElm, PcbHoleElm, PcbModel, PcbPlatedHoleElm, PcbPoint,
-    PcbSilkscreenPathElm, PcbSilkscreenTextElm, PcbSmtPadElm, PcbTraceElm, PcbTracePoint,
+    PcbBoardElm, PcbComponentElm, PcbCopperPourElm, PcbHoleElm, PcbModel, PcbPlatedHoleElm,
+    PcbPoint, PcbSilkscreenPathElm, PcbSilkscreenTextElm, PcbSmtPadElm, PcbTraceElm, PcbTracePoint,
     PcbViaElm,
 };
 

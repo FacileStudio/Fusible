@@ -34,6 +34,7 @@ pub(super) enum Feature {
     Flash(Aperture, [f64; 2]),
     Stroke(Aperture, [f64; 2], [f64; 2]),
     Region(Vec<[f64; 2]>),
+    Polarity(bool),
 }
 
 impl PadShape {
@@ -90,7 +91,7 @@ pub(super) fn render(
         .iter()
         .map(|f| match f {
             Feature::Flash(ap, _) | Feature::Stroke(ap, _, _) => Some(dict.intern(ap.clone())),
-            Feature::Region(_) => None,
+            Feature::Region(_) | Feature::Polarity(_) => None,
         })
         .collect();
     let mut writer = GerberWriter::new(title, func, polarity, &dict);
@@ -104,6 +105,7 @@ pub(super) fn render(
                 writer.move_to(Coord::from_mm(*x1), Coord::from_mm(*y1));
                 writer.draw_to(Coord::from_mm(*x2), Coord::from_mm(*y2));
             }
+            Feature::Polarity(dark) => writer.polarity(*dark),
             Feature::Region(points) => {
                 let pts: Vec<[Coord; 2]> = points.iter().map(|p| coord(*p)).collect();
                 writer.region(&pts);

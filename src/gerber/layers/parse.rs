@@ -49,6 +49,10 @@ impl PcbModel {
             "pcb_silkscreen_text" => self.silkscreen_texts.push(decode(&typ, index, val)?),
             "pcb_component" => self.components.push(decode(&typ, index, val)?),
             "pcb_hole" => self.holes.push(decode(&typ, index, val)?),
+            "pcb_copper_pour" => self.pours.push(decode(&typ, index, val)?),
+            "pcb_port" | "source_port" | "source_net" | "source_trace" => {
+                self.nets.record(&typ, &val)
+            }
             _ => {}
         }
         Ok(())

@@ -13,9 +13,10 @@ impl PcbModel {
     /// Builds a copper layer: SMT pads, plated hole rings, via pads and trace strokes.
     pub fn build_copper_layer(&self, layer: CopperLayer) -> Result<String, GerberError> {
         let layer_count = self.copper_layers()?.len() as u8;
-        let mut features = self.smtpad_features(|pad| {
+        let mut features = self.pour_features(layer)?;
+        features.extend(self.smtpad_features(|pad| {
             Ok((CopperLayer::parse(pad.layer.as_deref())? == layer).then_some(0.0))
-        })?;
+        })?);
         features.extend(self.plated_ring_features(|_| Ok(Some(0.0)))?);
         features.extend(self.via_pad_features(0.0, true)?);
         features.extend(self.trace_features(layer)?);
