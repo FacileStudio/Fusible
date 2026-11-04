@@ -26,6 +26,7 @@
     <Switch checked={settings.value?.auto_update} aria-label="Update automatically" onchange={(e) => settings.save({ auto_update: e.currentTarget.checked })} />
   </SettingsRow>
   <SettingsRow label={status || "Check for updates"} stacked>
+    <div class="flex flex-col gap-3">
     {#if updater.state === "downloading"}
       <div class="h-2 w-full overflow-hidden rounded-full bg-fc-surface" role="progressbar" aria-label="Download progress" aria-valuenow={updater.percent ?? undefined} aria-valuemin={0} aria-valuemax={100}>
         <div class="h-full rounded-full bg-fc-accent transition-[width]" style:width="{updater.percent ?? 0}%"></div>
@@ -55,6 +56,7 @@
       {#if updater.version}
         <Button variant="ghost" onclick={() => api.openUrl(releaseUrl(updater.version!))}>Release notes</Button>
       {/if}
+    </div>
     </div>
   </SettingsRow>
 </SettingsSection>
