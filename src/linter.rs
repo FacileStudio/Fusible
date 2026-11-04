@@ -22,7 +22,8 @@ pub use context::LintContext;
 pub use diagnostics::{Diagnostic, FuseBlown, Severity};
 pub use rules::{
     AutorouteRule, BypassCapRule, DanglingReferenceRule, GhostNetRule, MalformedElementRule,
-    PinMuxRule, SchematicScaleRule, ShortedNetsRule, TraceClearanceRule, UnconnectedNetRule,
+    PinMuxRule, QfnFootprintSpanRule, SchematicScaleRule, ShortedNetsRule, TraceClearanceRule,
+    UnconnectedNetRule,
 };
 
 // ---------------------------------------------------------------------------
@@ -99,5 +100,6 @@ impl Default for Linter {
             .with_rule(TraceClearanceRule)
             .with_rule(SchematicScaleRule)
             .with_rule(AutorouteRule)
+            .with_rule(QfnFootprintSpanRule)
     }
 }

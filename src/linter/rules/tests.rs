@@ -12,6 +12,7 @@ mod bypass;
 mod clearance;
 mod mcu_target;
 mod pin_mux;
+mod qfn_footprint;
 mod references;
 mod schematic;
 
