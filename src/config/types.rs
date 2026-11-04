@@ -68,6 +68,15 @@ pub struct BodyConfig {
     pub enclosure: EnclosureConfig,
 }
 
+impl BodyConfig {
+    /// A code part: its `source` is a TypeScript module that builds the shape.
+    pub fn is_code(&self) -> bool {
+        self.source
+            .as_ref()
+            .is_some_and(|s| s.extension().is_some_and(|e| e.eq_ignore_ascii_case("ts")))
+    }
+}
+
 /// Settings of the `enclosure` generator (base + lid around a board outline).
 #[derive(Debug, Clone, Deserialize, Default, PartialEq)]
 pub struct EnclosureConfig {

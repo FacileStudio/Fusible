@@ -10,6 +10,13 @@ const GENERATOR_TS: &str = include_str!("../../assets/enclosure.ts");
 const CONVERT_TS: &str = include_str!("../../assets/convert.ts");
 const ASSEMBLY_TS: &str = include_str!("../../assets/assembly.ts");
 const PROBES_TS: &str = include_str!("../../assets/probes.ts");
+const PART_FILES: &[(&str, &str)] = &[
+    ("part.ts", include_str!("../../assets/part.ts")),
+    ("part_board.ts", include_str!("../../assets/part_board.ts")),
+    ("part_cad.ts", include_str!("../../assets/part_cad.ts")),
+    ("part_hw.ts", include_str!("../../assets/part_hw.ts")),
+    ("part_ops.ts", include_str!("../../assets/part_ops.ts")),
+];
 pub(super) const OCCT_WASM_VERSION: &str = "5.7.1";
 static PREPARE: Mutex<()> = Mutex::new(());
 
@@ -38,6 +45,9 @@ pub(super) fn prepare_generator(bun: &Path, dir: &Path) -> Result<(), BodyError>
     write_atomic(&dir.join("convert.ts"), CONVERT_TS)?;
     write_atomic(&dir.join("assembly.ts"), ASSEMBLY_TS)?;
     write_atomic(&dir.join("probes.ts"), PROBES_TS)?;
+    for (name, content) in PART_FILES {
+        write_atomic(&dir.join(name), content)?;
+    }
     write_atomic(&dir.join("package.json"), &package_json())?;
     if dir.join("node_modules/occt-wasm/package.json").exists() {
         return Ok(());

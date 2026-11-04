@@ -6,6 +6,7 @@
 //! vents) from Circuit JSON, then hands a JSON spec to an embedded TypeScript generator
 //! that runs the OpenCascade kernel (`occt-wasm`) under bun and writes the CAD files.
 
+mod authored;
 mod convert;
 mod edges;
 mod eject;
@@ -19,7 +20,15 @@ mod jobs;
 mod kit;
 mod kit_data;
 mod kit_levels;
+mod kit_parts;
 mod layout;
+mod mech_check;
+mod mech_rules;
+mod mech_rules_data;
+mod mech_rules_parts;
+mod new;
+mod part;
+mod part_features;
 mod settings;
 mod spec;
 mod step;
@@ -36,6 +45,8 @@ mod generator_tests;
 #[cfg(test)]
 mod jobs_tests;
 #[cfg(test)]
+mod kit_parts_tests;
+#[cfg(test)]
 mod kit_tests;
 #[cfg(test)]
 mod layout_tests;
@@ -45,20 +56,22 @@ mod tests;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 
-use crate::commands::build::execute_shell;
 use crate::commands::check;
 use crate::commands::target::BoardTarget;
 use crate::config::{BodyConfig, EnclosureConfig, FusibleConfig};
 use crate::gerber::PcbModel;
 
+pub(crate) use authored::build_authored;
 pub(crate) use convert::convert_to_glb;
 pub use eject::eject;
 pub use error::BodyError;
 use generator::run_generator;
-pub(crate) use generator::{generator_dir, run_script};
+pub(crate) use generator::{generator_dir, run_capture, run_script};
 use jobs::{select_jobs, Job};
 pub use kit::kit;
 pub(crate) use kit_data::{build_kit, Kit, KitOpening};
+pub use mech_check::verify_mech;
+pub use new::new;
 use settings::{preview_settings, resolve_settings, Settings};
 use spec::{build_spec, preview_from, Output, Spec};
 pub(crate) use step::generate_step;
@@ -113,34 +126,15 @@ pub fn run(
     for job in select_jobs(&cfg.unwrap_or_default(), target)? {
         match job {
             Job::Authored { name, body } => build_authored(&name, &body, root)?,
+            Job::Code { name, body, board } => {
+                part::build_code(&name, &body, board.as_deref(), &overrides, skip_lint)?;
+            }
             Job::Generated { name, body, board } => {
                 let settings = resolve_settings(overrides.clone(), body.enclosure)?;
                 build_generated(&name, &board, &settings, skip_lint)?;
             }
         }
     }
-    Ok(())
-}
-
-/// Runs the `build:` command of an authored body from `root`, then checks that its `source` exists.
-pub(crate) fn build_authored(name: &str, body: &BodyConfig, root: &Path) -> Result<(), BodyError> {
-    let path = body.source.clone().unwrap_or_default();
-    if let Some(command) = &body.build {
-        println!("🛠️  Building body `{name}`: \"{command}\"...");
-        let failed = || BodyError::BuildFailed {
-            name: name.to_string(),
-            command: command.clone(),
-        };
-        let status = execute_shell(command, Some(root)).map_err(|_| failed())?;
-        status.success().then_some(()).ok_or_else(failed)?;
-    }
-    if !path.is_file() {
-        return Err(BodyError::MissingSource {
-            name: name.to_string(),
-            path,
-        });
-    }
-    println!("✅ Body {name} (authored) -> {}", path.display());
     Ok(())
 }
 

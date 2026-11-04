@@ -26,10 +26,10 @@ pub use detect::{detect, Part};
 pub use error::BomError;
 pub use estimate::Body;
 pub use file::{bom_path, BomFile, PartEntry, PrintEntry, PrintSettings};
-pub use project::bodies_of;
-pub use render::{csv, table};
-pub use report::{build, Kind, Line, Report, Totals};
 pub use materials::{
     library as materials, resolve as resolve_material, validate as validate_material, Material,
 };
+pub use project::bodies_of;
+pub use render::{csv, table};
+pub use report::{build, Kind, Line, Report, Totals};
 pub use stl::{stl_grams, stl_mass};

@@ -2,7 +2,7 @@
 
 use std::path::Path;
 
-use super::materials::{library, DEFAULT_MATERIAL, Material};
+use super::materials::{library, Material, DEFAULT_MATERIAL};
 
 const EFFECTIVE_FILL: f64 = 0.4;
 
@@ -74,7 +74,11 @@ fn signed_volume([a, b, c]: &Facet) -> f64 {
 pub fn stl_mass(path: &Path, material: &Material, process: &str) -> Option<f64> {
     let bytes = std::fs::read(path).ok()?;
     let cm3 = volume_mm3(&bytes)? / 1000.0;
-    let fill = if process == "fdm" { EFFECTIVE_FILL } else { 1.0 };
+    let fill = if process == "fdm" {
+        EFFECTIVE_FILL
+    } else {
+        1.0
+    };
     Some((cm3 * material.density * fill * 10.0).round() / 10.0)
 }
 

@@ -42,7 +42,10 @@ pub fn validate(material: Option<&str>, process: Option<&str>) -> Result<(), Str
     };
     let found = library().get(key).ok_or_else(|| {
         let known: Vec<&str> = library().keys().map(String::as_str).collect();
-        format!("unknown material `{key}`; known materials: {}", known.join(", "))
+        format!(
+            "unknown material `{key}`; known materials: {}",
+            known.join(", ")
+        )
     })?;
     match process {
         Some(p) if !found.processes.iter().any(|s| s == p) => Err(format!(

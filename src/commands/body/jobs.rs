@@ -16,6 +16,11 @@ pub(super) enum Job {
         body: BodyConfig,
         board: Box<BoardTarget>,
     },
+    Code {
+        name: String,
+        body: BodyConfig,
+        board: Option<Box<BoardTarget>>,
+    },
 }
 
 /// Picks the bodies for `target`: a body name, a board, or every body of the manifest.
@@ -28,13 +33,13 @@ pub(super) fn select_jobs(
         .and_then(|t| t.to_str())
         .and_then(|n| cfg.bodies.get_key_value(n));
     if let Some((name, body)) = by_name {
-        return Ok(vec![job(name, body)?]);
+        return Ok(vec![job(cfg, name, body)?]);
     }
     if target.is_none() && !cfg.bodies.is_empty() {
         return cfg
             .bodies
             .iter()
-            .map(|(name, body)| job(name, body))
+            .map(|(name, body)| job(cfg, name, body))
             .collect();
     }
     let board = resolve_board(target)?;
@@ -54,7 +59,25 @@ pub(super) fn select_jobs(
     Ok(vec![generated(&name, &BodyConfig::default(), board)])
 }
 
-fn job(name: &str, body: &BodyConfig) -> Result<Job, TargetError> {
+/// The board a code part is modeled on: its `board:`, else the only board of the project.
+pub(crate) fn code_board(
+    cfg: &FusibleConfig,
+    body: &BodyConfig,
+) -> Result<Option<BoardTarget>, TargetError> {
+    let Some(name) = cfg.body_board(body) else {
+        return Ok(None);
+    };
+    resolve_board(Some(PathBuf::from(name))).map(Some)
+}
+
+fn job(cfg: &FusibleConfig, name: &str, body: &BodyConfig) -> Result<Job, TargetError> {
+    if body.is_code() {
+        return Ok(Job::Code {
+            name: name.to_string(),
+            body: body.clone(),
+            board: code_board(cfg, body)?.map(Box::new),
+        });
+    }
     if body.source.is_some() {
         return Ok(Job::Authored {
             name: name.to_string(),

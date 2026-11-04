@@ -19,6 +19,7 @@ const tray = (env: Env, outline: [number, number][], wall: number, h: number, fl
   rec.floorTop = zb + floor;
   rec.features.push({ kind: "wall", part: "wall", thickness: wall, at: [0, 0, zb] });
   rec.features.push({ kind: "wall", part: "floor", thickness: floor, at: [0, 0, zb] });
+  rec.features.push({ kind: "clearance", gap: CLEARANCE, at: [0, 0, zb] });
   const outer = face(ring(env, outline, CLEARANCE + wall), zb, h);
   return k.cut(outer, face(ring(env, outline, CLEARANCE), zb + floor, h));
 };
@@ -30,9 +31,10 @@ const boss = (env: Env, x: number, y: number, o: { insert?: Size; screw?: Size; 
   const hw = INSERTS[o.insert ?? o.screw ?? "m3"];
   const bore = o.insert ? hw.bore : hw.pilot;
   const depth = o.insert ? hw.length : o.h;
+  const hole = o.insert ? { bore } : { pilot: bore };
   const top = env.rec.floorTop + o.h;
   const at: [number, number, number] = [x, y, env.rec.floorTop];
-  env.rec.features.push({ kind: "boss", insert: o.insert, screw: o.screw, bore, outer: hw.outer, h: o.h, below: deepestBelow(env.board), at });
+  env.rec.features.push({ kind: "boss", insert: o.insert, screw: o.screw, ...hole, outer: hw.outer, h: o.h, below: deepestBelow(env.board), at });
   return env.k.cut(column(env, x, y, hw.outer, o.h), post(env.k, x, y, top - depth, bore, depth + 1));
 };
 

@@ -6,6 +6,7 @@ use miette::Diagnostic;
 use thiserror::Error;
 
 use crate::commands::assembly::{self, AssemblyError};
+use crate::commands::body;
 use crate::commands::check_merge::{label, merge};
 use crate::commands::links::check_links;
 pub use crate::commands::source::{find_fallback_circuit_json, load_circuit_source};
@@ -117,6 +118,9 @@ pub fn run_boards(
     if failure.is_none() {
         failure = check_manifest_assembly(boards).err();
     }
+    if failure.is_none() {
+        failure = check_manifest_mech(boards).err();
+    }
     failure.map_or(Ok(()), Err)
 }
 
@@ -146,6 +150,17 @@ fn check_manifest_assembly(boards: &[BoardTarget]) -> Result<(), CheckError> {
         AssemblyError::Check(inner) => inner,
         other => CheckError::Assembly(Box::new(other)),
     })
+}
+
+fn check_manifest_mech(boards: &[BoardTarget]) -> Result<(), CheckError> {
+    let Some((manifest, cfg)) = FusibleConfig::nearest() else {
+        return Ok(());
+    };
+    if !checked_every_board(&cfg, boards) {
+        return Ok(());
+    }
+    let root = manifest.parent().unwrap_or(Path::new("."));
+    body::verify_mech(&cfg, root)
 }
 
 fn check_board(

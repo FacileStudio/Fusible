@@ -11,7 +11,7 @@ type Input = {
   material: string;
   process: string;
   gap: number;
-  outputs: { format: "step" | "stl" | "glb"; path: string }[];
+  outputs: { format: "step" | "stl" | "glb" | "brep"; path: string }[];
 };
 
 const STEP_DATE = "2000-01-01T00:00:00";
@@ -31,6 +31,7 @@ const interferences = (k: OcctKernel, shape: ShapeHandle, kit: Kit | null, gap: 
 const writers = (k: OcctKernel, shape: ShapeHandle) => ({
   step: () => stableStep(k.exportStep(shape)),
   stl: () => k.exportStl(shape, 0.05),
+  brep: () => k.toBREP(shape),
   glb: () => {
     const doc = k.createXCAFDocument();
     doc.addShape(shape, { name: "part", color: [0.18, 0.2, 0.23] });

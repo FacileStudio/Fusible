@@ -27,6 +27,9 @@ pub fn body(args: BodyArgs) -> ExitCode {
         Some(BodyAction::Kit(a)) => {
             return body_exit(commands::body::kit(a.board, a.output, a.skip_lint));
         }
+        Some(BodyAction::New(a)) => {
+            return body_exit(commands::body::new(a.name, a.board, a.material, a.process))
+        }
         None => {}
     }
     let overrides = EnclosureConfig {

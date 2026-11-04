@@ -116,6 +116,28 @@ pub enum BodyAction {
 
     /// Export a reference kit (outline, holes, openings, board STEP) to model parts around a board
     Kit(KitArgs),
+
+    /// Scaffold a code part: mech/<NAME>.ts, editor types, and its fusible.yml entry
+    New(NewArgs),
+}
+
+#[derive(Debug, Args, PartialEq)]
+pub struct NewArgs {
+    /// Name of the new body; unique across boards, firmware and bodies
+    #[arg(value_name = "NAME")]
+    pub name: String,
+
+    /// Board the part is modeled on [default: the only board]
+    #[arg(long)]
+    pub board: Option<String>,
+
+    /// Material key from the material library
+    #[arg(long, default_value = "petg")]
+    pub material: String,
+
+    /// Manufacturing process: fdm, sla, mjf, injection or cnc
+    #[arg(long, default_value = "fdm")]
+    pub process: String,
 }
 
 #[derive(Debug, Args, PartialEq)]
