@@ -37,6 +37,14 @@ pub struct Diagnostic {
     pub help: Option<String>,
     /// Set by the linter from the rule that produced this diagnostic.
     pub severity: Severity,
+    /// Standard or guideline the check comes from, e.g. `IPC-2152`.
+    pub standard: Option<String>,
+    /// Where to read that standard.
+    pub source_url: Option<String>,
+    /// Ids of the circuit elements involved.
+    pub elements: Vec<String>,
+    /// A concrete change that clears the violation.
+    pub fix: Option<String>,
 }
 
 impl miette::Diagnostic for Diagnostic {
@@ -55,6 +63,12 @@ impl miette::Diagnostic for Diagnostic {
         self.help
             .as_deref()
             .map(|help| Box::new(help) as Box<dyn fmt::Display>)
+    }
+
+    fn url(&self) -> Option<Box<dyn fmt::Display + '_>> {
+        self.source_url
+            .as_deref()
+            .map(|url| Box::new(url) as Box<dyn fmt::Display>)
     }
 }
 

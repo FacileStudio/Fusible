@@ -8,9 +8,11 @@ use crate::silicon::{find_target, SiliconTarget};
 /// chip missing from the silicon database is an error diagnostic.
 pub(super) fn resolve_target(
     ctx: &LintContext<'_>,
-) -> Result<Option<&'static SiliconTarget>, Diagnostic> {
+) -> Result<Option<&'static SiliconTarget>, Box<Diagnostic>> {
     match ctx.mcu {
-        Some(chip) => find_target(chip).map(Some).ok_or_else(|| unknown_mcu(chip)),
+        Some(chip) => find_target(chip)
+            .map(Some)
+            .ok_or_else(|| Box::new(unknown_mcu(chip))),
         None => Ok(detect_mcu_chip(ctx.circuit)),
     }
 }
