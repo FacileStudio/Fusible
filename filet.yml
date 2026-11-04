@@ -9,6 +9,9 @@ ignore:
   - desktop/src-tauri/target
   - desktop/src-tauri/gen
   - desktop/src-tauri/binaries
+  - site/build
+  - site/.svelte-kit
+  - site/node_modules
 
 extensions: [.rs, .ts]
 

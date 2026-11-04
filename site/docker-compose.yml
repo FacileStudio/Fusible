@@ -1,0 +1,10 @@
+services:
+  fusible:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    labels:
+      - "journal.app=fusible"
+    expose:
+      - "80"
+    restart: unless-stopped
