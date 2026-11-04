@@ -51,6 +51,7 @@ export const api = {
   checkUpdate: (auto: boolean) => call<UpdateCheck>("check_update", { auto }),
   installUpdate: () => call<void>("install_update"),
   restartApp: () => call<void>("restart_app"),
+  windowAction: (cmd: string) => call<void>(`plugin:window|${cmd}`, { label: "main" }),
   openUrl: (url: string) => call<void>("plugin:opener|open_url", { url }),
   appVersion: () => call<string>("plugin:app|version"),
   pickFolder: (title: string, defaultPath?: string) =>

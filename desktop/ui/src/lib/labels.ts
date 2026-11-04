@@ -1,6 +1,11 @@
 import type { Project } from "./types";
 
-export const CURRENCIES = ["EUR", "USD", "GBP", "CHF", "CAD", "AUD", "JPY", "CNY", "SEK", "NOK", "DKK", "PLN"];
+export const CURRENCIES = ["EUR", "USD", "GBP"];
+
+/** The offered currencies, plus a saved one that is not in the short list. */
+export function currencyChoices(current: string): string[] {
+  return CURRENCIES.includes(current) ? CURRENCIES : [...CURRENCIES, current];
+}
 
 function plural(count: number, one: string, many: string): string {
   return `${count} ${count === 1 ? one : many}`;

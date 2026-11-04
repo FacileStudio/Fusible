@@ -1,5 +1,6 @@
 import type { Project, Settings, ToolchainStatus } from "./types";
 
+const skipOnboarding = new URLSearchParams(location.search).has("skip-onboarding");
 const HOUR = 3600 * 1000;
 
 function ago(hours: number): string {
@@ -41,6 +42,8 @@ export function defaultSettings(): Settings {
     theme: "system",
     auto_update: true,
     last_update_check: Math.floor(Date.now() / 1000) - 3 * 3600,
+    onboarded: skipOnboarding,
+    allow_phone_pairing: false,
   };
 }
 

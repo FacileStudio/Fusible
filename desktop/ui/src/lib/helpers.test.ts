@@ -1,8 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { countsLabel } from "./labels";
 import { finalPath, shortenPath, suggestName } from "./path";
+import { checkedLabel, percentOf, releaseUrl } from "./updateText";
 import { toolchainReport } from "./report";
-import { filterProjects, moveSelection, pickSelection } from "./selection";
+import { filterProjects } from "./projects.svelte";
 import { relativeTime } from "./time";
 import type { Project } from "./types";
 import { validateName, validatePort } from "./validate";
@@ -94,29 +95,29 @@ const PROJECTS = [
   sample("Fresh", "/b/fresh", "2026-10-01T00:00:00Z"),
 ];
 
-describe("selection", () => {
-  test("orders the most recent first and defaults to it", () => {
-    const visible = filterProjects(PROJECTS, "");
-    expect(visible.map((p) => p.name)).toEqual(["Fresh", "Old", "Never"]);
-    expect(pickSelection(visible, null)).toBe("/b/fresh");
-    expect(pickSelection(visible, "/gone")).toBe("/b/fresh");
+describe("project list", () => {
+  test("orders the most recent first and never-opened last", () => {
+    expect(filterProjects(PROJECTS, "").map((p) => p.name)).toEqual(["Fresh", "Old", "Never"]);
   });
-  test("keeps a valid selection", () => {
-    expect(pickSelection(filterProjects(PROJECTS, ""), "/a/old")).toBe("/a/old");
-  });
-  test("moves with the keyboard and stops at the ends", () => {
-    const visible = filterProjects(PROJECTS, "");
-    expect(moveSelection(visible, "/b/fresh", 1)).toBe("/a/old");
-    expect(moveSelection(visible, "/a/never", 1)).toBe("/a/never");
-    expect(moveSelection(visible, "/b/fresh", -1)).toBe("/b/fresh");
-    expect(moveSelection(visible, null, 1)).toBe("/b/fresh");
-    expect(moveSelection([], null, 1)).toBeNull();
-  });
-  test("filters by name and path and clears a hidden selection", () => {
+  test("filters by name and path", () => {
     expect(filterProjects(PROJECTS, "FRESH").map((p) => p.path)).toEqual(["/b/fresh"]);
     expect(filterProjects(PROJECTS, "/a/").length).toBe(2);
-    const visible = filterProjects(PROJECTS, "never");
-    expect(pickSelection(visible, "/b/fresh")).toBe("/a/never");
-    expect(pickSelection(filterProjects(PROJECTS, "zzz"), "/b/fresh")).toBeNull();
+    expect(filterProjects(PROJECTS, "zzz")).toEqual([]);
+  });
+});
+
+describe("update text", () => {
+  test("percentOf handles unknown and oversized totals", () => {
+    expect(percentOf(10, null)).toBeNull();
+    expect(percentOf(10, 0)).toBeNull();
+    expect(percentOf(300, 200)).toBe(100);
+  });
+  test("checkedLabel and releaseUrl", () => {
+    const now = Date.parse("2026-10-24T12:00:00Z");
+    expect(checkedLabel(null, now)).toBe("Never checked");
+    expect(checkedLabel(now / 1000 - 30, now)).toBe("Checked just now");
+    expect(checkedLabel(now / 1000 - 3 * 3600, now)).toBe("Checked 3 hours ago");
+    expect(checkedLabel(now / 1000 - 5 * 86400, now)).toBe("Checked 5 days ago");
+    expect(releaseUrl("0.19.0")).toBe("https://github.com/FacileStudio/Fusible/releases/tag/v0.19.0");
   });
 });

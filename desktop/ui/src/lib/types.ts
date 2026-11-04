@@ -16,6 +16,8 @@ export type Settings = {
   theme: "system" | "dark" | "light";
   auto_update: boolean;
   last_update_check: number | null;
+  onboarded: boolean;
+  allow_phone_pairing: boolean;
 };
 
 export type Inspection = { has_manifest: boolean; name: string | null };

@@ -68,6 +68,9 @@ const handlers: Record<string, (args: Args) => Promise<unknown>> = {
   install_update: installUpdate,
   restart_app: () => delay(undefined),
   "plugin:opener|open_url": openUrl,
+  "plugin:window|close": () => delay(undefined),
+  "plugin:window|minimize": () => delay(undefined),
+  "plugin:window|toggle_maximize": () => delay(undefined),
   "plugin:app|version": () => delay("0.14.3"),
   "plugin:dialog|open": () => delay(query.get("pick") ?? "/home/yann/Code/Scratch"),
 };
