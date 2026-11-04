@@ -13,6 +13,7 @@ mod file;
 mod materials;
 #[cfg(test)]
 mod materials_tests;
+mod print_label;
 mod project;
 mod render;
 mod report;

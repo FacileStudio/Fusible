@@ -113,13 +113,7 @@ fn body_part(
         .copied()
         .unwrap_or(IDENTITY);
     let (input, format, offset) = match &body.source {
-        Some(_) if body.is_code() => {
-            let input = ctx.parts_dir.join(format!("{name}.step"));
-            println!("🧊 Building code part `{name}` as STEP...");
-            let circuit = board.map(|b| (ctx.circuits[b].1.as_str(), b));
-            code_step(body, ctx.root, circuit, input.clone())?;
-            (input, "step", IDENTITY)
-        }
+        Some(_) if body.is_code() => (code_input(ctx, name, body, board)?, "step", IDENTITY),
         Some(source) => {
             build_authored(name, body, ctx.root)?;
             (source.clone(), source_format(name, source)?, IDENTITY)
@@ -140,6 +134,19 @@ fn body_part(
         format,
         matrix: compose(&frame, &compose(&placement(place), &offset)),
     })
+}
+
+fn code_input(
+    ctx: &Context,
+    name: &str,
+    body: &BodyConfig,
+    board: Option<&str>,
+) -> Result<PathBuf, AssemblyError> {
+    let input = ctx.parts_dir.join(format!("{name}.step"));
+    println!("🧊 Building code part `{name}` as STEP...");
+    let circuit = board.map(|b| (ctx.circuits[b].1.as_str(), b));
+    code_step(body, ctx.root, circuit, input.clone())?;
+    Ok(input)
 }
 
 fn source_format(name: &str, path: &Path) -> Result<&'static str, AssemblyError> {

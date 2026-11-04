@@ -5,6 +5,8 @@
 
 #[cfg(test)]
 mod assembly_tests;
+#[cfg(test)]
+mod code_part_tests;
 mod discovery;
 pub mod error;
 #[cfg(test)]

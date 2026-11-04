@@ -1,5 +1,6 @@
 //! Text renderings of a report: an aligned table for the terminal, and CSV.
 
+use super::print_label::print_label;
 use super::report::{Kind, Line, Report};
 
 const HEADER: [&str; 6] = ["PICK", "QTY", "PART", "REFS", "UNIT", "TOTAL"];
@@ -7,24 +8,6 @@ const HEADER: [&str; 6] = ["PICK", "QTY", "PART", "REFS", "UNIT", "TOTAL"];
 fn price(value: Option<f64>, estimated: bool) -> String {
     let mark = if estimated { "~" } else { "" };
     value.map_or_else(|| "-".into(), |v| format!("{mark}{v:.2}"))
-}
-
-fn print_label(line: &Line) -> String {
-    let made = [line.material.clone(), line.process.clone()]
-        .into_iter()
-        .flatten()
-        .collect::<Vec<_>>()
-        .join(" ");
-    let grams = line.grams.map(|g| format!("{g} g"));
-    let detail = [Some(made).filter(|m| !m.is_empty()), grams]
-        .into_iter()
-        .flatten()
-        .collect::<Vec<_>>()
-        .join(", ");
-    match detail.is_empty() {
-        true => line.description.clone(),
-        false => format!("{} ({detail})", line.description),
-    }
 }
 
 fn label(line: &Line) -> String {

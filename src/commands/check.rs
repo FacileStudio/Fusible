@@ -118,9 +118,6 @@ pub fn run_boards(
     if failure.is_none() {
         failure = check_manifest_assembly(boards).err();
     }
-    if failure.is_none() {
-        failure = check_manifest_mech(boards).err();
-    }
     failure.map_or(Ok(()), Err)
 }
 
@@ -142,24 +139,16 @@ fn check_manifest_assembly(boards: &[BoardTarget]) -> Result<(), CheckError> {
     let Some((manifest, cfg)) = FusibleConfig::nearest() else {
         return Ok(());
     };
-    if cfg.assembly.is_none() || !checked_every_board(&cfg, boards) {
-        return Ok(());
-    }
-    let root = manifest.parent().unwrap_or(Path::new("."));
-    assembly::verify(&cfg, root).map_err(|error| match error {
-        AssemblyError::Check(inner) => inner,
-        other => CheckError::Assembly(Box::new(other)),
-    })
-}
-
-fn check_manifest_mech(boards: &[BoardTarget]) -> Result<(), CheckError> {
-    let Some((manifest, cfg)) = FusibleConfig::nearest() else {
-        return Ok(());
-    };
     if !checked_every_board(&cfg, boards) {
         return Ok(());
     }
     let root = manifest.parent().unwrap_or(Path::new("."));
+    if cfg.assembly.is_some() {
+        assembly::verify(&cfg, root).map_err(|error| match error {
+            AssemblyError::Check(inner) => inner,
+            other => CheckError::Assembly(Box::new(other)),
+        })?;
+    }
     body::verify_mech(&cfg, root)
 }
 

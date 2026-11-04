@@ -21,12 +21,14 @@ mod kit;
 mod kit_data;
 mod kit_levels;
 mod kit_parts;
+mod kit_scan;
 mod layout;
 mod mech_check;
 mod mech_rules;
 mod mech_rules_data;
 mod mech_rules_parts;
 mod new;
+mod new_manifest;
 mod part;
 mod part_features;
 mod settings;
@@ -50,6 +52,8 @@ mod kit_parts_tests;
 mod kit_tests;
 #[cfg(test)]
 mod layout_tests;
+#[cfg(test)]
+mod mech_rules_fit_tests;
 #[cfg(test)]
 mod mech_rules_tests;
 #[cfg(test)]

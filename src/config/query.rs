@@ -43,6 +43,13 @@ impl FusibleConfig {
         }
     }
 
+    /// The board whose holes a body must boss: [`Self::body_board`], except for a code part
+    /// that names no board, which is only modeled on the board and may sit anywhere.
+    pub fn fitted_board<'a>(&'a self, body: &'a BodyConfig) -> Option<&'a str> {
+        self.body_board(body)
+            .filter(|_| !(body.is_code() && body.board.is_none()))
+    }
+
     /// Display title for `board`: the project name for a single-board project, else the board name.
     pub fn board_title(&self, board: &str) -> String {
         match &self.name {

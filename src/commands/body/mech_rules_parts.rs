@@ -32,7 +32,10 @@ fn boss_shape(part: &str, process: &str, outer: f64, hole: f64) -> Vec<Finding> 
         ));
     }
     if process == "injection" && outer > INJECTION_BOSS_RATIO * hole {
-        let text = format!("`{part}` has a boss of {outer} mm around a {hole} mm hole; molded bosses stay under {} mm.", INJECTION_BOSS_RATIO * hole);
+        let text = format!(
+            "`{part}` has a boss of {outer} mm around a {hole} mm hole; molded bosses stay under {} mm.",
+            INJECTION_BOSS_RATIO * hole
+        );
         found.push(Finding::error(
             BOSS,
             text,
@@ -78,7 +81,9 @@ pub(super) fn port_clearance(part: &str, process: &str, features: &[Feature]) ->
         .iter()
         .filter_map(|f| match f {
             Feature::Port { margin } if *margin < min => {
-                let text = format!("`{part}` has a port with {margin} mm of margin per side; {process} needs {min} mm.");
+                let text = format!(
+                    "`{part}` has a port with {margin} mm of margin per side; {process} needs {min} mm."
+                );
                 Some(Finding::error(PORT_CLEARANCE, text, "widen the cutout around the connector", HUBS))
             }
             _ => None,

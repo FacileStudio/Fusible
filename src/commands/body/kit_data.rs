@@ -1,17 +1,11 @@
 //! The reference kit data: board outline, holes, component footprints, and edge openings.
 
-use std::collections::HashMap;
-
 use serde::Serialize;
 
-use super::edges::edge_contacts;
-use super::kit_levels::{
-    component_heights, keep_out, level_of, verified_top, warnings, KitKeepOut,
-};
-use super::kit_parts::PartFacts;
+use super::kit_levels::{keep_out, warnings, KitKeepOut};
+use super::kit_scan::{component_names, entry, scan_of};
 use super::spec::open_ring;
 use super::{BodyError, CLEARANCE, DEFAULT_BOARD_THICKNESS, EDGE_TOLERANCE, NOTCH_MARGIN};
-use crate::gerber::layers::{PcbComponentElm, PcbPoint};
 use crate::gerber::PcbModel;
 
 #[derive(Debug, Serialize)]
@@ -88,20 +82,6 @@ pub(crate) struct Kit {
     pub warnings: Vec<String>,
 }
 
-fn component_names(json: &str) -> Result<HashMap<String, String>, BodyError> {
-    let elements: Vec<serde_json::Value> =
-        serde_json::from_str(json).map_err(|e| BodyError::InvalidCircuit(e.to_string()))?;
-    let text = |e: &serde_json::Value, key: &str| e[key].as_str().map(str::to_string);
-    Ok(elements
-        .iter()
-        .filter(|e| e["type"] == "source_component")
-        .filter_map(|e| {
-            let id = text(e, "source_component_id").or_else(|| text(e, "component_id"))?;
-            Some((id.clone(), text(e, "name").unwrap_or(id)))
-        })
-        .collect())
-}
-
 /// The holes with a usable diameter, and how many had none and were left out.
 fn holes(model: &PcbModel) -> (Vec<KitHole>, usize) {
     let plain = model
@@ -129,85 +109,9 @@ fn holes(model: &PcbModel) -> (Vec<KitHole>, usize) {
     (holes, skipped)
 }
 
-fn side(normal: [f64; 2]) -> &'static str {
-    let horizontal = normal[0].abs() >= normal[1].abs();
-    match (horizontal, normal[0] >= 0.0, normal[1] >= 0.0) {
-        (true, true, _) => "+x",
-        (true, false, _) => "-x",
-        (false, _, true) => "+y",
-        (false, _, false) => "-y",
-    }
-}
-
-fn label(component: &PcbComponentElm, names: &HashMap<String, String>) -> String {
-    let id = component.source_component_id.clone();
-    id.as_ref()
-        .and_then(|id| names.get(id).cloned())
-        .or(id)
-        .or_else(|| component.pcb_component_id.clone())
-        .unwrap_or_else(|| "component".into())
-}
-
-/// What one board scan shares between its components.
-struct Scan<'a> {
-    outline: &'a [PcbPoint],
-    names: HashMap<String, String>,
-    heights: HashMap<String, (f64, f64)>,
-    facts: PartFacts,
-    half: f64,
-}
-
-/// The bottom and height of `c`, with a verified top applied to a top-side part.
-fn level(c: &PcbComponentElm, scan: &Scan) -> Option<(f64, f64)> {
-    let measured = level_of(c, &scan.heights);
-    let on_top = c.layer.as_deref().unwrap_or("top") == "top";
-    let Some(top) = verified_top(scan.facts.part_ids(c)).filter(|_| on_top) else {
-        return measured;
-    };
-    let bottom = measured.map_or(scan.half, |(z, _)| z);
-    Some((bottom, scan.half + top - bottom))
-}
-
-/// A component's kit entry and the wall openings it needs, or `None` without a footprint.
-///
-/// Only a connector gets openings; any other part at the edge stays in `components` alone.
-fn entry(c: &PcbComponentElm, scan: &Scan) -> Option<(KitComponent, Vec<KitOpening>)> {
-    let (center, w, h) = (c.center?, c.width?, c.height?);
-    let name = label(c, &scan.names);
-    let contacts = edge_contacts(c, scan.outline);
-    let wanted = scan.facts.is_connector(c);
-    let openings: Vec<KitOpening> = contacts
-        .iter()
-        .filter(|_| wanted)
-        .map(|k| KitOpening {
-            component: name.clone(),
-            edge: k.edge,
-            side: side(k.normal),
-            normal: k.normal,
-            from: k.span[0],
-            to: k.span[1],
-        })
-        .collect();
-    let level = level(c, scan);
-    let component = KitComponent {
-        z: level.map(|(z, _)| z),
-        height: level.map(|(_, h)| h),
-        layer: c.layer.clone().unwrap_or_else(|| "top".into()),
-        touches_edge: !contacts.is_empty(),
-        x: center.x,
-        y: center.y,
-        name,
-        w,
-        h,
-    };
-    Some((component, openings))
-}
-
 /// Builds the kit of the board in `json`; `board` is the manifest name written to the file.
 pub(crate) fn build_kit(json: &str, board: Option<String>) -> Result<Kit, BodyError> {
     let names = component_names(json)?;
-    let heights = component_heights(json)?;
-    let facts = PartFacts::parse(json)?;
     let model = PcbModel::parse(json);
     let elm = model.boards.first().ok_or(BodyError::NoBoard)?;
     let outline = open_ring(elm.outline_points());
@@ -216,13 +120,7 @@ pub(crate) fn build_kit(json: &str, board: Option<String>) -> Result<Kit, BodyEr
     }
     let (holes, skipped) = holes(&model);
     let thickness = elm.thickness.unwrap_or(DEFAULT_BOARD_THICKNESS);
-    let scan = Scan {
-        outline: &outline,
-        names,
-        heights,
-        facts,
-        half: thickness / 2.0,
-    };
+    let scan = scan_of(json, names, &outline, thickness)?;
     let entries = model.components.iter().filter_map(|c| entry(c, &scan));
     let (components, openings): (Vec<_>, Vec<_>) = entries.unzip();
     let keep_out = keep_out(&components);

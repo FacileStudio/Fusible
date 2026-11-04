@@ -15,9 +15,11 @@ const SCRIPT_MODULES: &[(&str, &str)] = &[
     ("part_board.ts", include_str!("../../assets/part_board.ts")),
     ("part_cad.ts", include_str!("../../assets/part_cad.ts")),
     ("part_hw.ts", include_str!("../../assets/part_hw.ts")),
+    ("part_cut.ts", include_str!("../../assets/part_cut.ts")),
     ("part_ops.ts", include_str!("../../assets/part_ops.ts")),
     ("glb.ts", include_str!("../../assets/glb.ts")),
     ("slim.ts", include_str!("../../assets/slim.ts")),
+    ("slim_pack.ts", include_str!("../../assets/slim_pack.ts")),
 ];
 pub(super) const OCCT_WASM_VERSION: &str = "5.7.1";
 static PREPARE: Mutex<()> = Mutex::new(());

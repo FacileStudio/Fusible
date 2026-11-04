@@ -104,20 +104,3 @@ fn a_measured_weight_prices_the_print_until_grams_are_typed() {
     assert!(!typed.lines[0].estimated);
     assert_eq!(typed.totals.printed, 0.25);
 }
-
-#[test]
-fn a_declared_material_prices_and_labels_the_print() {
-    let body = [Body {
-        name: "bracket".into(),
-        grams: Some(100.0),
-        material: Some("al6061".into()),
-        process: Some("cnc".into()),
-        cost_per_kg: Some(6.0),
-    }];
-    let report = build(Vec::new(), &body, &BomFile::default());
-    let line = &report.lines[0];
-    assert!(line.estimated);
-    assert_eq!(report.totals.printed, 0.6);
-    assert_eq!(line.material.as_deref(), Some("al6061"));
-    assert_eq!(line.process.as_deref(), Some("cnc"));
-}

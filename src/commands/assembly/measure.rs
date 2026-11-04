@@ -14,7 +14,7 @@ use super::rules::{missing_bosses, violations, write_report, Response, Violation
 use super::rules_validate::validate;
 use super::{blow_if_any, AssemblyError, FORMATS};
 use crate::commands::body::{build_kit, generator_dir, run_script};
-use crate::config::{AssemblyConfig, BodyConfig, DEFAULT_HOLE_MIN};
+use crate::config::{AssemblyConfig, DEFAULT_HOLE_MIN};
 
 static REPORT_COUNTER: AtomicU64 = AtomicU64::new(0);
 
@@ -51,15 +51,10 @@ fn fitted(ctx: &Context, bodies: &[Part]) -> Vec<(String, String)> {
     bodies
         .iter()
         .filter_map(|part| {
-            let body = ctx.cfg.bodies.get(&part.name)?;
-            let board = ctx.cfg.body_board(body).filter(|_| !is_loose_code(body))?;
+            let board = ctx.cfg.fitted_board(ctx.cfg.bodies.get(&part.name)?)?;
             Some((part.name.clone(), board.to_string()))
         })
         .collect()
-}
-
-fn is_loose_code(body: &BodyConfig) -> bool {
-    body.is_code() && body.board.is_none()
 }
 
 fn judged(

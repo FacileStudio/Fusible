@@ -2,43 +2,7 @@
 
 mod common;
 
-use std::path::Path;
-
-use common::{fusible, require_bun, TestDir};
-
-fn copy_dir(from: &Path, to: &Path) {
-    std::fs::create_dir_all(to).unwrap();
-    for entry in std::fs::read_dir(from).unwrap().flatten() {
-        let target = to.join(entry.file_name());
-        match entry.file_type().unwrap().is_dir() {
-            true => copy_dir(&entry.path(), &target),
-            false => drop(std::fs::copy(entry.path(), target).unwrap()),
-        }
-    }
-}
-
-fn project(name: &str) -> TestDir {
-    let dir = TestDir::new(name);
-    let example = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/mech");
-    for entry in ["fusible.yml", "circuit.json"] {
-        std::fs::copy(example.join(entry), dir.path.join(entry)).unwrap();
-    }
-    copy_dir(&example.join("mech"), &dir.path.join("mech"));
-    dir
-}
-
-fn run(dir: &Path, args: &[&str]) -> (Option<i32>, String, String) {
-    let out = fusible()
-        .current_dir(dir)
-        .args(args)
-        .output()
-        .expect("binary should run");
-    (
-        out.status.code(),
-        String::from_utf8_lossy(&out.stdout).into_owned(),
-        String::from_utf8_lossy(&out.stderr).into_owned(),
-    )
-}
+use common::{mech_project as project, require_bun, run_in as run};
 
 fn bun_or_skip() -> bool {
     let found = require_bun().is_some();
@@ -112,40 +76,4 @@ fn mass_and_cost_reach_the_bom() {
     let (code, out, err) = run(&dir.path, &["bom"]);
     assert_eq!(code, Some(0), "{err}");
     assert!(out.contains("3D print: bracket (al6061 cnc, "), "{out}");
-}
-
-#[test]
-fn body_new_scaffolds_a_part_and_refuses_a_taken_name() {
-    if !bun_or_skip() {
-        return;
-    }
-    let dir = project("mech_new");
-    let (code, _, err) = run(&dir.path, &["body", "new", "probe"]);
-    assert_eq!(code, Some(0), "{err}");
-    assert!(dir.path.join("mech/probe.ts").is_file());
-    assert!(dir.path.join("mech/fusible.d.ts").is_file());
-    let manifest = std::fs::read_to_string(dir.path.join("fusible.yml")).unwrap();
-    assert!(
-        manifest.contains("probe:\n    source: mech/probe.ts"),
-        "{manifest}"
-    );
-    assert_eq!(run(&dir.path, &["body", "probe"]).0, Some(0));
-    assert!(dir.path.join("dist/bodies/probe.step").is_file());
-    for taken in ["probe", "main", "case"] {
-        let (code, _, err) = run(&dir.path, &["body", "new", taken]);
-        assert_eq!(code, Some(2), "{taken}: {err}");
-    }
-}
-
-#[test]
-fn an_unknown_material_is_a_manifest_error() {
-    let dir = project("mech_material");
-    let manifest = dir.path.join("fusible.yml");
-    let text = std::fs::read_to_string(&manifest)
-        .unwrap()
-        .replace("petg", "unobtainium");
-    std::fs::write(&manifest, text).unwrap();
-    let (code, _, err) = run(&dir.path, &["check"]);
-    assert_eq!(code, Some(2), "{err}");
-    assert!(err.contains("unobtainium"), "{err}");
 }

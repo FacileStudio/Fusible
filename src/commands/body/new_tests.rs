@@ -1,4 +1,4 @@
-use super::new::add_entry;
+use super::new_manifest::add_entry;
 use crate::config::FusibleConfig;
 
 fn fields() -> Vec<String> {
@@ -14,7 +14,10 @@ fn a_manifest_without_bodies_gets_a_section() {
 
 #[test]
 fn a_new_entry_goes_after_the_last_body_and_keeps_comments() {
-    let old = "boards:\n  main: {}\nbodies:\n  # the lid\n  lid:\n    generate: enclosure\n\nassembly:\n  parts: {main: {}}\n";
+    let old = concat!(
+        "boards:\n  main: {}\nbodies:\n  # the lid\n  lid:\n    generate: enclosure\n\n",
+        "assembly:\n  parts: {main: {}}\n"
+    );
     let out = add_entry(old, "x", &fields()).unwrap();
     assert!(out.contains("# the lid"));
     let cfg = FusibleConfig::from_str(&out).unwrap();

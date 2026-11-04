@@ -21,7 +21,8 @@ const span = (c: KitComponent | undefined, half: number): [number, number] => {
 const opening = (o: KitOpening, components: KitComponent[], half: number) => {
   const [z0, z1] = span(components.find((c) => c.name === o.component), half);
   const w = Math.hypot(o.to[0] - o.from[0], o.to[1] - o.from[1]);
-  return { name: o.component, x: (o.from[0] + o.to[0]) / 2, y: (o.from[1] + o.to[1]) / 2, z: z0, w, h: z1 - z0, side: o.side };
+  const [x, y] = [(o.from[0] + o.to[0]) / 2, (o.from[1] + o.to[1]) / 2];
+  return { name: o.component, x, y, z: z0, w, h: z1 - z0, side: o.side };
 };
 
 /** Turns the JSON of `fusible body kit` into the `board` of a part context. */

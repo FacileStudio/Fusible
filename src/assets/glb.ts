@@ -18,6 +18,11 @@ export type Gltf = {
   [key: string]: unknown;
 };
 
+export const FLOAT = 5126;
+export const UINT = 5125;
+export const USHORT = 5123;
+export const TRIANGLES = 4;
+
 const GLB_MAGIC = 0x46546c67;
 const JSON_CHUNK = 0x4e4f534a;
 const BIN_CHUNK = 0x004e4942;

@@ -1,11 +1,6 @@
-import { concat, readGlb, writeGlb, type Gltf, type Mesh, type Primitive } from "./glb";
+import { FLOAT, readGlb, TRIANGLES, USHORT, writeGlb, type Gltf, type Mesh, type Primitive } from "./glb";
+import { pack, type Merged } from "./slim_pack";
 
-type Merged = { position: Float32Array; normal: Float32Array; index: Uint32Array; material?: number };
-
-const FLOAT = 5126;
-const UINT = 5125;
-const USHORT = 5123;
-const TRIANGLES = 4;
 const UNSUPPORTED = ["images", "animations", "skins", "samplers", "textures"];
 
 const read = (gltf: Gltf, bin: Uint8Array, id: number): Float32Array | Uint32Array => {
@@ -14,7 +9,9 @@ const read = (gltf: Gltf, bin: Uint8Array, id: number): Float32Array | Uint32Arr
   const start = bin.byteOffset + (view.byteOffset ?? 0) + (a.byteOffset ?? 0);
   const width = a.type === "VEC3" ? 3 : 1;
   if (a.componentType === FLOAT) return new Float32Array(bin.buffer.slice(start, start + a.count * width * 4));
-  if (a.componentType === USHORT) return Uint32Array.from(new Uint16Array(bin.buffer.slice(start, start + a.count * 2)));
+  if (a.componentType === USHORT) {
+    return Uint32Array.from(new Uint16Array(bin.buffer.slice(start, start + a.count * 2)));
+  }
   return new Uint32Array(bin.buffer.slice(start, start + a.count * 4));
 };
 
@@ -42,39 +39,6 @@ const merge = (gltf: Gltf, bin: Uint8Array, prims: Primitive[]): Merged => {
   return { ...out, index, material: prims[0]?.material };
 };
 
-const bounds = (position: Float32Array) => {
-  const min = [Infinity, Infinity, Infinity];
-  const max = [-Infinity, -Infinity, -Infinity];
-  position.forEach((value, n) => {
-    min[n % 3] = Math.min(min[n % 3], value);
-    max[n % 3] = Math.max(max[n % 3], value);
-  });
-  return { min, max };
-};
-
-const pack = (gltf: Gltf, meshes: Merged[][]): Uint8Array => {
-  const chunks: Uint8Array[] = [];
-  let offset = 0;
-  const add = (data: Float32Array | Uint32Array, accessor: object, target: number) => {
-    gltf.bufferViews.push({ buffer: 0, byteOffset: offset, byteLength: data.byteLength, target });
-    gltf.accessors.push({ ...accessor, bufferView: gltf.bufferViews.length - 1 } as Gltf["accessors"][number]);
-    chunks.push(new Uint8Array(data.buffer, data.byteOffset, data.byteLength));
-    offset += data.byteLength;
-    return gltf.accessors.length - 1;
-  };
-  const primitive = (m: Merged): Primitive => {
-    const count = m.position.length / 3;
-    const POSITION = add(m.position, { componentType: FLOAT, count, type: "VEC3", ...bounds(m.position) }, 34962);
-    const NORMAL = add(m.normal, { componentType: FLOAT, count, type: "VEC3" }, 34962);
-    const indices = add(m.index, { componentType: UINT, count: m.index.length, type: "SCALAR" }, 34963);
-    return { attributes: { POSITION, NORMAL }, indices, material: m.material, mode: TRIANGLES };
-  };
-  [gltf.accessors, gltf.bufferViews] = [[], []];
-  gltf.meshes = gltf.meshes.map((mesh, i) => ({ ...mesh, primitives: meshes[i].map(primitive) }));
-  gltf.buffers = [{ byteLength: offset }];
-  return concat(chunks);
-};
-
 const byMaterial = (prims: Primitive[]): Primitive[][] => {
   const groups = new Map<number | undefined, Primitive[]>();
   for (const p of prims) groups.set(p.material, [...(groups.get(p.material) ?? []), p]);
@@ -95,7 +59,3 @@ export const slimGlb = (glb: Uint8Array): Uint8Array => {
   const merged = (gltf.meshes ?? []).map((mesh) => slimMesh(gltf, bin, mesh));
   return writeGlb(gltf, pack(gltf, merged));
 };
-
-/** Counts the primitives of a GLB, for tests. */
-export const primitiveCount = (glb: Uint8Array): number =>
-  readGlb(glb).gltf.meshes.reduce((n, m) => n + m.primitives.length, 0);

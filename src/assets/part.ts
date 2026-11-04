@@ -18,7 +18,9 @@ type Input = {
 const STEP_DATE = "2000-01-01T00:00:00";
 const MIN_VOLUME = 0.01;
 
-const stableStep = (text: string): string => text.replace(/(FILE_NAME\s*\(\s*'[^']*'\s*,\s*')[^']*'/, `$1${STEP_DATE}'`);
+const FILE_NAME = /(FILE_NAME\s*\(\s*'[^']*'\s*,\s*')[^']*'/;
+
+const stableStep = (text: string): string => text.replace(FILE_NAME, `$1${STEP_DATE}'`);
 
 const interferences = (k: OcctKernel, shape: ShapeHandle, kit: Kit | null, gap: number): Feature[] =>
   (kit?.keep_out ?? []).flatMap((c) => {
