@@ -89,7 +89,7 @@ fn export_via_runner(job: &ExportJob, format: &str) -> Result<(), ExportError> {
 }
 
 /// Returns the explicit output, or `<out_dir>/<entry stem>.<ext>` so exports land in `dist/`.
-fn runner_output(job: &ExportJob, format: &str) -> PathBuf {
+pub(super) fn runner_output(job: &ExportJob, format: &str) -> PathBuf {
     let ext = match format {
         "kicad_zip" => "zip",
         "schematic-svg" | "schematic_svg" => "schematic.svg",
@@ -101,36 +101,4 @@ fn runner_output(job: &ExportJob, format: &str) -> PathBuf {
         .and_then(|s| s.to_str())
         .unwrap_or("board");
     job.output_or(&format!("{stem}.{ext}"))
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    fn job(output: Option<&str>) -> ExportJob {
-        ExportJob {
-            runner: None,
-            entry: PathBuf::from("hardware/index.tsx"),
-            board_title: "t".into(),
-            out_dir: PathBuf::from("dist"),
-            output: output.map(PathBuf::from),
-            source: None,
-        }
-    }
-
-    #[test]
-    fn format_without_output_lands_in_dist() {
-        assert_eq!(
-            runner_output(&job(None), "glb"),
-            PathBuf::from("dist/index.glb")
-        );
-    }
-
-    #[test]
-    fn explicit_output_wins() {
-        assert_eq!(
-            runner_output(&job(Some("x/y.glb")), "glb"),
-            PathBuf::from("x/y.glb")
-        );
-    }
 }
