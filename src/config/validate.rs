@@ -36,6 +36,12 @@ pub(super) fn validate(cfg: &FusibleConfig) -> Result<(), String> {
 }
 
 fn assembly_parts(cfg: &FusibleConfig, assembly: &AssemblyConfig) -> Result<(), String> {
+    if assembly
+        .hole_min_diameter
+        .is_some_and(|d| !d.is_finite() || d < 0.0)
+    {
+        return Err("`assembly.hole_min_diameter` must be a positive number of millimetres".into());
+    }
     if assembly.parts.is_empty() {
         return Err("`assembly` has no parts; list the boards and bodies to place".into());
     }

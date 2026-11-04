@@ -76,6 +76,7 @@ pub enum Role {
         side: Side,
         at: [f64; 2],
         plated: bool,
+        exempt: bool,
     },
     HoleQuadrant {
         hole: usize,
@@ -193,7 +194,9 @@ fn openings(frame: &Frame, kit: &Kit) -> Vec<Probe> {
 }
 
 /// Builds every probe of the board `board`, placed by `frame` in the assembly frame.
-pub fn probes(board: &str, kit: &Kit, frame: &Matrix) -> Vec<Probe> {
+///
+/// A hole narrower than `min_hole` or under a component needs no boss.
+pub fn probes(board: &str, kit: &Kit, frame: &Matrix, min_hole: f64) -> Vec<Probe> {
     let frame = Frame {
         board,
         matrix: frame,
@@ -201,6 +204,6 @@ pub fn probes(board: &str, kit: &Kit, frame: &Matrix) -> Vec<Probe> {
     let mut all = vec![slab(&frame, kit)];
     all.extend(keep_outs(&frame, kit));
     all.extend(openings(&frame, kit));
-    all.extend(hole_probes(&frame, kit));
+    all.extend(hole_probes(&frame, kit, min_hole));
     all
 }
