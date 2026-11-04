@@ -30,6 +30,8 @@ mod actions_tests;
 #[cfg(test)]
 mod discovery_tests;
 #[cfg(test)]
+mod launch_tests;
+#[cfg(test)]
 mod log_tests;
 #[cfg(test)]
 mod manifest_tests;

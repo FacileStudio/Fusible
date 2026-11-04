@@ -25,8 +25,15 @@ pub async fn open<R: Runtime>(app: &AppHandle<R>, path: &str) -> Result<(), Stri
     let dir = PathBuf::from(path);
     check_folder(&dir)?;
     let studio = app.state::<Studio>();
-    let port = storage::load_settings(app).port;
-    let ready = launch::start(app, &studio, &dir, port).await?;
+    let settings = storage::load_settings(app);
+    let ready = launch::start(
+        app,
+        &studio,
+        &dir,
+        settings.port,
+        settings.allow_phone_pairing,
+    )
+    .await?;
     let card = project::describe(&dir, None);
     remember(app, &card.path);
     window::show_studio(app, &ready.url, &card.name)
