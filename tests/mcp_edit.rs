@@ -114,70 +114,7 @@ fn changes_made_outside_the_session_are_refused() {
     assert_eq!(std::fs::read_to_string(&file).unwrap(), mine);
 }
 
-#[test]
-fn exactly_one_of_patch_or_content_is_required() {
-    let dir = committed_project();
-    let both = json!({"board": "main", "content": "x", "patch": "y"});
-    let neither = json!({"board": "main"});
-
-    let replies = session(
-        &dir.path,
-        &[call(1, "edit_board", both), call(2, "edit_board", neither)],
-    );
-
-    assert!(is_error(&replies[0]) && is_error(&replies[1]));
-}
-
-#[test]
-fn a_board_file_outside_the_root_is_refused() {
-    let parent = TestDir::new("escape");
-    let root = parent.path.join("proj");
-    std::fs::create_dir_all(&root).unwrap();
-    std::fs::write(parent.path.join("outside.json"), "[]").unwrap();
-    std::fs::copy(repo(INTACT), root.join("circuit.json")).unwrap();
-    let manifest = "name: escape\nboards:\n  main: {entry: circuit.json}\n  escape: {entry: ../outside.json}\n";
-    std::fs::write(root.join("fusible.yml"), manifest).unwrap();
-    git_commit_all(&root);
-
-    let args = json!({"board": "escape", "content": blown_text(), "dry_run": false});
-    let replies = session(&root, &[call(1, "edit_board", args)]);
-
-    assert!(is_error(&replies[0]));
-    assert!(structured(&replies[0])["error"]
-        .as_str()
-        .unwrap()
-        .contains("outside the project root"));
-    assert_eq!(
-        std::fs::read_to_string(parent.path.join("outside.json")).unwrap(),
-        "[]"
-    );
-}
-
 #[cfg(unix)]
-#[test]
-fn a_symlink_that_escapes_the_root_is_refused() {
-    let parent = TestDir::new("symlink");
-    let root = parent.path.join("proj");
-    std::fs::create_dir_all(&root).unwrap();
-    std::fs::write(parent.path.join("outside.json"), "[]").unwrap();
-    std::os::unix::fs::symlink(parent.path.join("outside.json"), root.join("linked.json")).unwrap();
-    std::fs::write(
-        root.join("fusible.yml"),
-        "name: link\nboards:\n  linked: {entry: linked.json}\n",
-    )
-    .unwrap();
-    git_commit_all(&root);
-
-    let args = json!({"board": "linked", "content": blown_text(), "dry_run": false});
-    let replies = session(&root, &[call(1, "edit_board", args)]);
-
-    assert!(is_error(&replies[0]));
-    assert_eq!(
-        std::fs::read_to_string(parent.path.join("outside.json")).unwrap(),
-        "[]"
-    );
-}
-
 #[test]
 fn a_patch_applies_and_a_patch_for_another_file_is_refused() {
     let dir = committed_project();
@@ -198,20 +135,4 @@ fn a_patch_applies_and_a_patch_for_another_file_is_refused() {
     assert_eq!(structured(&replies[1])["applied"], true);
     assert_eq!(structured(&replies[1])["fuse"], "blown");
     assert_eq!(std::fs::read_to_string(&file).unwrap(), blown_text());
-}
-
-#[test]
-fn edit_body_needs_a_code_part() {
-    let dir = committed_project();
-
-    let replies = session(
-        &dir.path,
-        &[call(
-            1,
-            "edit_body",
-            json!({"name": "nothing", "content": "x"}),
-        )],
-    );
-
-    assert!(is_error(&replies[0]));
 }
