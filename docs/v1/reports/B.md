@@ -1,5 +1,5 @@
 # Track B report
-Branch: feat/v1-desktop   Last commit: LASTSHA
+Branch: feat/v1-desktop   Last commit: d823dc0 (before this report)
 ## Done
 - Rebuilt `desktop/ui` on Svelte 5 + muse v0.10.0 with vite 7 and Tailwind 4. Old vanilla TS, `styles.css`, the Undefined font and the build scripts are gone.
 - Structure follows B-desktop.md: `App.svelte` (state routing, hash links), `lib/` (api, mock, updater store, projects store, settings store, theme, icons), `components/` (TitleBar, Sidebar, ProjectList, ProjectCard, NewProject, Settings with four tabs, UpdateBadge, five onboarding steps).
