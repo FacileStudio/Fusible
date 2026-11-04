@@ -10,6 +10,7 @@ use crate::config::FusibleConfig;
 use crate::tscircuit::detect::{find_binary_in_path, resolve_program};
 use crate::tscircuit::{bun_path, Runner};
 
+pub mod installs;
 pub mod json;
 
 /// Errors that can occur during toolchain inspection or automated installation.
@@ -62,6 +63,13 @@ fn report_prerequisites() -> (bool, bool) {
     print_status("node", has_node.as_deref());
     print_status("npm", has_npm.as_deref());
     (has_bun.is_some(), has_npm.is_some())
+}
+
+fn report_installs() {
+    let path_var = std::env::var_os("PATH").unwrap_or_default();
+    if let Some((message, fix)) = installs::warning(&installs::find(&path_var)) {
+        println!("\nInstall path:\n  ⚠️  {message}\n     fix: {fix}");
+    }
 }
 
 fn report_manifest() {
@@ -149,6 +157,7 @@ pub fn run(install: bool, as_json: bool) -> Result<(), DoctorError> {
     }
     println!("🩺 Fusible Toolchain Doctor\n");
     let (has_bun, has_npm) = report_prerequisites();
+    report_installs();
     report_manifest();
     report_runner(install, has_bun, has_npm)?;
     println!();
