@@ -73,6 +73,10 @@ pub enum Commands {
         /// Destination path for generated firmware pin bindings (pins.rs)
         #[arg(long, value_name = "PATH")]
         pins_rs: Option<PathBuf>,
+
+        /// Print one JSON document with the fuse verdict and every diagnostic
+        #[arg(long, conflicts_with = "pins_rs")]
+        json: bool,
     },
 
     /// Compile circuit artifacts and build firmware

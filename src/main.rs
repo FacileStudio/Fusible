@@ -50,7 +50,7 @@ fn main() -> ExitCode {
 
     match cli.command {
         Some(command) => run_command(command),
-        None => dispatch::check(cli.input, cli.mcu, None),
+        None => dispatch::check(cli.input, cli.mcu, None, false),
     }
 }
 
@@ -63,7 +63,12 @@ fn run_command(command: Commands) -> ExitCode {
             legacy,
             desktop,
         } => dispatch::dev(file, port, legacy, desktop),
-        Commands::Check { file, mcu, pins_rs } => dispatch::check(file, mcu, pins_rs),
+        Commands::Check {
+            file,
+            mcu,
+            pins_rs,
+            json,
+        } => dispatch::check(file, mcu, pins_rs, json),
         Commands::Build { file } => dispatch::build(file),
         Commands::Export(args) => dispatch::export(args),
         Commands::Body(args) => dispatch::body(args),

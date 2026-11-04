@@ -6,12 +6,13 @@ use miette::Diagnostic;
 use thiserror::Error;
 
 use crate::commands::assembly::{self, AssemblyError};
+use crate::commands::check_lint::lint_board;
 use crate::commands::check_merge::{label, merge};
 use crate::commands::links::check_links;
 pub use crate::commands::source::{find_fallback_circuit_json, load_circuit_source};
 use crate::commands::target::{resolve_boards, BoardTarget, TargetError};
 use crate::config::FusibleConfig;
-use crate::linter::{FuseBlown, LintContext, Linter, Severity};
+use crate::linter::{FuseBlown, LintContext, Severity};
 use crate::netlist::Netlist;
 use crate::parser;
 use crate::tscircuit::RunnerError;
@@ -61,12 +62,8 @@ pub fn lint_source(
     entry: &Path,
     target_mcu: Option<String>,
 ) -> Result<(PathBuf, String), CheckError> {
-    let (json_path, source) = load_circuit_source(entry)?;
-    let circuit = parser::parse(&source, &json_path)?;
-    let netlist = Netlist::from_circuit(&circuit);
-    let ctx = LintContext::new(&circuit, &netlist).with_mcu(target_mcu.as_deref());
-    let (warnings, violations): (Vec<_>, Vec<_>) = Linter::default()
-        .run_with_context(&ctx)
+    let (json_path, source, diagnostics) = lint_board(entry, target_mcu.as_deref())?;
+    let (warnings, violations): (Vec<_>, Vec<_>) = diagnostics
         .into_iter()
         .partition(|d| d.severity == Severity::Warning);
 

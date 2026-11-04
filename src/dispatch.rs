@@ -1,8 +1,10 @@
 //! Runs fuse-gated subcommands and maps their results onto the exit-code contract.
 
 mod body;
+mod json;
 
 pub use body::body;
+use json::check_json;
 
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -22,7 +24,15 @@ pub fn dev(file: Option<PathBuf>, port: Option<u16>, legacy: bool, desktop: bool
 }
 
 /// Runs the electrical linter.
-pub fn check(file: Option<PathBuf>, mcu: Option<String>, pins_rs: Option<PathBuf>) -> ExitCode {
+pub fn check(
+    file: Option<PathBuf>,
+    mcu: Option<String>,
+    pins_rs: Option<PathBuf>,
+    json: bool,
+) -> ExitCode {
+    if json {
+        return check_json(file, mcu);
+    }
     match commands::check::run(file, mcu, pins_rs) {
         Ok(()) => ExitCode::SUCCESS,
         Err(CheckError::FuseBlown(blown)) => fail(blown, EXIT_VIOLATIONS),

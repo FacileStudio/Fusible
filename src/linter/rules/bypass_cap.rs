@@ -2,14 +2,15 @@
 
 use std::collections::{HashMap, HashSet};
 
+use super::bypass_distance::too_far;
 use crate::linter::{Diagnostic, LintContext, Rule};
 use crate::netlist::NetNode;
 use crate::parser::{Component, Port};
 
-type ComponentIndex<'a> = HashMap<&'a str, &'a Component>;
+pub(super) type ComponentIndex<'a> = HashMap<&'a str, &'a Component>;
 
 /// `ftype` values that mark a capacitor.
-const CAPACITOR_KINDS: &[&str] = &["simple_capacitor", "capacitor"];
+pub(super) const CAPACITOR_KINDS: &[&str] = &["simple_capacitor", "capacitor"];
 
 /// `ftype` values that mark an integrated circuit.
 const CHIP_KINDS: &[&str] = &["simple_chip", "chip"];
@@ -20,7 +21,12 @@ pub struct BypassCapRule;
 
 /// Classifies a component by its `ftype`. Only a component without one falls
 /// back to the designator prefix (`C1`, `U1`) of its name or id.
-fn is_kind(id: &str, component: Option<&Component>, kinds: &[&str], prefix: char) -> bool {
+pub(super) fn is_kind(
+    id: &str,
+    component: Option<&Component>,
+    kinds: &[&str],
+    prefix: char,
+) -> bool {
     match component.and_then(|c| c.kind.as_deref()) {
         Some(kind) => kinds.iter().any(|k| kind.eq_ignore_ascii_case(k)),
         None => {
@@ -31,11 +37,11 @@ fn is_kind(id: &str, component: Option<&Component>, kinds: &[&str], prefix: char
 }
 
 /// An IC power pin and the rail net it sits on.
-struct PowerPin<'a> {
-    comp_id: &'a str,
-    comp_name: &'a str,
-    pin_name: &'a str,
-    net: &'a NetNode,
+pub(super) struct PowerPin<'a> {
+    pub comp_id: &'a str,
+    pub comp_name: &'a str,
+    pub pin_name: &'a str,
+    pub net: &'a NetNode,
 }
 
 impl Rule for BypassCapRule {
@@ -59,6 +65,7 @@ impl Rule for BypassCapRule {
                     && reported_rails.insert((pin.comp_id.to_string(), pin.net.id.clone()))
             })
             .map(|pin| self.missing_cap(&pin))
+            .chain(too_far(ctx, &components))
             .collect()
     }
 }
@@ -106,7 +113,7 @@ fn nets_with_capacitors<'a>(
 }
 
 /// The port as an IC power pin, when its component is a chip and its net a power rail.
-fn chip_power_pin<'a>(
+pub(super) fn chip_power_pin<'a>(
     ctx: &'a LintContext<'_>,
     components: &ComponentIndex<'a>,
     port: &'a Port,

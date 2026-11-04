@@ -1,0 +1,5 @@
+nets:
+  VBUS: { voltage: 5, current: 2, max_rise: 10 }
+  MAINS_L: { voltage: 230 }
+fab: jlcpcb-2l
+clearance_class: B2
