@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("fusible-theme");
+          var dark =
+            stored === "dark" || stored === null || (stored === "system" && matchMedia("(prefers-color-scheme: dark)").matches);
+          document.documentElement.classList.toggle("dark", dark);
+          document.documentElement.classList.toggle("light", !dark);
+        } catch (e) {}
+      })();
+    </script>
+    <link rel="icon" href="%sveltekit.assets%/favicon.svg" type="image/svg+xml" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Fusible</title>
+    %sveltekit.head%
+  </head>
+  <body data-sveltekit-preload-data="off">
+    <div style="display: contents">%sveltekit.body%</div>
+  </body>
+</html>
