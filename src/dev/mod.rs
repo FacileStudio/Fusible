@@ -27,6 +27,7 @@ mod kicad_status;
 mod kicad_sync;
 mod kicad_watch;
 mod limiter;
+mod pair;
 pub mod pipeline;
 mod project;
 mod refresh;

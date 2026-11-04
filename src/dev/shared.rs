@@ -4,6 +4,7 @@ use std::sync::{Arc, Mutex};
 
 use super::hub::ClientHub;
 use super::kicad_status::KicadStates;
+use super::pair::PairState;
 use super::runs::Runs;
 use super::state::Slot;
 use crate::commands::target::BoardTarget;
@@ -16,6 +17,8 @@ pub(super) struct State {
     pub runs: Runs,
     pub desktop: bool,
     pub kicad: KicadStates,
+    pub pair: Option<Arc<PairState>>,
+    pub lan_host: Option<String>,
 }
 
 impl State {
@@ -27,6 +30,8 @@ impl State {
             runs: Runs::default(),
             desktop: false,
             kicad: KicadStates::default(),
+            pair: None,
+            lan_host: None,
         }
     }
 

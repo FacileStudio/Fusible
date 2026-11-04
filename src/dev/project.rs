@@ -76,7 +76,8 @@ fn firmware_item(name: &str, fw: &FirmwareConfig, root: &Path) -> Value {
     })
 }
 
-fn body_item(name: &str, body: &BodyConfig, root: &Path) -> Value {
+/// The JSON item of one manifest body.
+pub(super) fn body_item(name: &str, body: &BodyConfig, root: &Path) -> Value {
     let kind = if body.source.is_some() {
         "authored"
     } else {

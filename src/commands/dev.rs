@@ -31,6 +31,7 @@ pub fn run(
     port: Option<u16>,
     legacy: bool,
     desktop: bool,
+    share: bool,
 ) -> Result<i32, DevError> {
     let boards = match resolve_boards(file) {
         Err(TargetError::Missing) => vec![fallback_board()],
@@ -51,7 +52,7 @@ pub fn run(
         "⚡ Starting Fusible Studio dev server for {}...",
         names.join(", ")
     );
-    crate::dev::run_dev_server(boards, port_num, desktop)
+    crate::dev::run_dev_server(boards, port_num, desktop, share)
         .map_err(|e| DevError::Server(e.to_string()))?;
 
     Ok(0)

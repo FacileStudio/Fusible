@@ -57,6 +57,10 @@ pub enum Commands {
         /// Run under the desktop shell: print a ready line, exit when stdin closes
         #[arg(long)]
         desktop: bool,
+
+        /// Also listen on the local network so a paired phone can view the project
+        #[arg(long)]
+        share: bool,
     },
 
     /// Run the electronic linter on a circuit file or monorepo project
