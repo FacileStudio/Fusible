@@ -1,0 +1,15 @@
+export const frTools: string[][] = [
+  ["project_info", "Cartes, firmware, corps et état git."],
+  ["check", "Applique les règles et renvoie le verdict du fusible."],
+  ["explain_rule", "Résumé, norme et source d'une règle."],
+  ["list_components", "Composants et ports d'une carte."],
+  ["list_nets", "Réseaux d'une carte et leurs limites déclarées."],
+  ["bom", "Lignes et totaux de la nomenclature."],
+  ["firmware_pins", "Le pins.rs généré, seulement quand le fusible est intact."],
+  ["edit_board", "Corrige ou remplace un fichier de carte. Simulation par défaut."],
+  ["body_new", "Crée une pièce en code."],
+  ["edit_body", "Corrige ou remplace une pièce en code."],
+  ["build_body", "Construit une pièce en STEP, STL et GLB."],
+  ["export", "Fichiers de fabrication, CAO ou docs. Refusé tant que le fusible est sauté."],
+  ["render", "SVG du PCB ou du schéma."],
+];
