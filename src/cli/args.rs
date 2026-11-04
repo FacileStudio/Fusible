@@ -5,6 +5,25 @@ use std::path::PathBuf;
 use clap::{Args, Subcommand};
 
 #[derive(Debug, Args, PartialEq)]
+pub struct CheckArgs {
+    /// Path to Circuit JSON, TSX, or KiCad entry file
+    #[arg(value_name = "FILE")]
+    pub file: Option<PathBuf>,
+
+    /// Silicon target, e.g. `stm32g431` or `esp32-s3`
+    #[arg(long, value_name = "MCU")]
+    pub mcu: Option<String>,
+
+    /// Destination path for generated firmware pin bindings (pins.rs)
+    #[arg(long, value_name = "PATH")]
+    pub pins_rs: Option<PathBuf>,
+
+    /// Print one JSON document with the fuse verdict and every diagnostic
+    #[arg(long, conflicts_with = "pins_rs")]
+    pub json: bool,
+}
+
+#[derive(Debug, Args, PartialEq)]
 pub struct ExportArgs {
     /// Path to entry TSX file
     #[arg(value_name = "FILE")]

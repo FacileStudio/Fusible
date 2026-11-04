@@ -10,8 +10,8 @@ use clap::{Parser, Subcommand};
 mod args;
 
 pub use args::{
-    AssemblyArgs, BodyAction, BodyArgs, BomArgs, BomFormat, EjectArgs, ExportArgs, InitArgs,
-    KitArgs, RouteArgs, SyncArgs,
+    AssemblyArgs, BodyAction, BodyArgs, BomArgs, BomFormat, CheckArgs, EjectArgs, ExportArgs,
+    InitArgs, KitArgs, RouteArgs, SyncArgs,
 };
 
 /// Fusible — electronic linter & hardware-firmware bridge for tscircuit.
@@ -61,23 +61,7 @@ pub enum Commands {
 
     /// Run the electronic linter on a circuit file or monorepo project
     #[command(alias = "lint")]
-    Check {
-        /// Path to Circuit JSON, TSX, or KiCad entry file
-        #[arg(value_name = "FILE")]
-        file: Option<PathBuf>,
-
-        /// Silicon target, e.g. `stm32g431` or `esp32-s3`
-        #[arg(long, value_name = "MCU")]
-        mcu: Option<String>,
-
-        /// Destination path for generated firmware pin bindings (pins.rs)
-        #[arg(long, value_name = "PATH")]
-        pins_rs: Option<PathBuf>,
-
-        /// Print one JSON document with the fuse verdict and every diagnostic
-        #[arg(long, conflicts_with = "pins_rs")]
-        json: bool,
-    },
+    Check(CheckArgs),
 
     /// Compile circuit artifacts and build firmware
     Build {

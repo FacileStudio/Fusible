@@ -63,12 +63,7 @@ fn run_command(command: Commands) -> ExitCode {
             legacy,
             desktop,
         } => dispatch::dev(file, port, legacy, desktop),
-        Commands::Check {
-            file,
-            mcu,
-            pins_rs,
-            json,
-        } => dispatch::check(file, mcu, pins_rs, json),
+        Commands::Check(args) => dispatch::check(args.file, args.mcu, args.pins_rs, args.json),
         Commands::Build { file } => dispatch::build(file),
         Commands::Export(args) => dispatch::export(args),
         Commands::Body(args) => dispatch::body(args),
