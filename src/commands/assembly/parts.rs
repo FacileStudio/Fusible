@@ -8,7 +8,7 @@ use serde::Serialize;
 use super::gate::Circuits;
 use super::place::{compose, placement, translation, Matrix, IDENTITY};
 use super::AssemblyError;
-use crate::commands::body::{build_authored, generate_step};
+use crate::commands::body::{build_authored, code_step, generate_step};
 use crate::commands::target::BoardTarget;
 use crate::config::{AssemblyConfig, BodyConfig, FusibleConfig, PlacementConfig};
 use crate::tscircuit::Runner;
@@ -113,6 +113,13 @@ fn body_part(
         .copied()
         .unwrap_or(IDENTITY);
     let (input, format, offset) = match &body.source {
+        Some(_) if body.is_code() => {
+            let input = ctx.parts_dir.join(format!("{name}.step"));
+            println!("🧊 Building code part `{name}` as STEP...");
+            let circuit = board.map(|b| (ctx.circuits[b].1.as_str(), b));
+            code_step(body, ctx.root, circuit, input.clone())?;
+            (input, "step", IDENTITY)
+        }
         Some(source) => {
             build_authored(name, body, ctx.root)?;
             (source.clone(), source_format(name, source)?, IDENTITY)

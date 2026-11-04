@@ -145,3 +145,18 @@ pub(crate) fn code_glb(
     let board = code_board(cfg, body)?;
     code_model(body, root, board.as_ref(), "glb", output.to_path_buf()).map(|_| ())
 }
+
+/// Builds a code part as one STEP file at `path` from the Circuit JSON of its board, for the assembly.
+pub(crate) fn code_step(
+    body: &BodyConfig,
+    root: &Path,
+    circuit: Option<(&str, &str)>,
+    path: PathBuf,
+) -> Result<(), BodyError> {
+    let circuit = circuit.map(|(json, board)| (json, Some(board.to_string())));
+    let outputs = vec![Output {
+        format: "step",
+        path,
+    }];
+    build_part(body, root, circuit, outputs).map(|_| ())
+}

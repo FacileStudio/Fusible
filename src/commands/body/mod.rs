@@ -78,7 +78,7 @@ pub use kit::kit;
 pub(crate) use kit_data::{build_kit, Kit, KitOpening};
 pub use mech_check::verify_mech;
 pub use new::new;
-pub(crate) use part::{code_glb, read_report};
+pub(crate) use part::{code_glb, code_step, read_report};
 use settings::{preview_settings, resolve_settings, Settings};
 use spec::{build_spec, preview_from, Output, Spec};
 pub(crate) use step::generate_step;
