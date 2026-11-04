@@ -2,7 +2,8 @@
 
 use std::path::Path;
 
-const PLA_G_PER_CM3: f64 = 1.24;
+use super::materials::{library, DEFAULT_MATERIAL, Material};
+
 const EFFECTIVE_FILL: f64 = 0.4;
 
 fn volume_mm3(bytes: &[u8]) -> Option<f64> {
@@ -66,9 +67,18 @@ fn signed_volume([a, b, c]: &Facet) -> f64 {
     (a[0] * cross[0] + a[1] * cross[1] + a[2] * cross[2]) / 6.0
 }
 
-/// Filament weight of the STL at `path`, from its volume with a typical PLA shell and infill.
-pub fn stl_grams(path: &Path) -> Option<f64> {
+/// Mass in grams of the STL at `path` in `material`.
+///
+/// An `fdm` part is a shell with infill, so only [`EFFECTIVE_FILL`] of its volume counts; any
+/// other process makes a solid part.
+pub fn stl_mass(path: &Path, material: &Material, process: &str) -> Option<f64> {
     let bytes = std::fs::read(path).ok()?;
     let cm3 = volume_mm3(&bytes)? / 1000.0;
-    Some((cm3 * PLA_G_PER_CM3 * EFFECTIVE_FILL * 10.0).round() / 10.0)
+    let fill = if process == "fdm" { EFFECTIVE_FILL } else { 1.0 };
+    Some((cm3 * material.density * fill * 10.0).round() / 10.0)
+}
+
+/// Filament weight of the STL at `path`, from its volume with a typical PLA shell and infill.
+pub fn stl_grams(path: &Path) -> Option<f64> {
+    stl_mass(path, library().get(DEFAULT_MATERIAL)?, "fdm")
 }

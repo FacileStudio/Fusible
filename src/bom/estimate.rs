@@ -1,10 +1,13 @@
 //! Price estimates for lines the user has not priced, so a BOM never reads as free.
 
 /// A printed body, with the weight measured from its model when one exists.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct Body {
     pub name: String,
     pub grams: Option<f64>,
+    pub material: Option<String>,
+    pub process: Option<String>,
+    pub cost_per_kg: Option<f64>,
 }
 
 /// Typical hobby-quantity unit price in euros by component kind, value, and part number.

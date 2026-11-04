@@ -1,0 +1,8 @@
+pla:      { name: PLA,            density: 1.24, cost_per_kg: 20,  max_temp_c: 55,  processes: [fdm] }
+petg:     { name: PETG,           density: 1.27, cost_per_kg: 22,  max_temp_c: 70,  processes: [fdm] }
+abs:      { name: ABS,            density: 1.04, cost_per_kg: 22,  max_temp_c: 85,  processes: [fdm, injection] }
+asa:      { name: ASA,            density: 1.07, cost_per_kg: 28,  max_temp_c: 90,  processes: [fdm, injection] }
+pa12:     { name: PA12 (nylon),   density: 1.01, cost_per_kg: 80,  max_temp_c: 120, processes: [mjf] }
+resin:    { name: Standard resin, density: 1.18, cost_per_kg: 50,  max_temp_c: 50,  processes: [sla] }
+pc:       { name: Polycarbonate,  density: 1.20, cost_per_kg: 35,  max_temp_c: 115, processes: [fdm, injection] }
+al6061:   { name: Aluminium 6061, density: 2.70, cost_per_kg: 6,   max_temp_c: 150, processes: [cnc] }

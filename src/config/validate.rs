@@ -9,7 +9,7 @@ use super::FusibleConfig;
 pub const GENERATORS: &[&str] = &["enclosure"];
 
 /// Body names that `fusible body` reads as subcommands.
-const RESERVED_BODY_NAMES: &[&str] = &["eject", "kit"];
+const RESERVED_BODY_NAMES: &[&str] = &["eject", "kit", "new"];
 
 /// Fails on duplicate names, dangling board references, or ambiguous bodies.
 pub(super) fn validate(cfg: &FusibleConfig) -> Result<(), String> {
@@ -20,6 +20,8 @@ pub(super) fn validate(cfg: &FusibleConfig) -> Result<(), String> {
     for (name, body) in &cfg.bodies {
         reserved_name(name)?;
         body_kind(name, body)?;
+        crate::bom::validate_material(body.material.as_deref(), body.process.as_deref())
+            .map_err(|reason| format!("body `{name}`: {reason}"))?;
         if body.generate.is_some() || body.board.is_some() {
             board_reference(cfg, "body", name, body.board.as_deref())?;
         }

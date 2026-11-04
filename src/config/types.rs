@@ -58,6 +58,12 @@ pub struct BodyConfig {
     /// boards. An authored body is modeled in this board's coordinate frame.
     #[serde(default, alias = "around")]
     pub board: Option<String>,
+    /// Key in the material library (`pla`, `petg`, `al6061`, ...); sets the mass and the cost.
+    #[serde(default)]
+    pub material: Option<String>,
+    /// Manufacturing process: `fdm`, `sla`, `mjf`, `injection` or `cnc`.
+    #[serde(default)]
+    pub process: Option<String>,
     #[serde(flatten)]
     pub enclosure: EnclosureConfig,
 }
