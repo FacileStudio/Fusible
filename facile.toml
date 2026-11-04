@@ -2,7 +2,7 @@
 
 name = "fusible"
 summary = "Electronic linter: the fuse blows to block firmware code generation"
-repo = "KonoLabs/Fusible"
+repo = "FacileStudio/Fusible"
 branch = "main"
 build = "rust"
 srcSubdir = "."

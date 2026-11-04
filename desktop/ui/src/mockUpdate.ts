@@ -1,7 +1,7 @@
 import type { UpdateCheck, UpdateProgress } from "./types";
 
 const mode = new URLSearchParams(location.search).get("update") ?? "available";
-const RELEASES = "https://github.com/KonoLabs/Fusible/releases/latest";
+const RELEASES = "https://github.com/FacileStudio/Fusible/releases/latest";
 const listeners: ((progress: UpdateProgress) => void)[] = [];
 
 const AVAILABLE: UpdateCheck = {

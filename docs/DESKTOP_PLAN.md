@@ -28,7 +28,7 @@ Verified against the tree at `1a8128e` (v0.14.3) and Vitrine at `0df4dc5` on 202
 | `bom.yml` has `currency`, seeded to `EUR` on first read | `src/bom/file.rs:73`, `src/bom/file.rs:126`, studio picker `src/assets/bom.js:81` | Per-project currency exists since v0.14.3. |
 | Estimates are euros | `src/bom/estimate.rs:10` | A USD project shows euro estimates labeled USD. Bug. |
 | Vitrine is SvelteKit 2, Svelte 5, Tailwind 4, on Vercel; has `/fieldcam` and a home `Fusible.svelte` section | `../Vitrine/src/routes/fieldcam/+page.svelte`, `../Vitrine/src/lib/components/sections/Fusible.svelte` | `/fusible` follows the `/fieldcam` pattern. |
-| `KonoLabs/Fusible` is public | `gh repo view` | `releases/latest/download/<asset>` links work without an API call. |
+| `FacileStudio/Fusible` is public | `gh repo view` | `releases/latest/download/<asset>` links work without an API call. |
 
 ## Decisions for you
 
@@ -118,7 +118,7 @@ Storage: `tauri-plugin-store`, files `settings.json` and `recent.json` in the ap
 
 ### Release asset names (workstream F builds, G consumes)
 
-Stable names, no version, so `https://github.com/KonoLabs/Fusible/releases/latest/download/<name>` always works:
+Stable names, no version, so `https://github.com/FacileStudio/Fusible/releases/latest/download/<name>` always works:
 
 | OS | Asset |
 |---|---|
@@ -225,8 +225,8 @@ Files: under `../Vitrine/`: `src/routes/fusible/+page.svelte`, `src/routes/fusib
    - Link to GitHub and FieldCam as the reference board.
 2. **Download `/fusible/download`**:
    - Detects the visitor's OS from `navigator.userAgent` on the client and puts that installer first. All others stay listed below.
-   - Links use `https://github.com/KonoLabs/Fusible/releases/latest/download/<asset>` from contract F. No API call needed for the links.
-   - Shows the version from `https://api.github.com/repos/KonoLabs/Fusible/releases/latest` fetched in a `+page.server.ts` with a one-hour cache header; on failure the page still renders without a version.
+   - Links use `https://github.com/FacileStudio/Fusible/releases/latest/download/<asset>` from contract F. No API call needed for the links.
+   - Shows the version from `https://api.github.com/repos/FacileStudio/Fusible/releases/latest` fetched in a `+page.server.ts` with a one-hour cache header; on failure the page still renders without a version.
    - Per-OS first-run notes for the unsigned builds (decision 2): Windows "More info, Run anyway"; macOS right-click Open; Linux `chmod +x` for the AppImage.
    - A "Release notes" link to the GitHub release.
 3. Home section `Fusible.svelte`: add a Download button next to the install snippet, and a "Read more" link to `/fusible`. TopNav: the Fusible entry goes to `/fusible` from other pages, keeps `#fusible` on the home page.

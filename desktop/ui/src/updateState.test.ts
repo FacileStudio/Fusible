@@ -73,6 +73,6 @@ describe("update text", () => {
     expect(checkedLabel(now / 1000 - 30, now)).toBe("Checked just now");
     expect(checkedLabel(now / 1000 - 3 * 3600, now)).toBe("Checked 3 hours ago");
     expect(checkedLabel(now / 1000 - 5 * 86400, now)).toBe("Checked 5 days ago");
-    expect(releaseUrl("0.19.0")).toBe("https://github.com/KonoLabs/Fusible/releases/tag/v0.19.0");
+    expect(releaseUrl("0.19.0")).toBe("https://github.com/FacileStudio/Fusible/releases/tag/v0.19.0");
   });
 });

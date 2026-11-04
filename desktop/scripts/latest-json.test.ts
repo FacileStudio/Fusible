@@ -38,7 +38,7 @@ describe("changelogSection", () => {
 
 describe("buildLatest", () => {
   const latest = buildLatest({
-    tag: "v0.19.0", repo: "KonoLabs/Fusible", notes: "notes", now: NOW, signatures: signatures(),
+    tag: "v0.19.0", repo: "FacileStudio/Fusible", notes: "notes", now: NOW, signatures: signatures(),
   });
   test("has the manifest fields", () => {
     expect(latest.version).toBe("0.19.0");
@@ -51,7 +51,7 @@ describe("buildLatest", () => {
     ]);
     const linux = latest.platforms["linux-x86_64"];
     expect(linux.url).toBe(
-      "https://github.com/KonoLabs/Fusible/releases/download/v0.19.0/Fusible-Studio-linux-x64.AppImage",
+      "https://github.com/FacileStudio/Fusible/releases/download/v0.19.0/Fusible-Studio-linux-x64.AppImage",
     );
     expect(linux.signature).toBe("sig-of-Fusible-Studio-linux-x64.AppImage");
     expect(latest.platforms["darwin-aarch64"].url).toBe(latest.platforms["darwin-x86_64"].url);

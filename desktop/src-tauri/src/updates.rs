@@ -4,7 +4,7 @@ use std::sync::Mutex;
 use serde::Serialize;
 use tauri_plugin_updater::Update;
 
-pub const RELEASES_URL: &str = "https://github.com/KonoLabs/Fusible/releases/latest";
+pub const RELEASES_URL: &str = "https://github.com/FacileStudio/Fusible/releases/latest";
 pub const CHECK_INTERVAL_SECS: i64 = 24 * 3600;
 pub const PROGRESS_EVENT: &str = "update-progress";
 

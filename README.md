@@ -365,7 +365,7 @@ bun, runs `fusible check`, and fails the job when the fuse blows:
 ```yaml
 - uses: actions/checkout@v7
 - id: fuse
-  uses: KonoLabs/Fusible@v0.20.1
+  uses: FacileStudio/Fusible@v0.20.1
   with:
     target: ""        # optional board name or file; empty checks every board
     version: latest   # or a version such as 0.20.1

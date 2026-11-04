@@ -2,7 +2,7 @@
 
 /// Annotated, clean template string for `fusible init`.
 pub(super) const DEFAULT_MANIFEST: &str = r#"# Fusible project manifest
-# Docs: https://github.com/KonoLabs/Fusible
+# Docs: https://github.com/FacileStudio/Fusible
 
 name: sensor-node
 

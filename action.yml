@@ -51,7 +51,7 @@ runs:
           *) echo "::error::unsupported runner arch $RUNNER_ARCH_NAME"; exit 2 ;;
         esac
         if [ "$FUSIBLE_VERSION" = "latest" ]; then
-          tag="$(gh release view --repo KonoLabs/Fusible --json tagName -q .tagName)"
+          tag="$(gh release view --repo FacileStudio/Fusible --json tagName -q .tagName)"
         else
           tag="v${FUSIBLE_VERSION#v}"
         fi
@@ -61,7 +61,7 @@ runs:
         asset="fusible_${version}_${os}_${arch}.${ext}"
         dir="$RUNNER_TEMP/fusible"
         mkdir -p "$dir"
-        gh release download "$tag" --repo KonoLabs/Fusible --pattern "$asset" --dir "$dir" --clobber
+        gh release download "$tag" --repo FacileStudio/Fusible --pattern "$asset" --dir "$dir" --clobber
         if [ "$ext" = "zip" ]; then
           7z x -y -o"$dir" "$dir/$asset" > /dev/null
         else

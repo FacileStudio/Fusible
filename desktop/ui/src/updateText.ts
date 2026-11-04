@@ -1,7 +1,7 @@
 import type { UpdateState } from "./updateTypes";
 
 export function releaseUrl(version: string): string {
-  return `https://github.com/KonoLabs/Fusible/releases/tag/v${version}`;
+  return `https://github.com/FacileStudio/Fusible/releases/tag/v${version}`;
 }
 
 export function percentOf(downloaded: number, total: number | null): number | null {

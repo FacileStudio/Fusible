@@ -5,8 +5,8 @@ use tauri_plugin_opener::OpenerExt;
 
 use crate::{commands::open, window};
 
-const DOCS_URL: &str = "https://github.com/KonoLabs/Fusible#readme";
-const BUG_URL: &str = "https://github.com/KonoLabs/Fusible/issues/new";
+const DOCS_URL: &str = "https://github.com/FacileStudio/Fusible#readme";
+const BUG_URL: &str = "https://github.com/FacileStudio/Fusible/issues/new";
 const ZOOM_STEP: f64 = 0.1;
 
 /// Current page zoom of the main window.
