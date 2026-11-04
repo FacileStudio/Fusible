@@ -11,7 +11,7 @@ mod args;
 
 pub use args::{
     AssemblyArgs, BodyAction, BodyArgs, BomArgs, BomFormat, EjectArgs, ExportArgs, InitArgs,
-    KitArgs, RouteArgs, SyncArgs,
+    KitArgs, ReleaseArgs, RouteArgs, SyncArgs,
 };
 
 /// Fusible — electronic linter & hardware-firmware bridge for tscircuit.
@@ -84,6 +84,9 @@ pub enum Commands {
 
     /// Export tscircuit code to various formats (gerbers, svg, glb, etc.)
     Export(ExportArgs),
+
+    /// Check every board, then write the fabrication bundle with a checksum manifest
+    Release(ReleaseArgs),
 
     /// Build the physical bodies: authored CAD files and generated enclosures
     #[command(

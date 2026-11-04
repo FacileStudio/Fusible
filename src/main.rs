@@ -66,6 +66,7 @@ fn run_command(command: Commands) -> ExitCode {
         Commands::Check { file, mcu, pins_rs } => dispatch::check(file, mcu, pins_rs),
         Commands::Build { file } => dispatch::build(file),
         Commands::Export(args) => dispatch::export(args),
+        Commands::Release(args) => dispatch::release(args),
         Commands::Body(args) => dispatch::body(args),
         Commands::Assembly(args) => dispatch::assembly(args),
         Commands::Bom(args) => tool_exit(commands::bom::run(args)),

@@ -42,6 +42,8 @@ pub enum ExportError {
     UnknownPreset { preset: String },
 }
 
+pub use fab_files::write_fab_bundle;
+
 /// Everything an export step needs once the fuse check has passed.
 struct ExportJob {
     runner: Option<Runner>,
