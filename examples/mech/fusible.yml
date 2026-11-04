@@ -1,0 +1,14 @@
+name: mech
+boards:
+  main: { circuit_json: circuit.json }
+bodies:
+  case:
+    source: mech/case.ts
+    material: petg
+    process: fdm
+    format: all
+  bracket:
+    source: mech/bracket.ts
+    material: al6061
+    process: cnc
+    format: all

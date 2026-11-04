@@ -42,7 +42,7 @@ pub(super) fn project_json(state: &State, cfg: Option<&FusibleConfig>, root: &Pa
     .to_string()
 }
 
-fn shown(path: &Path, root: &Path) -> String {
+pub(super) fn shown(path: &Path, root: &Path) -> String {
     path.strip_prefix(root)
         .unwrap_or(path)
         .to_string_lossy()

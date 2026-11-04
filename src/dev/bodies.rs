@@ -1,4 +1,6 @@
-//! `GET /api/bodies/<name>.glb`: the GLB of an authored body.
+//! `GET /api/bodies/<name>.glb`: the GLB of an authored body or a code part.
+//!
+//! `GET /api/bodies` lists every body, see [`list`].
 
 use std::path::Path;
 
@@ -9,8 +11,11 @@ use super::assets::http_response;
 use super::authored::{authored_glb, Failure};
 use super::body::no_store;
 use super::server::percent_decode;
-use crate::commands::body::{convert_to_glb, generator_dir};
+use crate::commands::body::{code_glb, convert_to_glb, generator_dir};
 use crate::config::FusibleConfig;
+
+use super::api::{error_body, respond_json};
+use super::bodies_list::bodies_json;
 
 const PREFIX: &str = "/api/bodies/";
 
@@ -46,7 +51,10 @@ fn build(path: &str) -> Result<Vec<u8>, Failure> {
         &cfg,
         &name,
         &cache.join("authored"),
-        |input, format, output| convert_to_glb(input, format, output).map_err(describe),
+        |input, format, output| match format {
+            "ts" => code_glb(&cfg, &name, root, output).map_err(describe),
+            _ => convert_to_glb(input, format, output).map_err(describe),
+        },
     )
     .map_err(|failure| Failure::new(failure.status, scrub(&failure.message, root, &cache)))
 }
@@ -61,4 +69,15 @@ pub(super) fn serve(request: Request, path: &str) {
         }
     };
     let _ = request.respond(no_store(response));
+}
+
+/// Answers `GET /api/bodies` with the list of bodies of the manifest.
+pub(super) fn list(request: Request) {
+    match FusibleConfig::nearest() {
+        Some((manifest, cfg)) => {
+            let root = manifest.parent().unwrap_or(Path::new("."));
+            respond_json(request, 200, bodies_json(&cfg, root));
+        }
+        None => respond_json(request, 404, error_body("no fusible.yml found")),
+    }
 }

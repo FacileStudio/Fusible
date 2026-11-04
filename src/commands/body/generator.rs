@@ -7,6 +7,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use super::generator_setup::{prepare_generator, OCCT_WASM_VERSION};
+use super::part_features::PartReport;
 use super::spec::Spec;
 use super::BodyError;
 use crate::tscircuit::bun_path;
@@ -26,10 +27,10 @@ pub(crate) fn generator_dir() -> PathBuf {
 }
 
 /// Pipes `spec` to the generator, which writes every file listed in `spec.outputs`.
-pub(super) fn run_generator(spec: &Spec) -> Result<(), BodyError> {
+pub(super) fn run_generator(spec: &Spec) -> Result<Option<PartReport>, BodyError> {
     println!("🧊 Building body model with OpenCascade...");
     let payload = serde_json::to_vec(spec).map_err(std::io::Error::other)?;
-    run_script("generator.ts", &payload)
+    run_capture("generator.ts", &payload).map(|out| PartReport::from_output(&out))
 }
 
 /// Runs the embedded script `script` under bun with `payload` on stdin; stdout is discarded.

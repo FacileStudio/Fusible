@@ -41,6 +41,7 @@ fn kind_of(path: &Path) -> Option<Kind> {
         "glb" => Some(Kind::Glb),
         "step" | "stp" => Some(Kind::Convert("step")),
         "stl" => Some(Kind::Convert("stl")),
+        "ts" => Some(Kind::Convert("ts")),
         _ => None,
     }
 }

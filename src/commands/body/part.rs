@@ -4,6 +4,7 @@ use std::path::{Path, PathBuf};
 
 use serde::Serialize;
 
+use super::jobs::code_board;
 use super::kit_data::{build_kit, Kit};
 use super::mech_rules_data::clearance_gap;
 use super::part_features::PartReport;
@@ -13,7 +14,7 @@ use super::{fuse_gate, run_capture, BodyError};
 use crate::bom::resolve_material;
 use crate::commands::check::load_circuit_source;
 use crate::commands::target::BoardTarget;
-use crate::config::{BodyConfig, EnclosureConfig};
+use crate::config::{BodyConfig, EnclosureConfig, FusibleConfig};
 
 #[derive(Serialize)]
 struct PartJob<'a> {
@@ -92,8 +93,7 @@ pub(crate) fn build_code(
     println!("🧊 Building code part `{name}` with OpenCascade...");
     let circuit_ref = circuit.as_ref().map(|(json, n)| (json.as_str(), n.clone()));
     let report = build_part(body, Path::new("."), circuit_ref, outputs.clone())?;
-    let text = serde_json::to_string_pretty(&report).map_err(std::io::Error::other)?;
-    std::fs::write(out_dir.join(format!("{name}.features.json")), text + "\n")?;
+    write_report(&out_dir, name, &report)?;
     for output in outputs {
         println!(
             "✅ Body {name} (code, {}) -> {}",
@@ -117,4 +117,31 @@ pub(crate) fn code_model(
         .transpose()?;
     let circuit_ref = circuit.as_ref().map(|(json, n)| (json.as_str(), n.clone()));
     build_part(body, root, circuit_ref, vec![Output { format, path }])
+}
+
+/// Caches the features of the last build of `name` in `out_dir`, for `fusible check`.
+pub(super) fn write_report(out_dir: &Path, name: &str, report: &PartReport) -> std::io::Result<()> {
+    let text = serde_json::to_string_pretty(report).map_err(std::io::Error::other)?;
+    std::fs::write(out_dir.join(format!("{name}.features.json")), text + "\n")
+}
+
+/// Reads the features cached by the last build of `name`.
+pub(crate) fn read_report(root: &Path, name: &str, body: &BodyConfig) -> Option<PartReport> {
+    let text = std::fs::read_to_string(features_path(root, name, body)).ok()?;
+    serde_json::from_str(&text).ok()
+}
+
+/// Builds the code part `name` as a GLB at `output` without a fuse check, for the dev studio.
+pub(crate) fn code_glb(
+    cfg: &FusibleConfig,
+    name: &str,
+    root: &Path,
+    output: &Path,
+) -> Result<(), BodyError> {
+    let body = cfg.bodies.get(name).ok_or_else(|| BodyError::UnknownBody {
+        name: name.to_string(),
+        help: "add it to `bodies:` in fusible.yml".into(),
+    })?;
+    let board = code_board(cfg, body)?;
+    code_model(body, root, board.as_ref(), "glb", output.to_path_buf()).map(|_| ())
 }

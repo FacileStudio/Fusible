@@ -58,7 +58,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 
 use crate::commands::check;
 use crate::commands::target::BoardTarget;
-use crate::config::{BodyConfig, EnclosureConfig, FusibleConfig};
+use crate::config::{EnclosureConfig, FusibleConfig};
 use crate::gerber::PcbModel;
 
 pub(crate) use authored::build_authored;
@@ -72,6 +72,7 @@ pub use kit::kit;
 pub(crate) use kit_data::{build_kit, Kit, KitOpening};
 pub use mech_check::verify_mech;
 pub use new::new;
+pub(crate) use part::{code_glb, read_report};
 use settings::{preview_settings, resolve_settings, Settings};
 use spec::{build_spec, preview_from, Output, Spec};
 pub(crate) use step::generate_step;
@@ -155,7 +156,11 @@ fn build_generated(
         })
         .collect();
     std::fs::create_dir_all(&out_dir)?;
-    for output in generate(&circuit_json, settings, outputs)?.outputs {
+    let (spec, report) = generate_reported(&circuit_json, settings, outputs)?;
+    if let Some(report) = report {
+        part::write_report(&out_dir, name, &report)?;
+    }
+    for output in spec.outputs {
         println!(
             "✅ Body {name} ({}) -> {}",
             output.format,
@@ -220,7 +225,15 @@ fn generate(
     settings: &Settings,
     outputs: Vec<Output>,
 ) -> Result<Spec, BodyError> {
+    generate_reported(circuit_json, settings, outputs).map(|(spec, _)| spec)
+}
+
+fn generate_reported(
+    circuit_json: &str,
+    settings: &Settings,
+    outputs: Vec<Output>,
+) -> Result<(Spec, Option<part_features::PartReport>), BodyError> {
     let spec = build_spec(&PcbModel::parse(circuit_json), settings, outputs)?;
-    run_generator(&spec)?;
-    Ok(spec)
+    let report = run_generator(&spec)?;
+    Ok((spec, report))
 }
