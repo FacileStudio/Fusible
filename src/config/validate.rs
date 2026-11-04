@@ -2,6 +2,7 @@
 
 use std::collections::BTreeSet;
 
+use super::design_validate::validate_design;
 use super::types::{AssemblyConfig, BodyConfig, LinkConfig};
 use super::FusibleConfig;
 
@@ -14,6 +15,7 @@ const RESERVED_BODY_NAMES: &[&str] = &["eject", "kit"];
 /// Fails on duplicate names, dangling board references, or ambiguous bodies.
 pub(super) fn validate(cfg: &FusibleConfig) -> Result<(), String> {
     unique_names(cfg)?;
+    validate_design(cfg)?;
     for (name, fw) in &cfg.firmware {
         board_reference(cfg, "firmware", name, fw.board.as_deref())?;
     }

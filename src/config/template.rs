@@ -47,4 +47,12 @@ firmware:
 #     cutouts: true               # notch walls where components reach the board edge
 #     ventilation: none           # none | grid | slots
 #     mounting: true              # screw bosses under each pcb_hole
+
+# Physics declarations. Rules check only what you declare here.
+# nets:
+#   VBUS: { voltage: 5, current: 2, max_rise: 10 }  # IPC-2152 trace heating, rise in deg C
+#   MAINS_L: { voltage: 230 }                       # IPC-2221B clearance against other nets
+# fab: jlcpcb-2l          # jlcpcb-2l | jlcpcb-4l | inline limits for another fab
+# clearance_class: B2     # B1 internal | B2 external uncoated | B4 external coated
+# copper: { outer_oz: 1, inner_oz: 0.5 }
 "#;
