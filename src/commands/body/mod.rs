@@ -51,6 +51,12 @@ mod kit_tests;
 #[cfg(test)]
 mod layout_tests;
 #[cfg(test)]
+mod mech_rules_tests;
+#[cfg(test)]
+mod new_tests;
+#[cfg(test)]
+mod slim_tests;
+#[cfg(test)]
 mod tests;
 
 use std::path::{Path, PathBuf};

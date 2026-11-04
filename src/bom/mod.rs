@@ -11,6 +11,8 @@ mod error;
 mod estimate;
 mod file;
 mod materials;
+#[cfg(test)]
+mod materials_tests;
 mod project;
 mod render;
 mod report;

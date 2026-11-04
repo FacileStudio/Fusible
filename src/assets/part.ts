@@ -4,6 +4,7 @@ import { OcctKernel, type ShapeHandle } from "occt-wasm";
 import { toBoard, type Kit } from "./part_board";
 import { makeCad } from "./part_cad";
 import { block, type Env, type Feature } from "./part_hw";
+import { slimGlb } from "./slim";
 
 type Input = {
   source: string;
@@ -35,7 +36,7 @@ const writers = (k: OcctKernel, shape: ShapeHandle) => ({
   glb: () => {
     const doc = k.createXCAFDocument();
     doc.addShape(shape, { name: "part", color: [0.18, 0.2, 0.23] });
-    const bytes = doc.exportGLTF();
+    const bytes = slimGlb(doc.exportGLTF());
     doc.close();
     return bytes;
   },
