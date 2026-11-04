@@ -6,6 +6,8 @@ use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
+pub mod rpc;
+
 use crate::common::{fusible, TestDir};
 
 pub const INTACT: &str = "examples/circuit.json";
