@@ -84,19 +84,17 @@ fn project_lists_served_items_with_relative_paths() {
 }
 
 #[test]
-fn viewer_loads_the_project_script_the_server_serves() {
+fn viewer_page_is_served_with_the_app_mount_point() {
     let page = super::assets::static_response("/", None, false).unwrap();
     assert_eq!(page.status_code().0, 200);
-    let script = super::assets::static_response("/project.js", None, false).unwrap();
-    assert_eq!(script.status_code().0, 200);
     let html = include_str!("../assets/viewer.html");
-    assert!(html.contains(r#"<script src="/project.js"></script>"#));
+    assert!(html.contains(r#"<div id="app"></div>"#));
 }
 
 #[test]
-fn server_serves_the_theme_the_viewer_links() {
-    let css = super::assets::static_response("/theme.css", None, false).unwrap();
+fn server_serves_the_stylesheet_the_viewer_links() {
+    let css = super::assets::static_response("/studio.css", None, false).unwrap();
     assert_eq!(css.status_code().0, 200);
     let html = include_str!("../assets/viewer.html");
-    assert!(html.contains(r#"<link rel="stylesheet" href="/theme.css">"#));
+    assert!(html.contains(r#"<link rel="stylesheet" href="/studio.css">"#));
 }

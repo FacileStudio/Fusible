@@ -9,21 +9,16 @@ fn page(desktop: bool) -> String {
 }
 
 #[test]
-fn viewer_has_no_projects_button_without_the_desktop_flag() {
+fn viewer_has_no_desktop_flag_outside_the_desktop_shell() {
     let html = page(false);
     assert!(!html.contains("FUSIBLE_DESKTOP"));
-    assert!(!html.contains("open_projects"));
 }
 
 #[test]
-fn viewer_carries_the_flag_and_the_projects_button_under_the_desktop_shell() {
+fn viewer_carries_the_flag_before_the_bundle_under_the_desktop_shell() {
     let html = page(true);
     let flag = html.find("window.FUSIBLE_DESKTOP = true;").unwrap();
     assert!(flag < html.find("studio.bundle.js").unwrap());
-    assert!(html.contains("__TAURI_INTERNALS__"));
-    assert!(html.contains("open_projects"));
-    assert!(html.contains("desktop-chrome"));
-    assert!(html.contains("data-tauri-drag-region"));
 }
 
 #[test]
