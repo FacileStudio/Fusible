@@ -1,0 +1,208 @@
+@import "@facile/muse/styles";
+@source "../node_modules/@facile/muse/src";
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  overflow: hidden;
+  user-select: none;
+  font-family: var(--font-fc-body);
+}
+
+.view-host {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+#schematic-container > div,
+#pcb-container > div,
+#pcb-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+.tscircuit-schematic {
+  background-color: var(--color-fc-component) !important;
+}
+
+.tscircuit-schematic text {
+  font-family: var(--font-fc-mono) !important;
+}
+
+#schematic-container [data-circuit-json-type="schematic_component"] text.sch-text {
+  fill: var(--color-fc-fg) !important;
+}
+
+#schematic-container text.sch-text[fill="rgb(132, 0, 0)"] {
+  fill: var(--color-fc-success) !important;
+}
+
+[role="menu"],
+[data-radix-menu-content],
+[data-toolbar-overlay] div[style*="position: absolute"],
+[data-schematic-search] > div,
+#schematic-container div[style*="rgba(255, 255, 255"],
+#three-cad div[style*="background-color: white"],
+#three-cad div[style*="background-color: rgb(255, 255, 255)"] {
+  @apply rounded-fc-lg!;
+  background: var(--color-fc-surface) !important;
+  background-image: none !important;
+  color: var(--color-fc-fg) !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-family: var(--font-fc-body) !important;
+  font-size: 12px !important;
+}
+
+#three-cad div[style*="background-color: white"] *,
+#three-cad div[style*="background-color: rgb(255, 255, 255)"] * {
+  color: var(--color-fc-fg) !important;
+}
+
+[role="menu"] *,
+[data-toolbar-overlay] div[style*="position: absolute"] * {
+  font-family: var(--font-fc-body) !important;
+  background-image: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+[role="menuitem"],
+[role="menuitemcheckbox"],
+[role="menuitemradio"],
+[data-toolbar-overlay] div[style*="cursor: pointer"],
+#schematic-container button,
+[data-schematic-warnings] {
+  @apply rounded-fc-pill!;
+  background: transparent !important;
+  color: var(--color-fc-fg-muted) !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-size: 12px !important;
+  padding: 6px 12px !important;
+}
+
+[role="menuitem"]:is(:hover, :focus-visible, [data-highlighted]),
+[role="menuitemcheckbox"]:is(:hover, :focus-visible, [data-highlighted]),
+[role="menuitemradio"]:is(:hover, :focus-visible, [data-highlighted]),
+[data-toolbar-overlay] div[style*="cursor: pointer"]:hover,
+#schematic-container button:hover {
+  background: var(--color-fc-surface) !important;
+  color: var(--color-fc-fg) !important;
+}
+
+[role="separator"] {
+  height: 4px !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+[data-toolbar-overlay],
+.schematic-viewer-toolbar {
+  top: 12px !important;
+  left: 12px !important;
+  gap: 4px !important;
+  align-items: flex-start !important;
+}
+
+#schematic-container [data-schematic-warnings] {
+  color: var(--color-fc-danger) !important;
+  background: var(--color-fc-surface) !important;
+}
+
+[data-schematic-search] * {
+  font-family: var(--font-fc-body) !important;
+}
+
+[data-schematic-search] input {
+  background: transparent !important;
+  color: var(--color-fc-fg) !important;
+  font-size: 12px !important;
+}
+
+[data-schematic-search] input::placeholder,
+[data-schematic-search] svg {
+  color: var(--color-fc-fg-muted) !important;
+}
+
+[data-schematic-search] kbd {
+  background: var(--color-fc-component) !important;
+  color: var(--color-fc-fg-muted) !important;
+}
+
+#schematic-container div[style*="pointer-events: none"] {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#schematic-container dl,
+#schematic-container dl * {
+  font-family: var(--font-fc-body) !important;
+  color: var(--color-fc-fg) !important;
+}
+
+#schematic-container dt {
+  color: var(--color-fc-fg-muted) !important;
+  font-size: 11px !important;
+}
+
+#schematic-container dd {
+  color: var(--color-fc-success) !important;
+  font-size: 12px !important;
+}
+
+.schematic-warning [data-warning-reference="callout"] {
+  @apply rounded-fc-lg!;
+  background: var(--color-fc-surface) !important;
+  color: var(--color-fc-fg) !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.mechanical-status,
+.assembly-status {
+  @apply absolute left-1/2 top-1/2 flex max-w-[min(560px,calc(100%-32px))] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-4 rounded-3xl bg-fc-surface p-6 text-center text-fc-sm text-fc-fg-muted;
+  white-space: pre-wrap;
+}
+
+.mechanical-status {
+  pointer-events: none;
+}
+
+.assembly-build {
+  @apply inline-flex h-9 items-center rounded-fc-pill bg-fc-accent px-4 text-fc-sm font-medium text-fc-accent-fg hover:opacity-90;
+}
+
+.assembly-list {
+  @apply absolute right-3 top-16 flex max-h-[calc(100%-160px)] w-[min(320px,calc(100%-24px))] flex-col overflow-y-auto rounded-3xl bg-fc-surface p-2 text-fc-xs;
+}
+
+.assembly-list[hidden] {
+  display: none;
+}
+
+.assembly-head {
+  @apply px-3 py-2 text-fc-success;
+}
+
+.assembly-head.is-blown {
+  @apply text-fc-danger;
+}
+
+.assembly-item {
+  @apply flex flex-col gap-1 rounded-fc-lg bg-transparent px-3 py-2 text-left text-fc-fg-muted hover:bg-fc-component hover:text-fc-fg;
+}
+
+.assembly-item.active {
+  @apply bg-fc-component text-fc-fg;
+}
+
+.assembly-rule {
+  @apply text-fc-danger;
+}
