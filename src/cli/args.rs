@@ -63,6 +63,9 @@ pub struct BomArgs {
     /// Write the output to this file instead of stdout
     #[arg(short = 'o', long, value_name = "PATH")]
     pub output: Option<PathBuf>,
+
+    #[command(flatten)]
+    pub opus: super::OpusArgs,
 }
 
 #[derive(Debug, Args, PartialEq)]

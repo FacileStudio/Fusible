@@ -1,0 +1,4 @@
+name: mcp-fixture
+boards:
+  main:
+    entry: circuit.json

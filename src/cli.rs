@@ -8,11 +8,13 @@ use clap::builder::ValueHint;
 use clap::{Parser, Subcommand};
 
 mod args;
+mod mcp_args;
 
 pub use args::{
     AssemblyArgs, BodyAction, BodyArgs, BomArgs, BomFormat, EjectArgs, ExportArgs, InitArgs,
     KitArgs, RouteArgs, SyncArgs,
 };
+pub use mcp_args::{McpArgs, McpClient, NuageArgs, OpusArgs, ShareArgs, ShareTarget};
 
 /// Fusible — electronic linter & hardware-firmware bridge for tscircuit.
 #[derive(Debug, Parser)]
@@ -73,6 +75,9 @@ pub enum Commands {
         /// Destination path for generated firmware pin bindings (pins.rs)
         #[arg(long, value_name = "PATH")]
         pins_rs: Option<PathBuf>,
+
+        #[command(flatten)]
+        opus: OpusArgs,
     },
 
     /// Compile circuit artifacts and build firmware
@@ -101,6 +106,12 @@ pub enum Commands {
     /// List the parts of the project with quantities and prices (bill of materials)
     #[command(alias = "parts")]
     Bom(BomArgs),
+
+    /// Serve the project to AI agents over MCP (stdio)
+    Mcp(McpArgs),
+
+    /// Send the fuse-gated export to a Facile app
+    Share(ShareArgs),
 
     /// Run the autorouter to solve circuit traces
     Route(RouteArgs),

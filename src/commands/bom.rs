@@ -34,7 +34,7 @@ pub enum BomCommandError {
     },
 }
 
-fn report(args: &BomArgs) -> Result<Report, BomCommandError> {
+pub(crate) fn report(args: &BomArgs) -> Result<Report, BomCommandError> {
     let boards = resolve_boards(args.target.clone())?;
     let scoped = boards.len() > 1;
     let mut parts: Vec<Part> = Vec::new();
@@ -60,6 +60,9 @@ fn report(args: &BomArgs) -> Result<Report, BomCommandError> {
 /// Prints or writes the bill of materials.
 pub fn run(args: BomArgs) -> Result<(), BomCommandError> {
     let report = report(&args)?;
+    if args.opus.opus {
+        crate::commands::opus::report_bom(&report, &args.opus);
+    }
     let text = match args.format {
         BomFormat::Table => bom::table(&report),
         BomFormat::Csv => bom::csv(&report),

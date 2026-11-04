@@ -41,7 +41,7 @@ fn main() -> ExitCode {
 
     if !matches!(
         cli.command,
-        Some(Commands::Init(_) | Commands::Doctor { .. })
+        Some(Commands::Init(_) | Commands::Doctor { .. } | Commands::Mcp(_))
     ) {
         if let Err(err) = config::FusibleConfig::find_and_load(std::path::Path::new(".")) {
             return fail(err, EXIT_TOOL_ERROR);
@@ -50,7 +50,7 @@ fn main() -> ExitCode {
 
     match cli.command {
         Some(command) => run_command(command),
-        None => dispatch::check(cli.input, cli.mcu, None),
+        None => dispatch::check(cli.input, cli.mcu, None, cli::OpusArgs::default()),
     }
 }
 
@@ -63,23 +63,24 @@ fn run_command(command: Commands) -> ExitCode {
             legacy,
             desktop,
         } => dispatch::dev(file, port, legacy, desktop),
-        Commands::Check { file, mcu, pins_rs } => dispatch::check(file, mcu, pins_rs),
+        Commands::Check {
+            file,
+            mcu,
+            pins_rs,
+            opus,
+        } => dispatch::check(file, mcu, pins_rs, opus),
         Commands::Build { file } => dispatch::build(file),
         Commands::Export(args) => dispatch::export(args),
         Commands::Body(args) => dispatch::body(args),
         Commands::Assembly(args) => dispatch::assembly(args),
         Commands::Bom(args) => tool_exit(commands::bom::run(args)),
+        Commands::Mcp(args) => tool_exit(commands::mcp::run(args)),
+        Commands::Share(args) => dispatch::share(args),
         Commands::Route(args) => dispatch::route(args),
         Commands::Diff { kicad_pcb, file } => dispatch::diff(kicad_pcb, file),
         Commands::Sync(args) => dispatch::sync(args),
         Commands::Doctor { install, json } => tool_exit(commands::doctor::run(install, json)),
-        Commands::Init(a) => tool_exit(commands::init::run(
-            a.path,
-            a.name,
-            a.mcu,
-            a.currency,
-            a.no_install,
-        )),
+        Commands::Init(args) => dispatch::init(args),
         Commands::Add { packages } => tool_exit(commands::add::run(&packages)),
         Commands::Install { dir } => tool_exit(commands::install::run(dir)),
         Commands::Search { query } => tool_exit(commands::search::run(&query)),
