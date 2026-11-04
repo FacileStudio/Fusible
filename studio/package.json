@@ -2,11 +2,15 @@
   "name": "fusible-studio",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "build": "bun build src/index.ts --target=browser --outfile=../src/assets/studio.bundle.js --minify"
+    "build": "vite build",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "test": "bun test",
+    "icons": "bun scripts/solar-icons.ts"
   },
   "dependencies": {
-    "@iconify-json/pixelarticons": "^1.2.10",
+    "@facile/muse": "github:FacileStudio/muse#v0.10.0",
     "@tscircuit/3d-viewer": "0.0.627",
     "@tscircuit/checks": "0.0.257",
     "@tscircuit/circuit-json-util": "^0.0.123",
@@ -16,17 +20,26 @@
     "@tscircuit/props": "0.0.704",
     "@tscircuit/schematic-viewer": "^2.0.105",
     "circuit-to-svg": "^0.0.450",
-    "iconify-icon": "^3.0.4",
+    "gsap": "^3.13",
+    "qrcode": "^1.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "three": "^0.165.0",
     "three-stdlib": "^2.36.1"
   },
   "devDependencies": {
+    "@iconify-json/solar": "^1.2.13",
+    "@sveltejs/vite-plugin-svelte": "^6",
+    "@tailwindcss/vite": "^4",
     "@types/bun": "latest",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@types/three": "0.165.0",
-    "typescript": "latest"
+    "svelte": "^5",
+    "svelte-check": "^4",
+    "tailwindcss": "^4",
+    "typescript": "^5.9",
+    "vite": "^7"
   }
 }
