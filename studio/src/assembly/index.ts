@@ -1,3 +1,4 @@
+import { setAssemblyBuildHandler } from "./panel";
 import { assemblyCameraPreset, hideAssemblyViewer, refreshAssembly, renderAssemblyViewer } from "./view";
 
 export const Assembly = {
@@ -5,4 +6,5 @@ export const Assembly = {
   hideAssemblyViewer,
   refreshAssembly,
   assemblyCameraPreset,
+  setAssemblyBuildHandler,
 };

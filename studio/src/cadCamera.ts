@@ -9,6 +9,18 @@ export interface CadCameraController {
   animateToPreset: (preset: string) => void;
 }
 
+let controller: CadCameraController | null = null;
+
+/** Remembers the live CadViewer camera controller, or forgets it when the viewer unmounts. */
+export function setCadController(next: CadCameraController | null): void {
+  controller = next;
+}
+
+/** Returns the live CadViewer camera controller, if a 3D viewer is mounted. */
+export function getCadController(): CadCameraController | null {
+  return controller;
+}
+
 /** Eye directions of the camera presets in a Z-up frame (CadViewer and the mechanical tab). */
 export const Z_UP_PRESETS: Record<CameraPresetName, Vec3> = {
   TOP: [0, 0, 1],

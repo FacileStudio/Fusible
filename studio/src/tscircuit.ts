@@ -2,19 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import { rootSlot, renderIntoSlot } from "./roots";
 import * as THREE from "three";
 import { CadViewer as BaseCadViewer } from "@tscircuit/3d-viewer";
-import "iconify-icon";
-import { addCollection } from "iconify-icon";
-import pixelarticons from "@iconify-json/pixelarticons/icons.json";
 import { Assembly } from "./assembly";
 import { Mechanical } from "./mechanical";
-import { animateCadCameraPreset, type CadCameraController } from "./cadCamera";
+import { animateCadCameraPreset, setCadController, type CadCameraController } from "./cadCamera";
 import { installRenderCapture, mainCapturedCanvas } from "./capture";
 import { useContextMenuIntercept } from "./contextMenu";
 import { renderPcbViewer } from "./pcbViewer";
 import { renderSchematicViewer } from "./schematicViewer";
 import { determineRefdesFrom3dObject, resolveComponentRefdes } from "./refdes";
-
-addCollection(pixelarticons as any);
 
 if (typeof window !== "undefined") installRenderCapture();
 
@@ -116,7 +111,7 @@ export function CadViewer({
         }
       },
       onCameraControllerReady: (controller: CadCameraController | null) => {
-        window.cadCameraController = controller ?? undefined;
+        setCadController(controller);
         if (onCameraControllerReady) onCameraControllerReady(controller);
       },
     })
@@ -134,6 +129,7 @@ export function render3dViewer(
   renderIntoSlot(cadSlot, container, React.createElement(CadViewer, props));
 }
 
+/** The viewer entry points the studio calls: 2D and 3D viewers, camera presets, bodies and assembly. */
 export const Tscircuit = {
   render3dViewer,
   renderPcbViewer,
@@ -142,17 +138,3 @@ export const Tscircuit = {
   ...Mechanical,
   ...Assembly,
 };
-
-declare global {
-  interface Window {
-    Tscircuit: typeof Tscircuit;
-    cadCameraController?: CadCameraController;
-  }
-}
-
-if (typeof window !== "undefined") {
-  window.Tscircuit = Tscircuit;
-  window.dispatchEvent(new CustomEvent("tscircuit-ready"));
-}
-
-export default Tscircuit;

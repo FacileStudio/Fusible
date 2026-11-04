@@ -7,7 +7,7 @@ import { parseMeshes, readError } from "./gltf";
  */
 export async function fetchAuthored(name: string, nonce: number): Promise<THREE.BufferGeometry[]> {
   const response = await fetch(`/api/bodies/${encodeURIComponent(name)}.glb?rev=${nonce}`, { cache: "no-store" });
-  if (!response.ok) throw new Error(await readError(response, "BODY MODEL UNAVAILABLE"));
+  if (!response.ok) throw new Error(await readError(response, "Body model unavailable"));
   const meshes = await parseMeshes(await response.arrayBuffer());
   return meshes.map((mesh) => mesh.geometry);
 }

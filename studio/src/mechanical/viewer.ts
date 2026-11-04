@@ -1,26 +1,24 @@
 import { Z_UP_PRESETS, type CameraPresetName } from "../cadCamera";
 import { demandAuthored, isAuthoredSelected, refreshAuthored, subscribeAuthored, type AuthoredState } from "./authored";
 import { buildMechanicalDisplay, poseMechanicalDisplay } from "./display";
-import { getMechanicalOption } from "./prefs";
+import { announceLidControls, getMechanicalOption } from "./prefs";
 import { framePreset } from "./frame";
 import { demandMechanical, subscribeMechanical, type MechanicalModel, type MechanicalState } from "./store";
 import { attach, clearAuthored, mount, showAuthored, startLoop, type Tab } from "./tab";
 
 const WAITING = {
-  idle: "WAITING FOR CIRCUIT...",
-  loading: "GENERATING MECHANICAL MODEL...",
+  idle: "Waiting for the circuit...",
+  loading: "Generating the mechanical model...",
   error: "",
   ready: "",
 };
 
 const WAITING_AUTHORED = {
-  idle: "SELECT A BODY",
-  loading: "LOADING BODY MODEL...",
+  idle: "Select a body",
+  loading: "Loading the body model...",
   error: "",
   ready: "",
 };
-
-const LID_BUTTONS = ["btn-mechanical-lid", "btn-mechanical-explode"];
 
 let tab: Tab | null = null;
 let generated: MechanicalState = { status: "idle" };
@@ -46,10 +44,7 @@ function sync(): void {
   tab.status.style.display = text ? "flex" : "none";
   demandMechanical("tab", tab.active && !auth);
   demandAuthored("tab", tab.active && auth);
-  for (const id of LID_BUTTONS) {
-    const button = document.getElementById(id);
-    if (button) button.style.display = auth ? "none" : "";
-  }
+  announceLidControls(!auth);
 }
 
 function onState(state: MechanicalState): void {

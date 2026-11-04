@@ -35,3 +35,16 @@ export function setMechanicalOption(option: MechanicalOption, value: boolean): v
     return;
   }
 }
+
+const lidListeners = new Set<(available: boolean) => void>();
+
+/** Tells the subscribers whether the lid and explode toggles apply to the shown body. */
+export function announceLidControls(available: boolean): void {
+  lidListeners.forEach((listener) => listener(available));
+}
+
+/** Subscribes to the availability of the lid toggles; returns the unsubscribe function. */
+export function onLidControls(listener: (available: boolean) => void): () => void {
+  lidListeners.add(listener);
+  return () => lidListeners.delete(listener);
+}

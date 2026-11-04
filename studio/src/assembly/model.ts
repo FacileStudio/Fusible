@@ -38,7 +38,7 @@ const COLLISION_OPACITY = 0.6;
 /** Fetches the assembly report and the address of its preview model. */
 export async function fetchOverview(): Promise<Overview> {
   const response = await fetch("/api/assembly");
-  if (!response.ok) throw new Error(await readError(response, "ASSEMBLY UNAVAILABLE"));
+  if (!response.ok) throw new Error(await readError(response, "Assembly unavailable"));
   return response.json();
 }
 
@@ -75,7 +75,7 @@ export function paintCollisions(root: THREE.Object3D): Map<string, THREE.Object3
 /** Downloads the preview GLB at `url` and paints its collisions. */
 export async function loadPreview(url: string): Promise<Preview> {
   const response = await fetch(url);
-  if (!response.ok) throw new Error(await readError(response, "ASSEMBLY PREVIEW UNAVAILABLE"));
+  if (!response.ok) throw new Error(await readError(response, "Assembly preview unavailable"));
   const root = await parseScene(await response.arrayBuffer());
   return { url, root, collisions: paintCollisions(root) };
 }
