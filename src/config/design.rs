@@ -4,18 +4,8 @@ use std::collections::BTreeMap;
 
 use serde::Deserialize;
 
+use super::fab::builtin_fab;
 use super::FusibleConfig;
-
-const BUILTIN_FABS: &[(&str, &str)] = &[
-    (
-        "jlcpcb-2l",
-        include_str!("../linter/rules/data/fab/jlcpcb-2l.yml"),
-    ),
-    (
-        "jlcpcb-4l",
-        include_str!("../linter/rules/data/fab/jlcpcb-4l.yml"),
-    ),
-];
 
 fn default_outer_oz() -> f64 {
     1.0
@@ -106,17 +96,6 @@ impl std::fmt::Display for ClearanceClass {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{self:?}")
     }
-}
-
-/// Returns the built-in fab profile called `name`.
-pub fn builtin_fab(name: &str) -> Option<FabProfile> {
-    let (_, text) = BUILTIN_FABS.iter().find(|(known, _)| *known == name)?;
-    serde_yaml::from_str(text).ok()
-}
-
-/// Names of the built-in fab profiles.
-pub fn builtin_fab_names() -> Vec<&'static str> {
-    BUILTIN_FABS.iter().map(|(name, _)| *name).collect()
 }
 
 /// The manifest's design rules with defaults applied.

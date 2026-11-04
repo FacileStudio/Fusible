@@ -1,6 +1,7 @@
 //! Checks of the design-rule keys: `nets`, `fab`, `clearance_class` and `copper`.
 
-use super::design::{builtin_fab_names, ClearanceClass, FabProfile, FabSpec};
+use super::design::{ClearanceClass, FabProfile, FabSpec};
+use super::fab::builtin_fab_names;
 use super::FusibleConfig;
 
 /// Fails on an unsupported class, an unknown fab or a non-positive quantity.
