@@ -3,6 +3,9 @@
 use super::elements::{PcbCopperPourElm, PcbPoint, PcbRing};
 use super::math::{add, finite_or, required, rotate};
 
+type Contour = Vec<[f64; 2]>;
+pub(super) type PourRings = (Contour, Vec<Contour>);
+
 const OUTSIDE_MARGIN_MM: f64 = 1.0;
 
 /// Returns a region covering everything outside `ring`: a bounding frame joined to the ring by a cut-in.
@@ -20,9 +23,7 @@ pub(super) fn outside_region(ring: &[[f64; 2]]) -> Vec<[f64; 2]> {
 }
 
 /// Returns the outer contour and the hole contours of a pour, in millimetres.
-pub(super) fn pour_rings(
-    pour: &PcbCopperPourElm,
-) -> Result<(Vec<[f64; 2]>, Vec<Vec<[f64; 2]>>), String> {
+pub(super) fn pour_rings(pour: &PcbCopperPourElm) -> Result<PourRings, String> {
     let (outer, holes) = match pour.shape.as_deref() {
         Some("rect") => (rect_ring(pour)?, Vec::new()),
         Some("polygon") => (points(pour.points.as_deref().unwrap_or(&[])), Vec::new()),

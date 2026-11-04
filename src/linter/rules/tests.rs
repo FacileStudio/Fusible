@@ -7,6 +7,7 @@
 //! rule family's tests live in a submodule under `tests/`, kept under
 //! filet's functions-per-file budget.
 
+mod autoroute;
 mod bypass;
 mod clearance;
 mod mcu_target;

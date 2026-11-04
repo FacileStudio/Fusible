@@ -106,8 +106,8 @@ fn a_generated_enclosure_assembles_to_a_glb_and_a_step_file() {
     );
     let circuit = dir.path.join("circuit.json");
     let source = std::fs::read_to_string(&circuit).unwrap();
-    let outline =
-        r#"[{"type":"pcb_board","width":40,"height":30,"center":{"x":0,"y":0},"thickness":1.4},"#;
+    let outline = r#"[{"type":"pcb_board","width":40,"height":30,"center":{"x":0,"y":0},"thickness":1.4},
+        {"type":"pcb_trace","route":[]},"#;
     std::fs::write(&circuit, source.replacen('[', outline, 1)).unwrap();
     let out = fusible()
         .current_dir(&dir.path)

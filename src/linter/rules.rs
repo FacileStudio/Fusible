@@ -15,6 +15,7 @@
 //! One rule per file — filet's functions-per-file budget counts `impl`
 //! methods, so a hub module keeps every rule comfortably under the limit.
 
+mod autoroute;
 mod bypass_cap;
 mod dangling_reference;
 mod ghost_net;
@@ -27,6 +28,7 @@ mod tests;
 mod trace_clearance;
 mod unconnected_net;
 
+pub use autoroute::AutorouteRule;
 pub use bypass_cap::BypassCapRule;
 pub use dangling_reference::DanglingReferenceRule;
 pub use ghost_net::GhostNetRule;
