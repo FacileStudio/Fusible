@@ -6,7 +6,8 @@ use serde::Serialize;
 
 use crate::commands::check::load_circuit_source;
 use crate::commands::target::board_for_entry;
-use crate::linter::{LintContext, Linter, Severity};
+use crate::config::DesignRules;
+use crate::linter::{Diagnostic, LintContext, Linter, Severity};
 use crate::netlist::Netlist;
 use crate::parser::{self, Circuit};
 
@@ -15,6 +16,33 @@ pub struct DevDiagnostic {
     pub rule: String,
     pub message: String,
     pub help: Option<String>,
+    pub severity: &'static str,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub standard: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub source_url: Option<String>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub elements: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fix: Option<String>,
+}
+
+impl From<Diagnostic> for DevDiagnostic {
+    fn from(d: Diagnostic) -> Self {
+        Self {
+            rule: d.rule,
+            message: d.message,
+            help: d.help,
+            severity: match d.severity {
+                Severity::Error => "error",
+                Severity::Warning => "warning",
+            },
+            standard: d.standard,
+            source_url: d.source_url,
+            elements: d.elements,
+            fix: d.fix,
+        }
+    }
 }
 
 /// The studio payload pushed over SSE and served at `/api/circuit`.
@@ -56,11 +84,12 @@ pub fn revision(source: &str) -> String {
 }
 
 fn diagnostic(rule: &str, message: String, help: &str) -> DevDiagnostic {
-    DevDiagnostic {
+    DevDiagnostic::from(Diagnostic {
         rule: rule.to_string(),
         message,
         help: Some(help.to_string()),
-    }
+        ..Default::default()
+    })
 }
 
 fn source_failure(board_name: String, message: String) -> DevPayload {
@@ -100,15 +129,11 @@ fn analyze(board_name: String, mcu: Option<&str>, json_path: &Path, source: &str
 
 fn lint(payload: &mut DevPayload, circuit: &Circuit, mcu: Option<&str>) {
     let netlist = Netlist::from_circuit(circuit);
-    let ctx = LintContext::new(circuit, &netlist).with_mcu(mcu);
+    let design = DesignRules::nearest();
+    let ctx = LintContext::new(circuit, &netlist)
+        .with_mcu(mcu)
+        .with_design(design.as_ref());
     let violations = Linter::default().run_with_context(&ctx);
     payload.fuse_blown = violations.iter().any(|v| v.severity == Severity::Error);
-    payload.diagnostics = violations
-        .into_iter()
-        .map(|v| DevDiagnostic {
-            rule: v.rule,
-            message: v.message,
-            help: v.help,
-        })
-        .collect();
+    payload.diagnostics = violations.into_iter().map(DevDiagnostic::from).collect();
 }

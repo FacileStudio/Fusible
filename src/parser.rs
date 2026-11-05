@@ -63,6 +63,9 @@
 
 mod diagnostic;
 mod elements;
+pub mod geometry;
+#[cfg(test)]
+mod geometry_tests;
 #[cfg(test)]
 mod tests;
 

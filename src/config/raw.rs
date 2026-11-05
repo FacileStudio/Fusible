@@ -9,6 +9,7 @@ use std::collections::BTreeMap;
 
 use serde::Deserialize;
 
+use super::design::{CopperSpec, FabSpec, NetSpec};
 use super::types::{
     AssemblyConfig, BoardConfig, BodyConfig, EnclosureConfig, FirmwareConfig, LinkConfig,
 };
@@ -34,6 +35,14 @@ pub(super) struct RawConfig {
     links: BTreeMap<String, LinkConfig>,
     #[serde(default)]
     assembly: Option<AssemblyConfig>,
+    #[serde(default)]
+    nets: BTreeMap<String, NetSpec>,
+    #[serde(default)]
+    fab: Option<FabSpec>,
+    #[serde(default)]
+    clearance_class: Option<String>,
+    #[serde(default)]
+    copper: Option<CopperSpec>,
     #[serde(default)]
     hardware: Option<BoardConfig>,
     #[serde(default)]
@@ -71,6 +80,10 @@ impl RawConfig {
             bodies,
             links: self.links,
             assembly: self.assembly,
+            nets: self.nets,
+            fab: self.fab,
+            clearance_class: self.clearance_class,
+            copper: self.copper,
         })
     }
 }

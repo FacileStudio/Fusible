@@ -29,7 +29,7 @@ impl Rule for PinMuxRule {
         let target = match resolve_target(ctx) {
             Ok(Some(target)) => target,
             Ok(None) => return Vec::new(),
-            Err(unknown) => return vec![unknown],
+            Err(unknown) => return vec![*unknown],
         };
         let assignments = extract_assigned_pins(ctx, target, target.name);
         validate_pin_assignments(target, &assignments)

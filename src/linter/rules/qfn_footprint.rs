@@ -16,6 +16,14 @@ impl Rule for QfnFootprintSpanRule {
         "qfn_footprint_span"
     }
 
+    fn summary(&self) -> &'static str {
+        "Warns when a qfn footprint gives only a copper span, which can short the corner pads."
+    }
+
+    fn standard(&self) -> Option<&'static str> {
+        Some("tscircuit footprinter")
+    }
+
     fn severity(&self) -> Severity {
         Severity::Warning
     }

@@ -5,8 +5,13 @@
 
 #[cfg(test)]
 mod assembly_tests;
+mod design;
+#[cfg(test)]
+mod design_tests;
+mod design_validate;
 mod discovery;
 pub mod error;
+mod fab;
 #[cfg(test)]
 mod kicad_tests;
 #[cfg(test)]
@@ -24,8 +29,10 @@ mod validate;
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
+pub use design::{ClearanceClass, CopperSpec, DesignRules, FabProfile, FabSpec, NetSpec};
 use discovery::{check_file_target, find_in_dir};
 pub use error::ConfigError;
+pub use fab::{builtin_fab, builtin_fab_names};
 use raw::RawConfig;
 pub use raw::LEGACY_BOARD;
 pub use types::{
@@ -48,6 +55,10 @@ pub struct FusibleConfig {
     pub bodies: BTreeMap<String, BodyConfig>,
     pub links: BTreeMap<String, LinkConfig>,
     pub assembly: Option<AssemblyConfig>,
+    pub nets: BTreeMap<String, NetSpec>,
+    pub fab: Option<FabSpec>,
+    pub clearance_class: Option<String>,
+    pub copper: Option<CopperSpec>,
 }
 
 impl FusibleConfig {

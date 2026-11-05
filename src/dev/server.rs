@@ -15,6 +15,7 @@ use super::hub::stream_events;
 use super::kicad_watch::start_kicad_watchers;
 use super::limiter::handlers;
 use super::refresh::{load_bundle, rebuild_trigger, refresh, warn_if_bundle_missing, watch_dir};
+use super::rules_api;
 use super::run_api;
 use super::serve::serve_static;
 use super::state::{Slot, State};
@@ -72,6 +73,7 @@ pub(super) fn handle(request: Request, state: &State, port: u16) {
         "/api/project" => api::project(request, state),
         "/api/bom" => bom::serve(request, state, port),
         "/api/runs" => api::runs(request, state),
+        "/api/rules" => rules_api::serve(request),
         p if assembly::owns(p) => assembly::serve(request, p),
         p if p.starts_with("/api/bodies/") => bodies::serve(request, p),
         "/api/kicad" => api::kicad(request, state),

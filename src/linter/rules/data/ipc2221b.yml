@@ -1,0 +1,16 @@
+source: IPC-2221B Table 6-1, cross-checked on https://www.atlaspcb.com/tools/conductor-spacing-calculator and https://pcbtools.xyz/tools/conductor-spacing
+checked: 2026-11-04
+rows:
+  - { max_v: 15, b1: 0.05, b2: 0.10, b4: 0.05 }
+  - { max_v: 30, b1: 0.05, b2: 0.10, b4: 0.05 }
+  - { max_v: 50, b1: 0.10, b2: 0.60, b4: 0.13 }
+  - { max_v: 100, b1: 0.10, b2: 0.60, b4: 0.13 }
+  - { max_v: 150, b1: 0.20, b2: 0.60, b4: 0.40 }
+  - { max_v: 170, b1: 0.20, b2: 1.25, b4: 0.40 }
+  - { max_v: 250, b1: 0.20, b2: 1.25, b4: 0.40 }
+  - { max_v: 300, b1: 0.20, b2: 1.25, b4: 0.40 }
+  - { max_v: 500, b1: 0.25, b2: 2.50, b4: 0.80 }
+over_500:
+  b1: { base: 0.25, per_volt: 0.0025 }
+  b2: { base: 2.50, per_volt: 0.005 }
+  b4: { base: 0.80, per_volt: 0.00305 }

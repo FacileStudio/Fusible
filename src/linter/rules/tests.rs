@@ -10,11 +10,15 @@
 mod autoroute;
 mod bypass;
 mod clearance;
+mod fab_profile;
 mod mcu_target;
+mod physical;
 mod pin_mux;
 mod qfn_footprint;
 mod references;
 mod schematic;
+mod trace_current;
+mod voltage_clearance;
 
 use std::path::Path;
 

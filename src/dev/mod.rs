@@ -30,6 +30,7 @@ mod limiter;
 pub mod pipeline;
 mod project;
 mod refresh;
+mod rules_api;
 mod run_api;
 mod run_exec;
 mod run_request;
@@ -86,6 +87,8 @@ mod kicad_watch_tests;
 mod limiter_tests;
 #[cfg(test)]
 mod panel_scripts_tests;
+#[cfg(test)]
+mod rules_api_tests;
 #[cfg(test)]
 mod run_exec_tests;
 #[cfg(test)]

@@ -6,6 +6,8 @@ pub mod body;
 pub mod bom;
 pub mod build;
 pub mod check;
+pub mod check_json;
+mod check_lint;
 mod check_merge;
 pub mod dev;
 pub mod diff;

@@ -1,0 +1,12 @@
+name: jlcpcb-4l
+source: https://jlcpcb.com/capabilities/pcb-capabilities
+checked: 2026-11-04
+min_trace: 0.09
+min_space: 0.09
+min_drill: 0.2
+min_via_pad: 0.45
+min_annular: 0.15
+min_via_to_via: 0.127
+drill_step: 0.05
+board_min: [5, 5]
+board_max: [400, 500]

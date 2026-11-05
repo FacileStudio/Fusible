@@ -1,0 +1,15 @@
+[
+  {"type": "source_component", "source_component_id": "J1", "name": "J1", "ftype": "simple_pin_header"},
+  {"type": "source_component", "source_component_id": "J2", "name": "J2", "ftype": "simple_pin_header"},
+  {"type": "source_net", "source_net_id": "net_VBUS", "name": "VBUS"},
+  {"type": "source_net", "source_net_id": "net_GND", "name": "GND"},
+  {"type": "source_port", "source_port_id": "J1.1", "name": "1", "source_component_id": "J1", "source_net_id": "net_VBUS"},
+  {"type": "source_port", "source_port_id": "J2.1", "name": "1", "source_component_id": "J2", "source_net_id": "net_VBUS"},
+  {"type": "source_port", "source_port_id": "J1.2", "name": "2", "source_component_id": "J1", "source_net_id": "net_GND"},
+  {"type": "source_port", "source_port_id": "J2.2", "name": "2", "source_component_id": "J2", "source_net_id": "net_GND"},
+  {"type": "pcb_board", "pcb_board_id": "board_0", "width": 40, "height": 30, "thickness": 1.6, "num_layers": 2},
+  {"type": "source_trace", "source_trace_id": "st0", "connected_source_net_ids": ["net_VBUS"]},
+  {"type": "pcb_trace", "pcb_trace_id": "pcb_trace_0", "source_trace_id": "st0", "route": [{"route_type": "wire", "x": 0, "y": 0, "width": 0.25, "layer": "top"}, {"route_type": "wire", "x": 20, "y": 0, "width": 0.25, "layer": "top"}]},
+  {"type": "source_trace", "source_trace_id": "st1", "connected_source_net_ids": ["net_GND"]},
+  {"type": "pcb_trace", "pcb_trace_id": "pcb_trace_1", "source_trace_id": "st1", "route": [{"route_type": "wire", "x": 0, "y": 5, "width": 0.5, "layer": "top"}, {"route_type": "wire", "x": 20, "y": 5, "width": 0.5, "layer": "top"}]}
+]

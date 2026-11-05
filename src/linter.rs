@@ -14,35 +14,26 @@
 //! submodule: only the engine stays here.
 mod context;
 mod diagnostics;
+mod info;
+mod rule;
 mod rules;
+mod summaries;
 #[cfg(test)]
 mod tests;
 
 pub use context::LintContext;
 pub use diagnostics::{Diagnostic, FuseBlown, Severity};
+pub use info::RuleInfo;
+pub use rule::Rule;
 pub use rules::{
-    AutorouteRule, BypassCapRule, DanglingReferenceRule, GhostNetRule, MalformedElementRule,
-    PinMuxRule, QfnFootprintSpanRule, SchematicScaleRule, ShortedNetsRule, TraceClearanceRule,
-    UnconnectedNetRule,
+    AutorouteRule, BypassCapRule, DanglingReferenceRule, FabProfileRule, GhostNetRule,
+    MalformedElementRule, PinMuxRule, QfnFootprintSpanRule, SchematicScaleRule, ShortedNetsRule,
+    TraceClearanceRule, TraceCurrentRule, UnconnectedNetRule, VoltageClearanceRule,
 };
 
 // ---------------------------------------------------------------------------
 // Rule trait + Linter
 // ---------------------------------------------------------------------------
-
-/// One verification pass.
-pub trait Rule {
-    /// Short rule name, reused as the diagnostic's error code.
-    fn name(&self) -> &'static str;
-
-    /// Whether this rule blows the fuse or only warns. Errors by default.
-    fn severity(&self) -> Severity {
-        Severity::Error
-    }
-
-    /// Runs the rule against the lint context. An empty vector = rule passed.
-    fn check(&self, ctx: &LintContext<'_>) -> Vec<Diagnostic>;
-}
 
 /// The fuse: runs every pass and aggregates their violations.
 pub struct Linter {
@@ -79,9 +70,13 @@ impl Linter {
             .iter()
             .flat_map(|rule| {
                 let severity = rule.severity();
-                rule.check(ctx)
-                    .into_iter()
-                    .map(move |d| Diagnostic { severity, ..d })
+                rule.check(ctx).into_iter().map(move |d| Diagnostic {
+                    severity: match d.severity {
+                        Severity::Warning => Severity::Warning,
+                        Severity::Error => severity,
+                    },
+                    ..d
+                })
             })
             .collect()
     }
@@ -101,5 +96,8 @@ impl Default for Linter {
             .with_rule(SchematicScaleRule)
             .with_rule(AutorouteRule)
             .with_rule(QfnFootprintSpanRule)
+            .with_rule(TraceCurrentRule)
+            .with_rule(VoltageClearanceRule)
+            .with_rule(FabProfileRule)
     }
 }

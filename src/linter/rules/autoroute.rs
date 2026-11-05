@@ -19,6 +19,14 @@ impl Rule for AutorouteRule {
         "autoroute"
     }
 
+    fn summary(&self) -> &'static str {
+        "Blows the fuse when tscircuit reports a placement or routing error, or leaves nets with no routed trace."
+    }
+
+    fn standard(&self) -> Option<&'static str> {
+        Some("tscircuit")
+    }
+
     fn check(&self, ctx: &LintContext<'_>) -> Vec<Diagnostic> {
         let raw = &ctx.circuit.raw_elements;
         let mut found: Vec<Diagnostic> = raw

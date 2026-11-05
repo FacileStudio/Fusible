@@ -37,3 +37,41 @@ fn bypass_cap_flags_a_traced_rail_without_capacitor() {
 fn bypass_cap_accepts_a_capacitor_named_unlike_c() {
     assert!(lint(BypassCapRule, &rail_with("BYP", "simple_capacitor")).is_empty());
 }
+
+fn placed(cap_x: f64) -> String {
+    let pad = |id: &str, port: &str, x: f64| {
+        format!(
+            r#"{{"type": "pcb_smtpad", "pcb_smtpad_id": "{id}", "source_port_id": "{port}", "layer": "top",
+              "shape": "rect", "x": {x}, "y": 0, "width": 1, "height": 1}}"#
+        )
+    };
+    let base = rail_with("C3", "simple_capacitor");
+    let base = base.trim_end().trim_end_matches(']');
+    format!(
+        "{base}, {}, {}]",
+        pad("pad_u", "source_port_0", 0.0),
+        pad("pad_c", "source_port_1", cap_x)
+    )
+}
+
+#[test]
+fn bypass_cap_far_from_its_pin_warns_with_the_distance() {
+    let v = lint(BypassCapRule, &placed(7.2));
+    assert_eq!(v.len(), 1, "{v:?}");
+    assert_eq!(v[0].severity, crate::linter::Severity::Warning);
+    assert!(
+        v[0].message
+            .contains("C3 decouples MCU pin VDD from 6.2 mm away"),
+        "{}",
+        v[0].message
+    );
+    assert!(v[0].message.contains("place it within 3 mm"));
+    assert_eq!(v[0].standard.as_deref(), Some("layout guideline"));
+    assert!(v[0].help.as_deref().unwrap().contains("protoexpress.com"));
+}
+
+#[test]
+fn bypass_cap_within_three_millimetres_or_unplaced_is_silent() {
+    assert!(lint(BypassCapRule, &placed(3.9)).is_empty());
+    assert!(lint(BypassCapRule, &rail_with("C3", "simple_capacitor")).is_empty());
+}
