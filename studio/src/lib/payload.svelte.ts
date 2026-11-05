@@ -1,6 +1,6 @@
 import { Tscircuit } from "../tscircuit";
 import { loadGraph } from "./selection.svelte";
-import { studio } from "./studio.svelte";
+import { setCircuit, studio } from "./studio.svelte";
 import type { DevPayload } from "./types";
 
 let lastBoard = "";
@@ -20,7 +20,7 @@ export function applyPayload(data: DevPayload | null): void {
     resendRevision();
   }
   if (data.circuit_json) {
-    studio.circuit = data.circuit_json;
+    setCircuit(data.circuit_json);
     loadGraph(data.circuit_json);
   }
   studio.fuseBlown = Boolean(data.fuse_blown);

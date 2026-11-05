@@ -48,7 +48,7 @@ function ResponsiveSchematicViewer({
       style: { width: "100%", height: "100%", position: "relative", overflow: "hidden" },
     },
     React.createElement(SchematicViewer, {
-      key: `${dimensions.width}x${dimensions.height}`,
+      key: `${dimensions.width}x${dimensions.height}-${themeColor("bg")}`,
       circuitJson: normalizedCircuit || [],
       containerStyle: { width: "100%", height: "100%", backgroundColor: themeColor("bg") },
       colorOverrides: {

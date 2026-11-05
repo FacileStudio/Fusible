@@ -8,7 +8,7 @@
   import { initMechanical, syncOverlay } from "../lib/mechanical.svelte";
   import { resendRevision } from "../lib/payload.svelte";
   import { selectComponent } from "../lib/selection.svelte";
-  import { studio } from "../lib/studio.svelte";
+  import { getCircuit, studio } from "../lib/studio.svelte";
   import { cameraPreset, parkViewers, refit, renderView, type Hosts } from "../lib/viewers";
 
   let hosts = $state<Hosts>({});
@@ -22,11 +22,11 @@
   ] as const;
 
   function render() {
-    studio.status = renderView(studio.view, hosts, studio.circuit, selectComponent);
+    studio.status = renderView(studio.view, hosts, getCircuit(), selectComponent);
   }
 
   $effect(() => {
-    void studio.circuit;
+    void getCircuit();
     void studio.theme;
     void studio.view;
     void hosts.schematic;

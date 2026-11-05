@@ -31,7 +31,7 @@
       onclick={openProjects}
     >
       <Icon icon="solar:alt-arrow-left-linear" size={16} />
-      <span class="max-md:hidden">Projects</span>
+      <span class="max-lg:hidden">Projects</span>
     </button>
   {/if}
   <IconButton variant="ghost" aria-label="Show project" title="Show project ([)" onclick={toggleTree}>
@@ -39,7 +39,7 @@
   </IconButton>
   <div class="flex shrink-0 items-center gap-2">
     <Icon icon="solar:cpu-bolt-bold-duotone" size={20} class="text-fc-success" />
-    <span class="max-w-40 truncate text-fc-sm font-medium max-md:hidden">{project.data?.name || "Fusible"}</span>
+    <span class="max-w-40 truncate text-fc-sm font-medium max-lg:hidden">{project.data?.name || "Fusible"}</span>
   </div>
   {#if boards.length > 1}
     <Select
@@ -61,7 +61,7 @@
   <FusePill />
   <KicadPanel />
   <LiveDot />
-  <IconButton variant="ghost" aria-label="Pair a phone" title="Pair a phone" onclick={() => (studio.pairOpen = true)}>
+  <IconButton variant="ghost" class="max-md:hidden" aria-label="Pair a phone" title="Pair a phone" onclick={() => (studio.pairOpen = true)}>
     <Icon icon="solar:qr-code-linear" />
   </IconButton>
   <IconButton

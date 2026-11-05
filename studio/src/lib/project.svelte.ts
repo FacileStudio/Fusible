@@ -8,10 +8,11 @@ import { loadRuns } from "./runs.svelte";
 import { leaveBom, setView, showStatus, studio } from "./studio.svelte";
 import type { DevPayload, Project, ProjectItem } from "./types";
 
+export const boards = new Map<string, DevPayload>();
+
 export const project = $state({
   data: null as Project | null,
   board: null as string | null,
-  boards: {} as Record<string, DevPayload>,
   health: {} as Record<string, Health>,
   item: null as string | null,
 });
@@ -27,7 +28,7 @@ export function healthOf(board: string): Health {
 export function showBoard(name: string): void {
   project.board = name;
   resetSelection();
-  const cached = project.boards[name];
+  const cached = boards.get(name);
   if (cached) return applyPayload(cached);
   const mine = ++boardRequest;
   api

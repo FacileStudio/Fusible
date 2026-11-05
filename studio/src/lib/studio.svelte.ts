@@ -23,12 +23,23 @@ export const studio = $state({
   desktop: Boolean(window.FUSIBLE_DESKTOP),
   hasAssembly: false,
   boardName: "",
-  circuit: null as unknown,
   revision: null as string | null,
   fuseBlown: false,
   diagnostics: [] as Diagnostic[],
   status: "",
 });
+
+let circuit = $state.raw<unknown>(null);
+
+/** The circuit JSON on screen; kept out of deep reactivity because the viewers structured-clone it. */
+export function getCircuit(): unknown {
+  return circuit;
+}
+
+/** Replaces the circuit JSON on screen. */
+export function setCircuit(next: unknown): void {
+  circuit = next;
+}
 
 /** Switches the main view; the viewport reacts to the change. */
 export function setView(view: ViewName): void {

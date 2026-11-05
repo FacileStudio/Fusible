@@ -11,7 +11,7 @@
   ] as const;
   const CURRENCIES = ["EUR", "USD", "GBP", "CHF", "CAD", "AUD", "JPY", "CNY", "SEK", "NOK", "DKK", "PLN"];
   const price = (n: number | null | undefined) => (n == null ? "-" : n.toFixed(2));
-  const field = "h-9 rounded-full bg-fc-component px-3 text-fc-sm text-fc-fg placeholder:text-fc-fg-muted focus-visible:outline-2 focus-visible:outline-fc-ring";
+  const field = "h-9 rounded-full bg-fc-surface px-3 text-fc-sm text-fc-fg placeholder:text-fc-fg-muted focus-visible:outline-2 focus-visible:outline-fc-ring";
 
   let draft = $state("");
   const report = $derived(bom.data?.report);

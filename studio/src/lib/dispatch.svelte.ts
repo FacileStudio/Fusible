@@ -3,7 +3,7 @@ import { api } from "./api";
 import { onBoard, onRun } from "./firmware.svelte";
 import { applyKicad } from "./kicad.svelte";
 import { applyPayload } from "./payload.svelte";
-import { noteHealth, project } from "./project.svelte";
+import { boards, noteHealth, project } from "./project.svelte";
 import { appendLog, applyRunEvent, startRun } from "./runs.svelte";
 import { setView, studio } from "./studio.svelte";
 import type { DevPayload, KicadBoard, Run } from "./types";
@@ -29,7 +29,7 @@ function afterAssemblyRun(data: Message): void {
 
 function onPayload(data: DevPayload): void {
   const board = data.board || "";
-  project.boards[board] = data;
+  boards.set(board, data);
   noteHealth(board, data);
   onBoard(board);
   if (project.board === null) project.board = board;

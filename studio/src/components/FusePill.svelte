@@ -17,5 +17,5 @@
     icon={studio.fuseBlown ? "solar:danger-triangle-bold-duotone" : "solar:shield-check-bold-duotone"}
     size={18}
   />
-  <span class="max-sm:hidden">{studio.fuseBlown ? `Fuse blown · ${count}` : "Fuse intact"}</span>
+  <span class="max-lg:hidden">{studio.fuseBlown ? `Fuse blown · ${count}` : "Fuse intact"}</span>
 </button>
