@@ -12,15 +12,6 @@ pub enum FilePolarity {
     Negative,
 }
 
-impl FilePolarity {
-    fn as_str(self) -> &'static str {
-        match self {
-            Self::Positive => "Positive",
-            Self::Negative => "Negative",
-        }
-    }
-}
-
 /// RS-274X command stream buffer writer.
 pub struct GerberWriter {
     buffer: String,
@@ -48,7 +39,7 @@ impl GerberWriter {
             env!("CARGO_PKG_VERSION")
         );
         let _ = writeln!(buffer, "%TF.FileFunction,{file_function}*%");
-        let _ = writeln!(buffer, "%TF.FilePolarity,{}*%", polarity.as_str());
+        let _ = writeln!(buffer, "%TF.FilePolarity,{polarity:?}*%");
         apertures.write_definitions(&mut buffer);
         let _ = writeln!(buffer, "%LPD*%");
         let _ = writeln!(buffer, "G01*");
@@ -95,6 +86,11 @@ impl GerberWriter {
             x.format_gerber(),
             y.format_gerber()
         );
+    }
+
+    /// Switches the object polarity: dark adds copper, clear removes what was drawn before.
+    pub fn polarity(&mut self, dark: bool) {
+        let _ = writeln!(self.buffer, "{}", if dark { "%LPD*%" } else { "%LPC*%" });
     }
 
     /// Emits a filled region (G36/G37) whose contour is closed back to its first vertex.

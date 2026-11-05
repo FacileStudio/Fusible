@@ -1,7 +1,13 @@
 //! Subcommand: `fusible export` — export circuit artifacts.
 
+mod fab_files;
+#[cfg(test)]
+mod fab_tests;
 mod formats;
+#[cfg(test)]
+mod formats_tests;
 mod pdf;
+mod pnp;
 mod presets;
 
 use std::path::{Path, PathBuf};
@@ -31,10 +37,12 @@ pub enum ExportError {
     #[error("unknown export preset \"{preset}\"")]
     #[diagnostic(
         code(fusible::export::unknown_preset),
-        help("valid presets are: `fab` (gerbers + json), `cad` (kicad + step), `docs` (svg + pdf), or `all`")
+        help("valid presets: `fab` (gerbers, bom, pnp), `cad` (kicad, step), `docs` (svg, pdf), `all`")
     )]
     UnknownPreset { preset: String },
 }
+
+pub use fab_files::write_fab_bundle;
 
 /// Everything an export step needs once the fuse check has passed.
 struct ExportJob {

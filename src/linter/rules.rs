@@ -15,11 +15,13 @@
 //! One rule per file — filet's functions-per-file budget counts `impl`
 //! methods, so a hub module keeps every rule comfortably under the limit.
 
+mod autoroute;
 mod bypass_cap;
 mod dangling_reference;
 mod ghost_net;
 mod malformed_element;
 mod pin_mux;
+mod qfn_footprint;
 mod schematic_scale;
 mod shorted_nets;
 #[cfg(test)]
@@ -27,11 +29,13 @@ mod tests;
 mod trace_clearance;
 mod unconnected_net;
 
+pub use autoroute::AutorouteRule;
 pub use bypass_cap::BypassCapRule;
 pub use dangling_reference::DanglingReferenceRule;
 pub use ghost_net::GhostNetRule;
 pub use malformed_element::MalformedElementRule;
 pub use pin_mux::PinMuxRule;
+pub use qfn_footprint::QfnFootprintSpanRule;
 pub use schematic_scale::SchematicScaleRule;
 pub use shorted_nets::ShortedNetsRule;
 pub use trace_clearance::TraceClearanceRule;

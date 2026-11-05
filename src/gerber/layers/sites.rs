@@ -8,12 +8,13 @@ use super::math::{coord, required};
 use super::shapes::trace_segment;
 use super::{invalid, GerberError};
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub(super) struct ViaSite {
     pub(super) at: [f64; 2],
     pub(super) outer: f64,
     pub(super) hole: f64,
     pub(super) tented: bool,
+    pub(super) net: Option<String>,
 }
 
 #[derive(Debug)]
@@ -63,7 +64,9 @@ impl PcbModel {
                 if pt.route_type.as_deref() != Some("via") || !seen.insert(coord([pt.x, pt.y])) {
                     continue;
                 }
-                sites.push(route_via_site(pt).map_err(invalid("pcb_trace", i))?);
+                let mut site = route_via_site(pt).map_err(invalid("pcb_trace", i))?;
+                site.net = self.nets.trace_net(trace);
+                sites.push(site);
             }
         }
         Ok(sites)
@@ -88,6 +91,7 @@ fn pcb_via_site(via: &PcbViaElm) -> Result<ViaSite, String> {
         outer: required(via.outer_diameter, "outer_diameter")?,
         hole: required(via.hole_diameter, "hole_diameter")?,
         tented: via.is_tented != Some(false),
+        net: via.subcircuit_connectivity_map_key.clone(),
     })
 }
 
@@ -104,5 +108,6 @@ fn route_via_site(pt: &PcbTracePoint) -> Result<ViaSite, String> {
             "via hole_diameter (no pcb_via at this position)",
         )?,
         tented: true,
+        net: None,
     })
 }

@@ -1,8 +1,10 @@
 //! Runs fuse-gated subcommands and maps their results onto the exit-code contract.
 
 mod body;
+mod release;
 
 pub use body::body;
+pub use release::release;
 
 use std::path::PathBuf;
 use std::process::ExitCode;

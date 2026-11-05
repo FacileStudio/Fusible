@@ -50,6 +50,7 @@ pub struct PcbSmtPadElm {
     pub shape: Option<String>,
     pub soldermask_margin: Option<f64>,
     pub is_covered_with_solder_mask: Option<bool>,
+    pub pcb_port_id: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Default)]
@@ -67,6 +68,9 @@ pub struct PcbTracePoint {
 pub struct PcbTraceElm {
     #[serde(default)]
     pub route: Vec<PcbTracePoint>,
+    pub source_trace_id: Option<String>,
+    #[serde(default, rename = "connectsTo")]
+    pub connects_to: Vec<String>,
 }
 
 #[derive(Debug, Deserialize, Default)]
@@ -89,6 +93,7 @@ pub struct PcbPlatedHoleElm {
     pub rect_ccw_rotation: Option<f64>,
     pub is_covered_with_solder_mask: Option<bool>,
     pub soldermask_margin: Option<f64>,
+    pub pcb_port_id: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Default)]
@@ -98,6 +103,7 @@ pub struct PcbViaElm {
     pub hole_diameter: Option<f64>,
     pub outer_diameter: Option<f64>,
     pub is_tented: Option<bool>,
+    pub subcircuit_connectivity_map_key: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Default)]
@@ -129,6 +135,34 @@ pub struct PcbComponentElm {
     pub layer: Option<String>,
 }
 
+#[derive(Debug, Clone, Deserialize, Default)]
+pub struct PcbRing {
+    #[serde(default)]
+    pub vertices: Vec<PcbPoint>,
+}
+
+#[derive(Debug, Clone, Deserialize, Default)]
+pub struct PcbBrep {
+    #[serde(default)]
+    pub outer_ring: PcbRing,
+    #[serde(default)]
+    pub inner_rings: Vec<PcbRing>,
+}
+
+#[derive(Debug, Deserialize, Default)]
+pub struct PcbCopperPourElm {
+    pub shape: Option<String>,
+    pub layer: Option<String>,
+    pub source_net_id: Option<String>,
+    pub center: Option<PcbPoint>,
+    pub width: Option<f64>,
+    pub height: Option<f64>,
+    pub rotation: Option<f64>,
+    pub points: Option<Vec<PcbPoint>>,
+    pub brep_shape: Option<PcbBrep>,
+    pub covered_with_solder_mask: Option<bool>,
+}
+
 /// Generic container collecting all parsed PCB elements.
 #[derive(Debug, Default)]
 pub struct PcbModel {
@@ -141,4 +175,6 @@ pub struct PcbModel {
     pub silkscreen_texts: Vec<PcbSilkscreenTextElm>,
     pub components: Vec<PcbComponentElm>,
     pub holes: Vec<PcbHoleElm>,
+    pub pours: Vec<PcbCopperPourElm>,
+    pub nets: super::nets::NetKeys,
 }

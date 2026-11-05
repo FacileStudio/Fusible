@@ -1,6 +1,6 @@
 //! Direct single-format exports selected with `--format`.
 
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use super::{extract_zip_archive, ExportError, ExportJob};
 
@@ -82,7 +82,23 @@ fn export_via_runner(job: &ExportJob, format: &str) -> Result<(), ExportError> {
         job.entry.display(),
         format
     );
-    runner.export(&job.entry, format, job.output.as_deref())?;
-    println!("✅ Successfully exported {format}!");
+    let dest = runner_output(job, format);
+    runner.export(&job.entry, format, Some(&dest))?;
+    println!("✅ Successfully exported {format} to {}!", dest.display());
     Ok(())
+}
+
+/// Returns the explicit output, or `<out_dir>/<entry stem>.<ext>` so exports land in `dist/`.
+pub(super) fn runner_output(job: &ExportJob, format: &str) -> PathBuf {
+    let ext = match format {
+        "kicad_zip" => "zip",
+        "schematic-svg" | "schematic_svg" => "schematic.svg",
+        other => other,
+    };
+    let stem = job
+        .entry
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or("board");
+    job.output_or(&format!("{stem}.{ext}"))
 }

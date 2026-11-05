@@ -28,6 +28,21 @@ pub struct ExportArgs {
 }
 
 #[derive(Debug, Args, PartialEq)]
+pub struct ReleaseArgs {
+    /// Board name or circuit file [default: every board of the manifest]
+    #[arg(value_name = "TARGET")]
+    pub target: Option<PathBuf>,
+
+    /// Output directory
+    #[arg(short = 'o', long, default_value = "dist/release")]
+    pub out: PathBuf,
+
+    /// Release even when the linter reports warnings
+    #[arg(long)]
+    pub allow_warnings: bool,
+}
+
+#[derive(Debug, Args, PartialEq)]
 pub struct AssemblyArgs {
     /// Output format: glb, step, or all [default: glb]
     #[arg(short = 'f', long)]

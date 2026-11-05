@@ -15,6 +15,7 @@ pub mod harness;
 pub mod init;
 pub mod install;
 pub mod links;
+pub mod release;
 pub mod route;
 pub mod search;
 pub mod source;
