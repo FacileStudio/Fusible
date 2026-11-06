@@ -22,7 +22,7 @@ jobs:
         run: cargo clippy --all-targets -- -D warnings
 
       - name: Test
-        run: cargo test --locked
+        run: cargo test --locked --no-fail-fast
 
   check:
     runs-on: ubuntu-latest
@@ -42,7 +42,7 @@ jobs:
         run: cargo clippy --all-targets -- -D warnings
 
       - name: Test
-        run: cargo test --locked
+        run: cargo test --locked --no-fail-fast
         env:
           FUSIBLE_REQUIRE_BUN: "1"
 

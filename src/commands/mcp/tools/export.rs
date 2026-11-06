@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 
 use serde_json::{json, Value};
 
-use super::args::{choice, object, optional_str, required_str, string};
+use super::args::{choice, object, optional_str, required_str, shown, string};
 use super::outcome::Outcome;
 use crate::commands::check::CheckError;
 use crate::commands::export::{self, ExportError};
@@ -49,15 +49,7 @@ fn written(root: &Path, target: &BoardTarget, preset: &str) -> Vec<String> {
     parts
         .iter()
         .for_each(|part| walk(&root.join(&target.out_dir).join(part), &mut files));
-    files
-        .iter()
-        .map(|p| {
-            p.strip_prefix(root)
-                .unwrap_or(p)
-                .to_string_lossy()
-                .into_owned()
-        })
-        .collect()
+    files.iter().map(|p| shown(root, p)).collect()
 }
 
 fn export_one(root: &Path, target: &BoardTarget, preset: &str) -> Result<Vec<String>, Outcome> {

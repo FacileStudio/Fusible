@@ -48,3 +48,11 @@ pub fn object(properties: &[(&str, Value)], required: &[&str]) -> Value {
         "additionalProperties": false,
     })
 }
+
+/// A path relative to the project root, with forward slashes on every platform.
+pub fn shown(root: &std::path::Path, path: &std::path::Path) -> String {
+    path.strip_prefix(root)
+        .unwrap_or(path)
+        .to_string_lossy()
+        .replace('\\', "/")
+}

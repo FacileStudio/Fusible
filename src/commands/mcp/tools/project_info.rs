@@ -4,7 +4,7 @@ use std::path::Path;
 
 use serde_json::{json, Value};
 
-use super::args::object;
+use super::args::{object, shown};
 use super::outcome::Outcome;
 use crate::commands::mcp::git;
 use crate::commands::mcp::session::Session;
@@ -19,13 +19,7 @@ pub fn schema() -> Value {
 }
 
 fn relative(root: &Path, path: Option<&Path>) -> Value {
-    let shown = path.map(|p| {
-        p.strip_prefix(root)
-            .unwrap_or(p)
-            .to_string_lossy()
-            .into_owned()
-    });
-    json!(shown)
+    json!(path.map(|p| shown(root, p)))
 }
 
 fn body_kind(body: &BodyConfig) -> &'static str {

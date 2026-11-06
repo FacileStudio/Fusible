@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 
 use serde_json::{json, Value};
 
-use super::args::{object, required_str, string};
+use super::args::{object, required_str, shown, string};
 use super::outcome::Outcome;
 use crate::bom;
 use crate::commands::body::{self, BodyError};
@@ -38,15 +38,7 @@ fn outputs(root: &Path, name: &str, body: &BodyConfig) -> Vec<String> {
             .map(|e| e.path())
             .filter(|p| p.file_stem().is_some_and(|s| s == name)),
     );
-    files
-        .iter()
-        .map(|p| {
-            p.strip_prefix(root)
-                .unwrap_or(p)
-                .to_string_lossy()
-                .into_owned()
-        })
-        .collect()
+    files.iter().map(|p| shown(root, p)).collect()
 }
 
 fn mass(cfg: &FusibleConfig, root: &Path, name: &str) -> Option<f64> {
