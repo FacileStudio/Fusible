@@ -37,7 +37,8 @@ pub(super) fn wall_min(process: &str) -> f64 {
     match process {
         "fdm" => 2.0,
         "sla" | "mjf" => 1.5,
-        _ => 1.0,
+        "injection" | "cnc" => 1.0,
+        _ => 2.0,
     }
 }
 
@@ -77,3 +78,7 @@ pub(super) fn insert_bore(size: &str) -> Option<f64> {
         _ => None,
     }
 }
+
+#[cfg(test)]
+#[path = "mech_rules_wall_tests.rs"]
+mod wall_tests;
