@@ -56,6 +56,7 @@
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDJEMTNBN0I2OEYzQzRCQTMKUldTalN6eVB0cWNUTFFYb1ZSME5vQzhsTkhlT1pwcmpKK2pQb2tIYTZxT3pTcjdtNXI4ZTRKVUYK",
       "endpoints": ["https://github.com/FacileStudio/Fusible/releases/latest/download/latest.json"],
+      "requireSignedVersion": true,
       "windows": {
         "installMode": "passive"
       }

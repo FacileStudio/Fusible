@@ -26,6 +26,8 @@ pub struct Settings {
     pub theme: String,
     pub auto_update: bool,
     pub last_update_check: Option<i64>,
+    pub onboarded: bool,
+    pub allow_phone_pairing: bool,
 }
 
 impl Default for Settings {
@@ -38,6 +40,8 @@ impl Default for Settings {
             theme: "system".into(),
             auto_update: true,
             last_update_check: None,
+            onboarded: false,
+            allow_phone_pairing: false,
         }
     }
 }

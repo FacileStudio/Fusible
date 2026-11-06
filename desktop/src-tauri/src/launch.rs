@@ -66,6 +66,20 @@ fn describe_failure(reason: &str, log: &SharedLog) -> String {
     }
 }
 
+/// The arguments of `fusible studio` for the desktop app; `--share` opens phone pairing.
+pub fn studio_args(port: u16, share: bool) -> Vec<String> {
+    let mut args = vec![
+        "studio".into(),
+        "--desktop".into(),
+        "-p".into(),
+        port.to_string(),
+    ];
+    if share {
+        args.push("--share".into());
+    }
+    args
+}
+
 /// Starts `fusible studio --desktop` in `dir` and waits for its ready line.
 ///
 /// Replaces any studio already running. On failure the sidecar is killed and the
@@ -75,10 +89,10 @@ pub async fn start<R: Runtime>(
     studio: &Studio,
     dir: &Path,
     port: u16,
+    share: bool,
 ) -> Result<Ready, String> {
     studio.reset();
-    let command =
-        sidecar::fusible(app, dir)?.args(["studio", "--desktop", "-p", &port.to_string()]);
+    let command = sidecar::fusible(app, dir)?.args(studio_args(port, share));
     let (mut rx, child) = command
         .spawn()
         .map_err(|err| studio.fail(format!("Could not start fusible: {err}")))?;

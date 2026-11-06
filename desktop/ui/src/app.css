@@ -1,0 +1,15 @@
+@import "@facile/muse/styles";
+@source "../node_modules/@facile/muse/src";
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-fc-page);
+  color: var(--color-fc-fg);
+  overflow: hidden;
+}

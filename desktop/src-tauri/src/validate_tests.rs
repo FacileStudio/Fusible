@@ -60,3 +60,23 @@ fn update_preferences_survive_validation() {
     assert!(!clean.auto_update);
     assert_eq!(clean.last_update_check, Some(1_792_800_000));
 }
+
+#[test]
+fn onboarding_and_pairing_flags_survive_validation() {
+    let input = Settings {
+        projects_dir: "/p".into(),
+        onboarded: true,
+        allow_phone_pairing: true,
+        ..Settings::default()
+    };
+    let clean = settings(input).unwrap();
+    assert!(clean.onboarded && clean.allow_phone_pairing);
+    assert!(!Settings::default().onboarded && !Settings::default().allow_phone_pairing);
+}
+
+#[test]
+fn old_settings_files_load_with_flags_off() {
+    let old = r#"{"projects_dir":"/p","port":3020}"#;
+    let loaded: Settings = serde_json::from_str(old).unwrap();
+    assert!(!loaded.onboarded && !loaded.allow_phone_pairing);
+}
