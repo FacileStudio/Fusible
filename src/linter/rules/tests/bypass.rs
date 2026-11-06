@@ -75,3 +75,14 @@ fn bypass_cap_within_three_millimetres_or_unplaced_is_silent() {
     assert!(lint(BypassCapRule, &placed(3.9)).is_empty());
     assert!(lint(BypassCapRule, &rail_with("C3", "simple_capacitor")).is_empty());
 }
+
+#[test]
+fn only_supply_pins_are_measured_for_bypass_distance() {
+    use crate::linter::rules::bypass_distance::is_supply_pin;
+    for name in ["VDD", "VIN", "vbat", "AVDD", "VOUT", "BAT"] {
+        assert!(is_supply_pin(name), "{name}");
+    }
+    for name in ["EN", "CE", "G", "LEDA", "D", "SCL"] {
+        assert!(!is_supply_pin(name), "{name}");
+    }
+}

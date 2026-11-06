@@ -18,7 +18,7 @@
 mod autoroute;
 mod autoroute_scan;
 mod bypass_cap;
-mod bypass_distance;
+pub(super) mod bypass_distance;
 mod copper;
 mod copper_drill;
 mod dangling_reference;

@@ -39,6 +39,16 @@ fn pads_by_port<'a>(ctx: &'a LintContext<'_>) -> HashMap<&'a str, &'a Pad> {
         .collect()
 }
 
+const SUPPLY_PINS: &[&str] = &[
+    "VDD", "VCC", "VIN", "VOUT", "VBAT", "BAT", "VBUS", "VSYS", "VSUP", "AVDD", "DVDD", "3V3", "5V",
+];
+
+/// Whether a pin is a supply pin by its own name, so enable, gate and LED pins tied to a rail are not measured.
+pub(super) fn is_supply_pin(name: &str) -> bool {
+    let upper = name.to_ascii_uppercase();
+    SUPPLY_PINS.iter().any(|token| upper.contains(token))
+}
+
 fn pin_label(port: &Port) -> String {
     let name = port.name.as_deref().unwrap_or("");
     match port.pin_number {
@@ -74,7 +84,8 @@ pub(super) fn too_far(ctx: &LintContext<'_>, components: &ComponentIndex<'_>) ->
     let pads = pads_by_port(ctx);
     let mut found = Vec::new();
     for port in ctx.circuit.ports() {
-        let Some(pin) = chip_power_pin(ctx, components, port) else {
+        let pin = chip_power_pin(ctx, components, port).filter(|p| is_supply_pin(p.pin_name));
+        let Some(pin) = pin else {
             continue;
         };
         let at = port
