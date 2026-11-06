@@ -23,8 +23,9 @@ export const frDocs: DocsContent = {
           kind: "p",
           text:
             "L'application de bureau pour Windows, macOS et Linux est jointe à chaque version GitHub. " +
-            "Les installateurs ne sont pas signés avec des certificats Apple ou Microsoft : votre système vous avertira. " +
-          "Les mises à jour intégrées sont vérifiées avec la clé de signature de Fusible.",
+            "Les installateurs ne sont pas signés avec des certificats Apple ou Microsoft : " +
+            "votre système vous avertira. " +
+            "Les mises à jour intégrées sont vérifiées avec la clé de signature de Fusible.",
         },
       ],
     },
