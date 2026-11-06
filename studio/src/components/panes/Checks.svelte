@@ -7,7 +7,7 @@
   <div class="flex flex-col gap-2">
     {#each studio.diagnostics as diag, index (index)}
       <div class="flex flex-col gap-2 rounded-2xl bg-fc-component px-4 py-3 text-fc-sm select-text">
-        <div class="flex items-center gap-2 font-medium text-fc-danger">
+        <div class="flex items-center gap-2 font-medium {diag.severity === 'warning' ? 'text-fc-warning' : 'text-fc-danger'}">
           <Icon icon="solar:danger-triangle-bold-duotone" size={16} />
           <span>{diag.rule || "violation"}</span>
         </div>

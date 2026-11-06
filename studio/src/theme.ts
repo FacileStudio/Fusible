@@ -14,6 +14,7 @@ const DARK = {
   "stage-ground": "#18181b",
   "grid-major": "#353535",
   edge: "#1f1f1f",
+  "part-base": "#6f7d6b",
 };
 
 const LIGHT: typeof DARK = {

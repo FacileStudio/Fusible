@@ -34,7 +34,7 @@
   {#each summary?.boards ?? [] as board (board.name)}
     <a
       href={`/host/board?id=${encodeURIComponent(id)}&board=${encodeURIComponent(board.name)}`}
-      class="flex flex-col gap-3 rounded-full bg-fc-surface px-7 py-5 focus-visible:outline-2 focus-visible:outline-fc-ring"
+      class="flex flex-col gap-3 rounded-[2rem] bg-fc-surface px-7 py-5 focus-visible:outline-2 focus-visible:outline-fc-ring"
     >
       <span class="flex items-center justify-between gap-2">
         <span class="truncate text-fc-lg font-semibold">{board.name}</span>
