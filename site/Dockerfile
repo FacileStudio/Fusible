@@ -1,7 +1,7 @@
 FROM oven/bun:1 AS build
 WORKDIR /app
 COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile
+RUN for i in 1 2 3 4 5 6; do bun install --frozen-lockfile && exit 0; echo "install failed, retry $i"; sleep $((i * 10)); done; exit 1
 COPY . .
 RUN bun run build
 
