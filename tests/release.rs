@@ -91,3 +91,24 @@ fn pour_on_a_layer_without_a_gerber_exits_2() {
     assert!(String::from_utf8_lossy(&run.stderr).contains("inner1"));
     assert!(!out.exists());
 }
+
+#[test]
+fn physics_warnings_block_a_release_unless_allowed() {
+    let dir = TestDir::new("release_physics");
+    std::fs::write(
+        dir.path.join("fusible.yml"),
+        "nets:\n  GND: { voltage: 5, current: 2 }\n",
+    )
+    .unwrap();
+    std::fs::copy("examples/circuit.json", dir.path.join("c.json")).unwrap();
+    let args = |extra: &[&str]| {
+        let mut cmd = fusible();
+        cmd.current_dir(&dir.path)
+            .args(["release", "c.json", "-o", "rel"])
+            .args(extra);
+        cmd.output().expect("binary should run").status.code()
+    };
+    assert_eq!(args(&[]), Some(1));
+    assert!(!dir.path.join("rel").exists());
+    assert_ne!(args(&["--allow-warnings"]), Some(1));
+}

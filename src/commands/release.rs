@@ -11,6 +11,7 @@ use thiserror::Error;
 use crate::commands::check::{self, load_circuit_source, CheckError};
 use crate::commands::export::{write_fab_bundle, ExportError};
 use crate::commands::target::{resolve_boards, BoardTarget};
+use crate::config::DesignRules;
 use crate::gerber::generate_gerber_files;
 use crate::linter::{LintContext, Linter, Severity};
 use crate::netlist::Netlist;
@@ -37,6 +38,10 @@ pub enum ReleaseError {
     #[error("board \"{board}\": layer {layer} has a copper pour but its gerber has no G36 region")]
     #[diagnostic(code(fusible::release::missing_pour))]
     MissingPour { board: String, layer: String },
+
+    #[error("circuit JSON is unreadable: {0}")]
+    #[diagnostic(code(fusible::release::unreadable))]
+    Unreadable(String),
 
     #[error("fabrication files are invalid: {0}")]
     #[diagnostic(code(fusible::release::gerber))]
@@ -100,7 +105,10 @@ fn stage(board: &BoardTarget, allow_warnings: bool) -> Result<Staged, ReleaseErr
 fn warning_count(path: &Path, source: &str, mcu: Option<&str>) -> Result<usize, CheckError> {
     let circuit = parser::parse(source, path)?;
     let netlist = Netlist::from_circuit(&circuit);
-    let ctx = LintContext::new(&circuit, &netlist).with_mcu(mcu);
+    let design = DesignRules::nearest();
+    let ctx = LintContext::new(&circuit, &netlist)
+        .with_mcu(mcu)
+        .with_design(design.as_ref());
     let found = Linter::default().run_with_context(&ctx);
     Ok(found
         .iter()

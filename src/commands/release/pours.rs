@@ -12,7 +12,8 @@ pub(super) fn verify(
     circuit_json: &str,
     files: &GerberFiles,
 ) -> Result<(), ReleaseError> {
-    let elements: Vec<Value> = serde_json::from_str(circuit_json).unwrap_or_default();
+    let elements: Vec<Value> =
+        serde_json::from_str(circuit_json).map_err(|e| ReleaseError::Unreadable(e.to_string()))?;
     let pours = elements
         .iter()
         .filter(|el| el.get("type").and_then(Value::as_str) == Some("pcb_copper_pour"));
@@ -32,3 +33,7 @@ pub(super) fn verify(
     }
     Ok(())
 }
+
+#[cfg(test)]
+#[path = "pours_tests.rs"]
+mod tests;
