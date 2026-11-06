@@ -23,7 +23,24 @@ fn protocol_out() -> Box<dyn Write> {
     }
 }
 
-#[cfg(not(unix))]
+#[cfg(windows)]
+fn protocol_out() -> Box<dyn Write> {
+    use std::os::windows::io::{AsHandle, AsRawHandle};
+
+    extern "system" {
+        fn SetStdHandle(id: u32, handle: *mut std::ffi::c_void) -> i32;
+    }
+    const STD_OUTPUT_HANDLE: u32 = 0xFFFF_FFF5;
+    match std::io::stdout().as_handle().try_clone_to_owned() {
+        Ok(saved) => {
+            unsafe { SetStdHandle(STD_OUTPUT_HANDLE, std::io::stderr().as_raw_handle()) };
+            Box::new(std::fs::File::from(saved))
+        }
+        Err(_) => Box::new(std::io::stdout()),
+    }
+}
+
+#[cfg(not(any(unix, windows)))]
 fn protocol_out() -> Box<dyn Write> {
     Box::new(std::io::stdout())
 }
