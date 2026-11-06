@@ -11,7 +11,7 @@ function owningPart(node: THREE.Object3D): MechanicalPart {
 /** Fetches the metadata then the GLB of revision `rev` of `board` and splits the meshes into base and lid geometry. */
 export async function fetchModel(rev: string, board: string): Promise<MechanicalModel> {
   const query = `rev=${encodeURIComponent(rev)}&board=${encodeURIComponent(board)}`;
-  const failure = "MECHANICAL MODEL UNAVAILABLE";
+  const failure = "Mechanical model unavailable";
   const metaResponse = await fetch(`/api/mechanical?${query}`);
   if (!metaResponse.ok) throw new Error(await readError(metaResponse, failure));
   const meta: MechanicalMeta = await metaResponse.json();

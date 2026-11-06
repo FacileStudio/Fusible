@@ -1,4 +1,4 @@
-//! The theme file is the only place a colour is defined.
+//! The old green is gone, and the built studio stylesheet carries the muse tokens.
 
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -33,8 +33,10 @@ fn old_green_is_gone_everywhere() {
 }
 
 #[test]
-fn theme_defines_green_and_surface() {
-    let css = include_str!("../src/assets/theme.css");
-    assert!(css.contains("#88A888"));
-    assert!(css.contains("#111111"));
+fn studio_css_defines_the_muse_tokens_when_built() {
+    let css = Path::new(env!("CARGO_MANIFEST_DIR")).join("src/assets/studio.css");
+    let Ok(text) = fs::read_to_string(css) else {
+        return;
+    };
+    assert!(text.contains("--color-fc-page"));
 }

@@ -1,5 +1,11 @@
 import { setMechanicalBody } from "./authored";
-import { getMechanicalOption, loadMechanicalOptions, setMechanicalOption, type MechanicalOption } from "./prefs";
+import {
+  getMechanicalOption,
+  loadMechanicalOptions,
+  onLidControls,
+  setMechanicalOption,
+  type MechanicalOption,
+} from "./prefs";
 import { reconcileMechanicalOverlay, setMechanicalOverlay } from "./overlay";
 import { setMechanicalRevision } from "./store";
 import { hideMechanicalViewer, mechanicalCameraPreset } from "./viewer";
@@ -23,4 +29,5 @@ export const Mechanical = {
   setMechanicalOverlay,
   toggleMechanicalOption,
   getMechanicalOptions: loadMechanicalOptions,
+  onLidControls,
 };

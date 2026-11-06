@@ -9,3 +9,4 @@ desktop/src-tauri/target/
 desktop/src-tauri/gen/
 desktop/src-tauri/binaries/
 .claude/
+src/assets/studio.css

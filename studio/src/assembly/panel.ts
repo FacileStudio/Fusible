@@ -5,10 +5,11 @@ export interface Panel {
   list: HTMLDivElement;
 }
 
-declare global {
-  interface Window {
-    Project?: { startRun: (action: string) => void };
-  }
+let buildHandler: () => void = () => undefined;
+
+/** Registers what the build button of the assembly tab does. */
+export function setAssemblyBuildHandler(handler: () => void): void {
+  buildHandler = handler;
 }
 
 /** Creates the empty-state line and the violation list inside `host`. */
@@ -25,8 +26,8 @@ export function mountPanel(host: HTMLElement): Panel {
 function buildButton(): HTMLButtonElement {
   const button = document.createElement("button");
   button.className = "btn assembly-build";
-  button.innerHTML = '<iconify-icon icon="pixelarticons:layers"></iconify-icon> <span>BUILD ASSEMBLY</span>';
-  button.addEventListener("click", () => window.Project?.startRun("assembly"));
+  button.textContent = "Build assembly";
+  button.addEventListener("click", () => buildHandler());
   return button;
 }
 
@@ -42,7 +43,7 @@ function row(violation: Violation, onPick: (violation: Violation) => void): HTML
   item.className = "assembly-item";
   const rule = document.createElement("span");
   rule.className = "assembly-rule";
-  rule.textContent = violation.rule.toUpperCase();
+  rule.textContent = violation.rule;
   const message = document.createElement("span");
   message.textContent = violation.message;
   item.append(rule, message);
@@ -54,8 +55,8 @@ function heading(report: Report): HTMLDivElement {
   const head = document.createElement("div");
   head.className = "assembly-head";
   const count = report.violations.length;
-  const noun = count === 1 ? "VIOLATION" : "VIOLATIONS";
-  head.textContent = report.fuse === "blown" ? `FUSE BLOWN, ${count} ${noun}` : "FUSE INTACT";
+  const noun = count === 1 ? "violation" : "violations";
+  head.textContent = report.fuse === "blown" ? `Fuse blown, ${count} ${noun}` : "Fuse intact";
   head.classList.toggle("is-blown", report.fuse === "blown");
   return head;
 }

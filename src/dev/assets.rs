@@ -5,21 +5,7 @@ use std::path::PathBuf;
 use tiny_http::{Header, Response};
 
 const VIEWER_HTML: &str = include_str!("../assets/viewer.html");
-const PROJECT_JS: &str = include_str!("../assets/project.js");
-const BOM_JS: &str = include_str!("../assets/bom.js");
-const FIRMWARE_JS: &str = include_str!("../assets/firmware.js");
-const DESKTOP_JS: &str = include_str!("../assets/desktop.js");
-const DRAWER_JS: &str = include_str!("../assets/drawer.js");
-const GIT_JS: &str = include_str!("../assets/git.js");
-const KICAD_JS: &str = include_str!("../assets/kicad.js");
-const THEME_CSS: &str = include_str!("../assets/theme.css");
-const FONT_DATA: &[u8] = include_bytes!("../assets/undefined-medium.otf");
-const FAVICON_SVG: &str = concat!(
-    r##"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">"##,
-    r##"<path fill="#88A888" d="M5 3h14v2H5zm0 16h14v2H5zM3 5h2v14H3zm16 0h2v14h-2zM9 7h6v2H9zm0 8h6v2H9zM7 9h2v"##,
-    r##"6H7zm8 0h2v6h-2zm-4-8h2v2h-2zm0 20h2v2h-2zM1 11h2v2H1zm20 0h2v2h-2zm0-4h2v2h-2zm"##,
-    r##"0 8h2v2h-2zM1 15h2v2H1zm0-8h2v2H1zm6-6h2v2H7zm8 0h2v2h-2zm0 20h2v2h-2zm-8 0h2v2H7z"/></svg>"##,
-);
+const FAVICON_SVG: &str = include_str!("../../assets/favicon.svg");
 const MISSING_BUNDLE: &str = "// studio.bundle.js not found — run `bun run build` in studio/";
 
 /// A buffered HTTP response as served by the dev server.
@@ -44,6 +30,25 @@ pub(super) fn load_studio_bundle() -> Option<String> {
     std::fs::read_to_string(&bundle_path).ok()
 }
 
+/// Returns the studio stylesheet embedded at compile time in release builds.
+#[cfg(all(studio_bundle, not(debug_assertions)))]
+pub(super) fn load_studio_css() -> Option<String> {
+    Some(
+        include_str!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/src/assets/studio.css"
+        ))
+        .to_string(),
+    )
+}
+
+/// Reads the studio stylesheet from the source tree so a `bun run build` is picked up without recompiling.
+#[cfg(not(all(studio_bundle, not(debug_assertions))))]
+pub(super) fn load_studio_css() -> Option<String> {
+    let css_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("src/assets/studio.css");
+    std::fs::read_to_string(&css_path).ok()
+}
+
 /// Builds a response with `status`, a `Content-Type` header and `body`.
 pub(super) fn http_response(status: u16, content_type: &str, body: Vec<u8>) -> HttpResponse {
     let header = Header::from_bytes(&b"Content-Type"[..], content_type.as_bytes())
@@ -53,25 +58,19 @@ pub(super) fn http_response(status: u16, content_type: &str, body: Vec<u8>) -> H
         .with_status_code(status)
 }
 
-/// Returns the viewer page; under the desktop shell it carries the flag and the Projects button.
+/// Returns the viewer page; under the desktop shell it carries the flag the bundle reads.
 fn viewer_html(desktop: bool) -> String {
     if !desktop {
         return VIEWER_HTML.into();
     }
-    VIEWER_HTML
-        .replacen(
-            "<head>",
-            "<head>\n  <script>window.FUSIBLE_DESKTOP = true;</script>",
-            1,
-        )
-        .replacen(
-            "</body>",
-            &format!("<script>{DESKTOP_JS}</script>\n</body>"),
-            1,
-        )
+    VIEWER_HTML.replacen(
+        "<head>",
+        "<head>\n  <script>window.FUSIBLE_DESKTOP = true;</script>",
+        1,
+    )
 }
 
-/// Serves the embedded viewer, font, favicon and studio bundle; `None` for other paths.
+/// Serves the embedded viewer, favicon, studio stylesheet and studio bundle; `None` for other paths.
 pub(super) fn static_response(
     path: &str,
     bundle: Option<String>,
@@ -84,26 +83,15 @@ pub(super) fn static_response(
             viewer_html(desktop).into_bytes(),
         ),
         "/studio.bundle.js" => bundle_response(bundle),
-        "/project.js" => http_response(
+        "/studio.css" => http_response(
             200,
-            "application/javascript; charset=utf-8",
-            PROJECT_JS.into(),
+            "text/css; charset=utf-8",
+            load_studio_css().unwrap_or_default().into_bytes(),
         ),
-        "/theme.css" => http_response(200, "text/css; charset=utf-8", THEME_CSS.into()),
-        "/bom.js" => script_response(BOM_JS),
-        "/firmware.js" => script_response(FIRMWARE_JS),
-        "/drawer.js" => script_response(DRAWER_JS),
-        "/git.js" => script_response(GIT_JS),
-        "/kicad.js" => script_response(KICAD_JS),
-        "/undefined-medium.otf" => http_response(200, "font/otf", FONT_DATA.to_vec()),
         "/favicon.ico" | "/favicon.svg" => http_response(200, "image/svg+xml", FAVICON_SVG.into()),
         _ => return None,
     };
     Some(response)
-}
-
-fn script_response(source: &str) -> HttpResponse {
-    http_response(200, "application/javascript; charset=utf-8", source.into())
 }
 
 fn bundle_response(bundle: Option<String>) -> HttpResponse {

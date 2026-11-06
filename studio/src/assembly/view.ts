@@ -15,7 +15,7 @@ import { clearPreview, ensureFramed, loop, type View } from "./frameLoop";
 import { markPicked, mountPanel, setReport, setStatus } from "./panel";
 
 const MIN_FOCUS_RADIUS = 15;
-const REPORT_UNREADABLE = "REPORT UNREADABLE";
+const REPORT_UNREADABLE = "Report unreadable";
 let view: View | null = null;
 let ticket = 0;
 
@@ -49,8 +49,8 @@ function empty(current: View, overview: Overview): void {
   current.overview = overview;
   setReport(current.panel, null, pick);
   if (overview.report_error) return setStatus(current.panel, REPORT_UNREADABLE, true);
-  if (!overview.declared) return setStatus(current.panel, "NO ASSEMBLY IN fusible.yml");
-  setStatus(current.panel, "NO ASSEMBLY PREVIEW YET", true);
+  if (!overview.declared) return setStatus(current.panel, "No assembly in fusible.yml");
+  setStatus(current.panel, "No assembly preview yet", true);
 }
 
 async function reload(): Promise<void> {
