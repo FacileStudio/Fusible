@@ -25,11 +25,16 @@ pub fn unique_dir() -> std::io::Result<PathBuf> {
     }
 }
 
+#[cfg(unix)]
 fn private_dir(path: &Path) -> std::io::Result<()> {
     let mut builder = std::fs::DirBuilder::new();
-    #[cfg(unix)]
     std::os::unix::fs::DirBuilderExt::mode(&mut builder, 0o700);
     builder.create(path)
+}
+
+#[cfg(not(unix))]
+fn private_dir(path: &Path) -> std::io::Result<()> {
+    std::fs::create_dir(path)
 }
 
 /// Refuses a project name that could leave its folder.

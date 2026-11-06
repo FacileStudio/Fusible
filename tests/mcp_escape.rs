@@ -37,6 +37,7 @@ fn a_board_file_outside_the_root_is_refused() {
     );
 }
 
+#[cfg(unix)]
 #[test]
 fn a_symlink_that_escapes_the_root_is_refused() {
     let parent = TestDir::new("symlink");

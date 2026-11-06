@@ -1,4 +1,6 @@
-use super::{copy_tree, unique_dir, valid_name};
+#[cfg(unix)]
+use super::copy_tree;
+use super::{unique_dir, valid_name};
 
 #[test]
 fn escaping_names_are_refused() {
