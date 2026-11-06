@@ -20,6 +20,7 @@ mod autoroute_scan;
 mod bypass_cap;
 mod bypass_distance;
 mod copper;
+mod copper_drill;
 mod dangling_reference;
 mod fab_profile;
 mod geom2d;

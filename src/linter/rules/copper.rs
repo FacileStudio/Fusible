@@ -61,7 +61,7 @@ impl Shape {
     }
 }
 
-/// Every trace segment and positioned pad of the circuit as copper.
+/// Every trace segment, positioned pad, plated hole and via as copper.
 ///
 /// Segments whose trace names no net are left out: their net is unknown, so
 /// no pair involving them can be called a violation.
@@ -92,7 +92,10 @@ pub(super) fn collect(ctx: &LintContext<'_>, geometry: &Geometry) -> Vec<Copper>
             id,
         })
     });
-    segments.chain(pads).collect()
+    segments
+        .chain(pads)
+        .chain(super::copper_drill::drilled(ctx, geometry))
+        .collect()
 }
 
 /// Index pairs `(i, j)`, `i < j`, of copper on one layer, of distinct nets,

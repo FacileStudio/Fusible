@@ -85,3 +85,28 @@ fn undeclared_nets_are_skipped_and_table_rows_hold() {
     assert_eq!(spacing(B4, 101.0), 0.40);
     assert_eq!(spacing(B2, 500.0), 2.50);
 }
+
+#[test]
+fn through_hole_pin_counts_as_copper_for_clearance() {
+    let extra = serde_json::json!([
+        {"type":"source_port","source_port_id":"sp0"},
+        {"type":"source_trace","source_trace_id":"stp",
+         "connected_source_port_ids":["sp0"],"connected_source_net_ids":["n_MAINS_L"]},
+        {"type":"pcb_port","pcb_port_id":"pp0","source_port_id":"sp0"},
+        {"type":"pcb_plated_hole","pcb_plated_hole_id":"h0","shape":"circle","x":5.0,"y":1.7,
+         "outer_diameter":1.6,"hole_diameter":0.8,"pcb_port_id":"pp0"},
+    ])
+    .as_array()
+    .unwrap()
+    .iter()
+    .map(ToString::to_string)
+    .collect::<Vec<_>>()
+    .join(",");
+    let json = board(
+        &extra,
+        &["MAINS_L", "GND"],
+        &[("GND", "top", 0.2, (0.0, 0.0), (10.0, 0.0))],
+    );
+    let v = lint_with(VoltageClearanceRule, &json, MAINS);
+    assert_eq!(v.len(), 1, "{v:?}");
+}
