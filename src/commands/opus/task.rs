@@ -13,8 +13,16 @@ pub fn clean_title(text: &str) -> String {
         .split_whitespace()
         .map(|w| w.trim_start_matches(['+', '*', '@', '!']))
         .collect();
-    words.join(" ").chars().take(120).collect()
+    let title: String = words.join(" ").chars().take(120).collect();
+    match title.starts_with('-') {
+        true => format!("[fusible] {title}"),
+        false => title,
+    }
 }
+
+#[cfg(test)]
+#[path = "task_tests.rs"]
+mod tests;
 
 fn task_id(output: &[u8]) -> Option<String> {
     let json: Value = serde_json::from_slice(output).ok()?;

@@ -6,19 +6,31 @@ use std::path::PathBuf;
 pub struct Restore {
     path: PathBuf,
     bytes: Vec<u8>,
+    written: Option<Vec<u8>>,
     armed: bool,
 }
 
 impl Restore {
     /// Guards `path`; the bytes return to disk on drop when `armed`.
     pub fn new(path: PathBuf, bytes: Vec<u8>, armed: bool) -> Self {
-        Self { path, bytes, armed }
+        Self {
+            path,
+            bytes,
+            written: None,
+            armed,
+        }
+    }
+
+    /// Snapshots what the server left on disk; only that state is ever rolled back.
+    pub fn record(&mut self) {
+        self.written = std::fs::read(&self.path).ok();
     }
 }
 
 impl Drop for Restore {
     fn drop(&mut self) {
-        if self.armed {
+        let current = std::fs::read(&self.path).ok();
+        if self.armed && current == self.written {
             let _ = std::fs::write(&self.path, &self.bytes);
         }
     }
@@ -40,8 +52,9 @@ fn header_path(line: &str) -> Option<String> {
 fn git_paths(line: &str) -> Vec<String> {
     let rest = line.strip_prefix("diff --git ").unwrap_or_default();
     let strip = |p: &str| {
-        p.trim_start_matches("a/")
-            .trim_start_matches("b/")
+        p.strip_prefix("a/")
+            .or_else(|| p.strip_prefix("b/"))
+            .unwrap_or(p)
             .to_string()
     };
     rest.split(' ').map(strip).collect()
@@ -69,3 +82,7 @@ pub fn check_patch_scope(patch: &str, rel: &str) -> Result<(), String> {
         .then_some(())
         .ok_or_else(|| format!("the patch is not a unified diff of {rel}"))
 }
+
+#[cfg(test)]
+#[path = "guard_tests.rs"]
+mod tests;

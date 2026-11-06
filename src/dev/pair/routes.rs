@@ -1,6 +1,7 @@
 //! The pairing endpoints: start, claim, list and revoke.
 
 use std::io::Read;
+use std::net::IpAddr;
 use std::time::Instant;
 
 use serde_json::json;
@@ -51,7 +52,10 @@ fn handle_claim(mut request: Request, pair: &PairState) {
     let Some(body) = parsed else {
         return fail(request, 400, "bad claim body");
     };
-    match claim(pair, &body, Instant::now(), unix_now()) {
+    let peer = request
+        .remote_addr()
+        .map_or(IpAddr::from([0, 0, 0, 0]), |addr| addr.ip());
+    match claim(pair, &body, peer, Instant::now(), unix_now()) {
         Ok(reply) => respond_json(request, 200, reply),
         Err(429) => fail(request, 429, "too many attempts"),
         Err(status) => fail(request, status, "pairing refused"),

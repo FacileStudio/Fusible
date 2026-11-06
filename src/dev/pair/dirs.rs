@@ -20,10 +20,18 @@ fn base_dir() -> Option<PathBuf> {
     }
 }
 
+fn private_dirs(dir: &std::path::Path) -> std::io::Result<()> {
+    let mut builder = std::fs::DirBuilder::new();
+    builder.recursive(true);
+    #[cfg(unix)]
+    std::os::unix::fs::DirBuilderExt::mode(&mut builder, 0o700);
+    builder.create(dir)
+}
+
 /// The per-user `fusible` state directory, created when missing.
 pub(super) fn state_dir() -> Option<PathBuf> {
     let dir = base_dir()?.join("fusible");
-    std::fs::create_dir_all(&dir).ok()?;
+    private_dirs(&dir).ok()?;
     Some(dir)
 }
 
@@ -35,4 +43,18 @@ pub(super) fn project_name() -> String {
     let folder = path.parent().and_then(|dir| dir.file_name());
     let folder = folder.map(|name| name.to_string_lossy().into_owned());
     cfg.name.or(folder).unwrap_or_else(|| "project".into())
+}
+
+#[cfg(all(test, unix))]
+mod tests {
+    use std::os::unix::fs::PermissionsExt;
+
+    #[test]
+    fn the_state_dir_is_private() {
+        let root = std::env::temp_dir().join(format!("fusible-dirs-{}", std::process::id()));
+        let dir = root.join("a/b");
+        super::private_dirs(&dir).unwrap();
+        let mode = std::fs::metadata(&dir).unwrap().permissions().mode();
+        assert_eq!(mode & 0o777, 0o700);
+    }
 }

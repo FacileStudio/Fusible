@@ -37,6 +37,7 @@ fn glb_is_served_as_is_and_a_missing_file_is_a_404() {
     let (status, message) = failure(authored_glb(&cfg, "gone", &dir.cache(), no_convert));
     assert_eq!(status, 404);
     assert!(message.contains("does not exist"));
+    assert!(!message.contains(&*dir.0.to_string_lossy()), "{message}");
 }
 
 #[test]

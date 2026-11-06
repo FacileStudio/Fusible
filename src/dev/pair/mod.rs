@@ -11,6 +11,8 @@ mod summary;
 mod token;
 
 #[cfg(test)]
+mod claim_limit_tests;
+#[cfg(test)]
 mod claim_tests;
 #[cfg(test)]
 mod remote_tests;
@@ -19,7 +21,8 @@ mod summary_tests;
 #[cfg(test)]
 mod tests;
 
-use std::net::Ipv4Addr;
+use std::collections::HashMap;
+use std::net::{IpAddr, Ipv4Addr};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use std::time::Instant;
@@ -42,7 +45,7 @@ pub(super) struct Pending {
 pub(super) struct PairState {
     pub(in crate::dev::pair) pending: Mutex<Option<Pending>>,
     pub(in crate::dev::pair) devices: Mutex<Devices>,
-    pub(in crate::dev::pair) failures: Mutex<Vec<Instant>>,
+    pub(in crate::dev::pair) failures: Mutex<HashMap<IpAddr, Vec<Instant>>>,
 }
 
 /// Turns on phone pairing for `state` and tells the user where the studio is shared.
@@ -62,7 +65,7 @@ impl PairState {
         Self {
             pending: Mutex::new(None),
             devices: Mutex::new(Devices::load(path)),
-            failures: Mutex::new(Vec::new()),
+            failures: Mutex::new(HashMap::new()),
         }
     }
 

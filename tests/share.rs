@@ -97,6 +97,7 @@ fn an_occupied_folder_needs_force() {
     assert_eq!(refused.status.code(), Some(2));
     assert_eq!(forced.status.code(), Some(0));
     assert!(dest.join("pcb.svg").is_file());
+    assert!(!dest.join("old.txt").exists());
 }
 
 #[test]
@@ -120,4 +121,26 @@ fn a_failed_share_link_still_exits_0_with_a_hint() {
     assert_eq!(out.status.code(), Some(0));
     let stderr = String::from_utf8_lossy(&out.stderr);
     assert!(stderr.contains("files are synced; create the link from the Nuage app"));
+}
+
+#[test]
+fn a_manifest_name_that_escapes_the_sync_folder_exits_2() {
+    let dir = project(INTACT);
+    let sync = TestDir::new("sync");
+    let manifest = dir.path.join("fusible.yml");
+    let text = std::fs::read_to_string(&manifest).unwrap();
+    let rewritten: Vec<String> = text
+        .lines()
+        .map(|l| match l.starts_with("name:") {
+            true => "name: ../../escape".to_string(),
+            false => l.to_string(),
+        })
+        .collect();
+    std::fs::write(&manifest, rewritten.join("\n") + "\n").unwrap();
+
+    let out = share(&dir, Some(&sync), &[]);
+
+    assert_eq!(out.status.code(), Some(2));
+    assert!(String::from_utf8_lossy(&out.stderr).contains("unsafe project name"));
+    assert!(!sync.path.join("Fusible").exists());
 }

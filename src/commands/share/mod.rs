@@ -2,6 +2,7 @@
 
 mod nuage;
 mod revision;
+mod stage;
 
 use std::path::{Path, PathBuf};
 
@@ -37,6 +38,12 @@ pub enum ShareError {
     #[diagnostic(code(fusible::share::exists), help("pass --force to overwrite it"))]
     Exists(PathBuf),
 
+    #[error(
+        "unsafe project name \"{0}\"; use a plain name without separators, \"..\" or a leading dot"
+    )]
+    #[diagnostic(code(fusible::share::name))]
+    BadName(String),
+
     #[error("cannot copy the export: {0}")]
     #[diagnostic(code(fusible::share::io))]
     Io(#[from] std::io::Error),
@@ -52,38 +59,9 @@ impl ShareError {
     }
 }
 
-fn copy_tree(from: &Path, to: &Path) -> std::io::Result<usize> {
-    std::fs::create_dir_all(to)?;
-    let mut count = 0;
-    for entry in std::fs::read_dir(from)? {
-        let path = entry?.path();
-        let target = to.join(path.file_name().unwrap_or_default());
-        count += match path.is_dir() {
-            true => copy_tree(&path, &target)?,
-            false => std::fs::copy(&path, &target).map(|_| 1)?,
-        };
-    }
-    Ok(count)
-}
-
-fn destination(
-    sync_dir: &Path,
-    project: &str,
-    rev: &str,
-    force: bool,
-) -> Result<PathBuf, ShareError> {
-    let dest = sync_dir.join("Fusible").join(project).join(rev);
-    let occupied = std::fs::read_dir(&dest).is_ok_and(|mut entries| entries.next().is_some());
-    match occupied && !force {
-        true => Err(ShareError::Exists(dest)),
-        false => Ok(dest),
-    }
-}
-
 fn export_to_temp(preset: &str) -> Result<PathBuf, ShareError> {
     let board = resolve_board(None)?;
-    let tmp = std::env::temp_dir().join(format!("fusible-share-{}", std::process::id()));
-    let _ = std::fs::remove_dir_all(&tmp);
+    let tmp = stage::unique_dir()?;
     export::run(
         Some(board.entry),
         Some(preset),
@@ -115,11 +93,12 @@ pub fn run(args: ShareArgs) -> Result<(), ShareError> {
 
 fn share_nuage(args: &NuageArgs) -> Result<(), ShareError> {
     let sync_dir = nuage::sync_dir(&args.space)?;
-    let tmp = export_to_temp(&args.preset)?;
     let project = project_name();
+    stage::valid_name(&project)?;
+    let tmp = export_to_temp(&args.preset)?;
     let rev = revision::current();
-    let dest = destination(&sync_dir, &project, &rev, args.force)?;
-    let count = copy_tree(&tmp, &dest);
+    let dest = stage::destination(&sync_dir, &project, &rev, args.force)?;
+    let count = stage::copy_tree(&tmp, &dest);
     let _ = std::fs::remove_dir_all(&tmp);
     let count = count?;
     nuage::sync()?;

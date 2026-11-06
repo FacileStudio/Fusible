@@ -12,7 +12,7 @@ fn paired() -> (PairState, String) {
     let now = Instant::now();
     let (token, _) = start_pairing(&pair, now, 0);
     let body = ClaimBody { token, name: None };
-    let reply = claim(&pair, &body, now, 0).unwrap();
+    let reply = claim(&pair, &body, super::claim_tests::PEER, now, 0).unwrap();
     let json: serde_json::Value = serde_json::from_str(&reply).unwrap();
     let secret = json["device_token"].as_str().unwrap().to_string();
     (pair, secret)

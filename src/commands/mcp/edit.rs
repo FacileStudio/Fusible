@@ -52,7 +52,7 @@ fn apply(session: &Session, file: &Path, rel: &str, change: &Change) -> Result<(
     match change {
         Change::Patch(patch) => {
             check_patch_scope(patch, rel)?;
-            git::apply_patch(&session.root, patch)
+            git::apply_patch(&session.root, patch, rel)
         }
         Change::Content(text) => std::fs::write(file, text).map_err(|e| e.to_string()),
     }
@@ -68,8 +68,10 @@ fn run(
     let (file, rel) = resolve(session, path)?;
     let original = std::fs::read(&file).map_err(|e| e.to_string())?;
     ensure_clean(session, &file, &rel, &original)?;
-    let guard = Restore::new(file.clone(), original, dry);
-    apply(session, &file, &rel, change)?;
+    let mut guard = Restore::new(file.clone(), original, dry);
+    let applied = apply(session, &file, &rel, change);
+    guard.record();
+    applied?;
     let (fuse, diagnostics) = check();
     let diff = git::diff(&session.root, &rel)?;
     drop(guard);

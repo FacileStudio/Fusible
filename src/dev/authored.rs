@@ -57,6 +57,20 @@ fn source_of(cfg: &FusibleConfig, name: &str) -> Result<PathBuf, Failure> {
     })
 }
 
+fn relative_to_project(source: &Path) -> String {
+    let root = FusibleConfig::nearest().and_then(|(path, _)| path.parent().map(Path::to_path_buf));
+    let relative = root
+        .as_deref()
+        .and_then(|dir| source.strip_prefix(dir).ok());
+    match (relative, source.is_absolute()) {
+        (Some(rel), _) => rel.display().to_string(),
+        (None, true) => source
+            .file_name()
+            .map_or_else(String::new, |n| n.to_string_lossy().into_owned()),
+        (None, false) => source.display().to_string(),
+    }
+}
+
 /// Returns the GLB bytes of the authored body `name`, converting and caching when needed.
 ///
 /// `convert(source, format, output)` writes the GLB of a STEP or STL file to `output`.
@@ -68,10 +82,8 @@ pub(super) fn authored_glb(
 ) -> Result<Vec<u8>, Failure> {
     let source = source_of(cfg, name)?;
     let meta = std::fs::metadata(&source).map_err(|_| {
-        Failure::new(
-            404,
-            format!("source file \"{}\" does not exist", source.display()),
-        )
+        let shown = relative_to_project(&source);
+        Failure::new(404, format!("source file \"{shown}\" does not exist"))
     })?;
     if meta.len() > MAX_BYTES {
         let limit = MAX_BYTES / (1024 * 1024);

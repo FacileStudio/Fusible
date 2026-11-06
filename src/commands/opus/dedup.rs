@@ -1,8 +1,6 @@
 //! The `.fusible/opus.json` file that remembers which tasks already exist.
 
-use std::collections::hash_map::DefaultHasher;
 use std::collections::BTreeMap;
-use std::hash::{Hash, Hasher};
 use std::path::PathBuf;
 
 const PATH: &str = ".fusible/opus.json";
@@ -40,16 +38,15 @@ impl Store {
     }
 }
 
-fn digest(seed: u8, text: &str) -> u64 {
-    let mut hasher = DefaultHasher::new();
-    seed.hash(&mut hasher);
-    text.hash(&mut hasher);
-    hasher.finish()
-}
+const FNV_OFFSET: u128 = 0x6c62272e07bb014262b821756295c58d;
+const FNV_PRIME: u128 = 0x0000000001000000000000000000013B;
 
-/// A 32-hex-char dedup key for `text`; not a security hash.
+/// A 32-hex-char dedup key for `text`: FNV-1a 128, stable across Rust versions; not a security hash.
 fn hash32(text: &str) -> String {
-    format!("{:016x}{:016x}", digest(0, text), digest(1, text))
+    let hash = text.bytes().fold(FNV_OFFSET, |h, byte| {
+        (h ^ u128::from(byte)).wrapping_mul(FNV_PRIME)
+    });
+    format!("{hash:032x}")
 }
 
 /// The dedup key of a blown-fuse error.
@@ -57,4 +54,16 @@ pub fn fuse_key(rule: &str, detail: &[String], board: &str) -> String {
     let mut sorted = detail.to_vec();
     sorted.sort();
     hash32(&format!("{rule}\n{}\n{board}", sorted.join(",")))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::hash32;
+
+    #[test]
+    fn hash32_matches_the_fnv1a_128_vectors() {
+        assert_eq!(hash32(""), "6c62272e07bb014262b821756295c58d");
+        assert_eq!(hash32("a"), "d228cb696f1a8caf78912b704e4a8964");
+        assert_eq!(hash32("foobar"), "343e1662793c64bf6f0d3597ba446f18");
+    }
 }

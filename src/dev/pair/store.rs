@@ -1,6 +1,7 @@
 //! The paired devices, kept as token hashes in `devices.json`.
 
 use std::collections::HashMap;
+use std::io::Write;
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
 
@@ -20,6 +21,14 @@ pub(super) struct Device {
     pub token_sha256: String,
     pub paired_at: String,
     pub last_seen: String,
+}
+
+fn private_file(path: &std::path::Path) -> std::io::Result<std::fs::File> {
+    let mut options = std::fs::OpenOptions::new();
+    options.write(true).create_new(true);
+    #[cfg(unix)]
+    std::os::unix::fs::OpenOptionsExt::mode(&mut options, 0o600);
+    options.open(path)
 }
 
 /// The device list and where it is saved.
@@ -50,7 +59,10 @@ impl Devices {
             return Ok(());
         };
         let tmp = path.with_extension("json.tmp");
-        std::fs::write(&tmp, serde_json::to_vec_pretty(&self.list)?)?;
+        let _ = std::fs::remove_file(&tmp);
+        let mut file = private_file(&tmp)?;
+        file.write_all(&serde_json::to_vec_pretty(&self.list)?)?;
+        file.sync_all()?;
         std::fs::rename(&tmp, path)
     }
 
@@ -109,3 +121,7 @@ impl Devices {
         self.list.iter().map(show).collect()
     }
 }
+
+#[cfg(all(test, unix))]
+#[path = "store_tests.rs"]
+mod tests;
