@@ -1,27 +1,69 @@
-# Fusible
+<p align="center">
+  <img src="assets/logo.svg" alt="Fusible logo" width="72" height="72">
+</p>
 
-> **One project for your circuit boards, your firmware, and the case around them.**
-> Fusible checks the whole design against rules. When a rule fails, **the fuse
-> blows**: the command exits with an error, and nothing gets exported or generated.
+<h1 align="center">Fusible</h1>
+
+<p align="center">
+  <strong>One project for your boards, your firmware, and the case around them.</strong><br>
+  Fusible checks the whole design against electrical, physical and mechanical rules.
+  When a rule fails, <strong>the fuse blows</strong>: nothing gets exported, generated or flashed.
+</p>
+
+<p align="center">
+  <a href="https://fusible.facile.studio">Website</a> ·
+  <a href="https://fusible.facile.studio/docs">Docs</a> ·
+  <a href="https://fusible.facile.studio/download">Download</a> ·
+  <a href="https://crates.io/crates/fusible">crates.io</a>
+</p>
+
+<p align="center">
+  <a href="https://crates.io/crates/fusible"><img src="https://img.shields.io/crates/v/fusible?color=111111&label=crates.io" alt="crates.io version"></a>
+  <a href="https://github.com/FacileStudio/Fusible/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/FacileStudio/Fusible/ci.yml?branch=main&color=111111&label=ci" alt="CI status"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-111111" alt="MIT license"></a>
+</p>
 
 Fusible reads the Circuit JSON that [tscircuit](https://tscircuit.com) produces,
-checks the electrical and physical rules of every board, and only then writes
-fabrication files, firmware pin bindings, and enclosures. It ships as a command
-line tool, a browser studio (`fusible studio`), and a desktop app.
+checks the electrical, physical and mechanical rules of every board and part, and
+only then writes fabrication files, firmware pin bindings and enclosures. It ships
+as a command line tool, a browser studio (`fusible studio`), a desktop app, a
+read-only Android viewer, and an MCP server that lets agents work on the same
+project through the same checks.
 
-![demo1](assets/demo1.png)
-![demo4](assets/demo4.png)
+![The Fusible studio showing a round PCB](assets/screenshots/studio-pcb.png)
+
+<table>
+  <tr>
+    <td width="50%"><img src="assets/screenshots/studio-3d.png" alt="The studio showing the board in 3D"></td>
+    <td width="50%"><img src="assets/screenshots/studio-checks.png" alt="The studio listing checks with their standards"></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="assets/screenshots/studio-bodies.png" alt="The studio showing a generated enclosure"></td>
+    <td width="50%"><img src="assets/screenshots/desktop.png" alt="The desktop app listing projects"></td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="assets/screenshots/mobile.png" alt="The Android app showing a board summary" width="240">
+  <img src="assets/screenshots/mobile-board.png" alt="The Android app showing a board" width="240">
+</p>
 
 ## What you get
 
 | Piece | What it does |
 |---|---|
-| Linter | Checks nets, shorts, clearance, decoupling, pin muxing, and cabled connectors. |
-| Studio | Live PCB, schematic, 3D, parts, firmware pins, bodies, and checks in the browser. |
-| Fabrication | Gerbers, drill files, KiCad projects, STEP, GLB, SVG, PDF. All behind the fuse. |
-| Firmware | Typed Rust pin bindings (`pins.rs`) for STM32, RP2040, and ESP32-S3. |
-| Bodies | Authored CAD files or a generated two-part enclosure, plus a kit to model your own. |
-| Parts | A bill of materials with prices, picks, and print costs. |
+| Linter | Checks nets, shorts, clearance, decoupling, pin muxing, routing and cabled connectors. |
+| Physics rules | Trace current (IPC-2152), voltage clearance (IPC-2221B) and fab capability (JLCPCB), each citing its source. |
+| Studio | Live PCB, schematic, 3D, parts, firmware pins, bodies and checks in the browser. |
+| Mechanical | Parts written in TypeScript on OpenCascade, with materials, processes and mechanical rules. |
+| Firmware | Typed Rust pin bindings (`pins.rs`) for STM32, RP2040 and ESP32-S3. |
+| BOM | Prices, picks, material mass and print cost. |
+| Fabrication | Gerbers with copper pours, drill files, BOM, pick and place, KiCad, STEP, GLB, SVG, PDF. All behind the fuse. |
+| Release | `fusible release` refuses to write fab files from a blown or unrouted board. |
+| Agents | `fusible mcp` serves checks and fuse-gated edits to Bulle, Claude Code, Codex and others. |
+| Desktop | A signed-update app for Windows, macOS and Linux with first-run onboarding. |
+| Mobile | A read-only Android viewer, paired with a QR code on your local network. |
+| Suite | Opus tasks from blown fuses, Nuage sharing of fab files. |
 | Team | A `SYNC` panel that shares the project through git, with no terminal. |
 | KiCad | The studio watches your `.kicad_pcb` and writes moved parts back into your TSX. |
 
@@ -40,9 +82,11 @@ fusible doctor            # reports bun, node, and tsci
 fusible doctor --install  # installs what is missing
 ```
 
-The desktop app (Windows, macOS, Linux) is attached to each GitHub release. It
-bundles `bun`, lists your projects, and runs `fusible studio --desktop` for each.
-The installers are not code-signed yet.
+The desktop app (Windows, macOS, Linux) and the Android app are attached to each
+[GitHub release](https://github.com/FacileStudio/Fusible/releases/latest). The desktop
+app bundles `bun`, lists your projects and runs `fusible studio --desktop` for each.
+Installers are not code-signed with Apple or Microsoft certificates, so your OS
+will warn you. In-app updates are verified against Fusible's own signing key.
 
 ## Quick start
 
@@ -145,11 +189,12 @@ the fuse blew: 1 electrical violation(s)
 help: every net must connect at least two pads/ports: complete the routing in tscircuit
 ```
 
-The rules: `unconnected_net`, `ghost_net`, `shorted_nets`, `malformed_element`,
-`dangling_reference`, `trace_clearance`, `decoupling_capacitor`, `pin_mux`,
-`E_SCHEMATIC_SCALE_EXCESSIVE`, `harness_mismatch`, and the three assembly rules
-(`body_interference`, `hole_misaligned`, `connector_blocked`). A rule that cannot prove a
-net is connected reports it. Silence is never the default.
+The rules are listed in [Rules](#rules). A rule that cannot prove a net is
+connected reports it. Silence is never the default.
+
+`fusible check --json` prints one JSON document with the verdict and every
+diagnostic (rule, message, help, severity, and when known the standard, source
+URL, element ids and a fix). The exit codes stay the same.
 
 ### `studio`: the studio
 
@@ -172,6 +217,7 @@ fusible studio --desktop     # for the desktop shell
 - **Narrow windows.** The tree collapses with `[` and becomes a drawer below 900px.
 
 Studio serves only local requests. Run requests accept names from `fusible.yml`, a JSON body, and a local `Origin`.
+`fusible studio --share` also listens on your local network for paired phones. See [Phone pairing](#phone-pairing).
 
 ### `route`: the autorouter
 
@@ -347,6 +393,127 @@ fusible doctor --json      # {"bun","node","tsci"}, exit 0
 `FUSIBLE_BUN` names the bun binary for every command. Without a `tsci`, Fusible
 runs `bun x --bun --package tscircuit tsci`.
 
+## Rules
+
+Every rule runs in the fuse. Errors blow it. Warnings print. Rules that need your
+numbers stay off until you declare them in `fusible.yml`.
+
+| Rule | Checks | Source |
+|---|---|---|
+| `trace_current` | Temperature rise of the narrowest trace of a net that declares `current`. | IPC-2152 (Brooks and Adam fit, as in KiCad): https://docs.kicad.org/doxygen/tracks__width__versus__current__formula_8h.html |
+| `voltage_clearance` | Copper spacing between nets for their voltage difference, class B1, B2 or B4. | IPC-2221B Table 6-1 |
+| `fab_profile` | Trace width and spacing, drill, via pad, annular ring, via to via, board size for `jlcpcb-2l`, `jlcpcb-4l` or your own limits. | https://jlcpcb.com/capabilities/pcb-capabilities |
+| `trace_clearance` | Copper clearance between different nets, 0.15 mm unless a fab profile is set. | |
+| `decoupling_capacitor` | Every IC supply pin has a bypass capacitor, within 3 mm (warning). | https://www.protoexpress.com/blog/decoupling-capacitor-placement-guidelines-pcb-design/ |
+| `autoroute` | tscircuit placement or routing errors, and nets with no routed trace. | |
+| `unconnected_net`, `ghost_net`, `shorted_nets`, `malformed_element`, `dangling_reference` | Netlist integrity. | |
+| `pin_mux` | Pin muxing against the silicon of the target MCU. | |
+| `qfn_footprint_span` | A qfn footprint that gives only a copper span (warning). | |
+| `E_SCHEMATIC_SCALE_EXCESSIVE` | A schematic too large for one sheet. | |
+| `harness_mismatch` | Cabled connectors that do not match. | |
+| `body_interference`, `hole_misaligned`, `connector_blocked` | Boards against bodies in an assembly. | |
+| `mech.*` | Wall thickness, bosses, port and component clearance, vents, standoff height and draft, by process. | see [Mechanical parts](#mechanical-parts) |
+
+Declare the numbers a rule needs:
+
+```yaml
+nets:
+  VBUS: { voltage: 5, current: 2, max_rise: 10 }   # trace_current, voltage_clearance
+  MAINS_L: { voltage: 230 }
+fab: jlcpcb-2l                # or jlcpcb-4l, or { min_trace: 0.15, min_space: 0.15, ... }
+clearance_class: B2           # B1 internal, B2 external uncoated (default), B4 coated
+copper: { outer_oz: 1, inner_oz: 0.5 }
+```
+
+These are design pre-checks, not certifications. Fusible does not check
+creepage under IEC 62368-1 yet. A product with a safety rating still needs a lab.
+Fab profiles carry a source URL and the date they were checked.
+
+## Mechanical parts
+
+Beyond the generated enclosure, a body can be a TypeScript module on the same
+OpenCascade kernel, modeled against the real board:
+
+```sh
+fusible body new bracket --material petg --process fdm
+fusible body bracket                 # writes STEP, STL and GLB into dist/bodies/
+```
+
+```yaml
+bodies:
+  bracket:
+    source: mech/bracket.ts
+    material: petg        # pla, petg, abs, asa, pa12, resin, pc, al6061
+    process: fdm          # fdm, sla, mjf, injection or cnc
+```
+
+The part receives the board outline, holes, component heights and openings, and
+helpers for shells, screw bosses, standoffs, vents and cut-outs. Builds are
+reproducible: STEP files carry a fixed timestamp. Materials feed `fusible bom`
+with mass and cost. The `mech.*` rules read the features the helpers record, and
+the process decides the limits (for example a 2 mm wall on FDM, 1.5 mm on SLA).
+Sources for every limit are in [docs/v1/E-mechanical.md](docs/v1/E-mechanical.md).
+
+## Agents
+
+`fusible mcp` is a Model Context Protocol server over stdio. It exposes checks, rule
+explanations, components, nets, the BOM, firmware pins, fuse-gated edits to boards
+and parts, builds, exports and SVG renders. Every edit returns the diff and the
+new fuse verdict, and `export` refuses to run while the fuse is blown. Edits are
+file changes in your git repository. Nothing is committed for you.
+
+```sh
+fusible mcp --print-config bulle     # or claude, or codex
+```
+
+```yaml
+sources:
+  mcp:
+    fusible:
+      command: fusible
+      args: [mcp]
+```
+
+That snippet goes in `~/.config/bulle/config.yml`. See [docs/agents.md](docs/agents.md)
+for the tool list and the write-safety rules. Research on PCB agents finds that
+agents with rule-checker feedback beat one-shot generation:
+https://arxiv.org/html/2607.05915 and https://arxiv.org/html/2602.00510v1.
+
+## Phone pairing
+
+```sh
+fusible studio --share
+```
+
+`--share` also listens on your local network, which must be a private address.
+Press **Pair phone** in the studio to show a QR code. The Android app scans it and
+gets a device token. A paired phone can read the project summary, board data, BOM
+and checks, and nothing else: every other route, and every method except GET,
+is refused by the server. Codes last five minutes and work once. The desktop app
+has a switch for this in its settings.
+
+## Release
+
+```sh
+fusible release                    # dist/release/ with fab files, BOM, pick and place, RELEASE.txt
+fusible release --allow-warnings
+```
+
+`release` checks every board, requires routed traces, exports the fab preset, and
+checks that copper pours made it into the gerbers. It writes nothing when any step
+fails.
+
+## Facile suite
+
+```sh
+fusible check --opus                       # a task in Opus for each new blown-fuse error
+fusible bom --opus                         # a task for each unpriced part
+fusible share nuage --space Kono --link    # export the fab files into a Nuage space
+```
+
+These call the `opus` and `nuage` command line tools you already signed in to.
+Without them, the fuse verdict is unchanged.
+
 ## Exit codes
 
 | Code | Meaning |
@@ -365,10 +532,10 @@ bun, runs `fusible check`, and fails the job when the fuse blows:
 ```yaml
 - uses: actions/checkout@v7
 - id: fuse
-  uses: FacileStudio/Fusible@v0.20.1
+  uses: FacileStudio/Fusible@v1
   with:
     target: ""        # optional board name or file; empty checks every board
-    version: latest   # or a version such as 0.20.1
+    version: latest   # or a version such as 1.0.0
 ```
 
 Other inputs: `working-directory` (default `.`) and `install-deps` (default
@@ -380,16 +547,19 @@ Other inputs: `working-directory` (default `.`) and `install-deps` (default
 ```
 src/
 ├── cli.rs, dispatch.rs, main.rs   # commands and exit codes
-├── commands/                      # check, build, export, body, bom, links, init, doctor
+├── commands/                      # check, build, export, body, bom, release, mcp, share, links, init, doctor
 ├── config/                        # fusible.yml: boards, firmware, bodies, links
 ├── parser/, netlist/, linter/     # pure Rust: Circuit JSON, net graph, rules
 ├── silicon/, codegen/             # pin muxing databases and pins.rs
 ├── gerber/, svg/, router/, kicad/ # fabrication, rendering, routing, KiCad sync
-├── dev/                           # studio server (tiny_http, SSE, git, KiCad watch)
+├── dev/                           # studio server (tiny_http, SSE, git, KiCad watch, pairing)
 ├── tscircuit/                     # runner discovery and process control
 └── assets/                        # embedded studio
-studio/                            # studio sources, built into src/assets/studio.bundle.js
-desktop/                           # Tauri shell
+studio/                            # Svelte studio, built into src/assets/studio.bundle.js
+desktop/                           # Tauri shell and its Svelte UI
+mobile/                            # Capacitor Android viewer
+site/                              # fusible.facile.studio
+scripts/                           # screenshots
 ```
 
 The parser, netlist, and rules have no C dependencies. tscircuit, bun, and
