@@ -7,9 +7,51 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-06
+
+Fusible moves to Facile Studio (`FacileStudio/Fusible`, site at https://fusible.facile.studio).
+The exit codes, the manifest and every existing command keep working.
+
+### Added
+
+- Physics rules, each citing its standard: `trace_current` (IPC-2152), `voltage_clearance` (IPC-2221B classes B1, B2, B4) and `fab_profile` (`jlcpcb-2l`, `jlcpcb-4l`, or your own limits). Declare numbers in `fusible.yml` with `nets`, `fab`, `clearance_class` and `copper`.
+- `decoupling_capacitor` warns when a supply pin's nearest bypass capacitor is farther than 3 mm.
+- `autoroute` blows the fuse on tscircuit placement or routing errors and on boards with nets but no routed traces. Before, a board whose autorouting was skipped passed as "fuse intact".
+- `fusible check --json`: one JSON document with the verdict and every diagnostic.
+- `fusible release`: checks every board, requires routed traces, exports the fab preset and verifies copper pours, and writes nothing on failure.
+- Code-first mechanical parts: `fusible body new`, TypeScript parts on `occt-wasm` modeled against the board, a material library, process-aware `mech.*` rules, mass and cost in the BOM, reproducible STEP output.
+- `fusible mcp`: a Model Context Protocol server with fuse-gated edits for Bulle, Claude Code, Codex and others. `fusible mcp --print-config` prints the client snippet.
+- `fusible check --opus`, `fusible bom --opus` and `fusible share nuage` connect Opus and Nuage through their command line tools.
+- `fusible studio --share` and phone pairing: a QR code, single-use five-minute codes, per-device tokens, and a read-only allowlist enforced by the server.
+- A read-only Android app (`mobile/`) that pairs with a running studio.
+- Desktop first-run onboarding and an Updates tab with progress and restart.
+- `fusible doctor` reports several `fusible` binaries on `PATH`.
+- `fusible export --preset fab` also writes `bom.csv` and `pnp.csv`.
+- A website for Fusible with English and French pages, downloads and docs.
+
+### Changed
+
+- The studio and the desktop app are rebuilt on Svelte 5 and muse: pill buttons, Solar icons, no borders, a new logo.
+- `fusible export` without `-o` writes into `dist/`, not next to the entry file.
+- `GET /api/bom` no longer creates `bom.yml`.
+- The kit makes wall openings only for connectors, with a verified height for the SHOU HAN USB-C (LCSC C2765186).
+- The assembly hole rule skips holes under components and holes narrower than 1 mm (`assembly.hole_min_diameter`).
+- The GLB writer merges primitives per mesh.
+- Releases are gated on matching crate, app and tag versions, and the desktop updater requires signed versions.
+
 ### Fixed
 
 - `fusible build`: a firmware build command whose program is not installed (for example `cargo` on a machine without Rust) now fails with `firmware build tool not found: cargo` and a hint to install it and fix the PATH, instead of the generic "check firmware build configuration".
+- Gerbers now include copper pours. `B_Cu.gbr` had no fill region before.
+- Through-hole pads and vias now count as copper in the spacing rules.
+
+### Known limits
+
+- Creepage under IEC 62368-1 is not checked. Clearance classes B3 and A5 to A7 are not supported.
+- Pours have no thermal relief and no mask openings, and rectangle and polygon pours do not clear non-plated holes yet.
+- `pnp.csv` uses each part's center, which some assembly houses read differently from the footprint origin.
+- Installers are not code-signed with Apple or Microsoft certificates. Updates are verified with Fusible's own key.
+- The studio bundle is about 20 MB uncompressed (5 MB compressed on crates.io).
 
 ## [0.20.9] - 2026-10-25
 
