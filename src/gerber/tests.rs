@@ -2,6 +2,7 @@
 
 mod layers;
 mod pour;
+mod pour_clip;
 mod shapes;
 mod silkscreen;
 mod validation;

@@ -4,7 +4,7 @@ use super::copper::CopperLayer;
 use super::elements::PcbModel;
 use super::geometry::{Feature, PadShape};
 use super::nets::same_net;
-use super::pour_shape::{outside_region, pour_rings};
+use super::pour_shape::pour_rings;
 use super::shapes::trace_segment;
 use super::{invalid, GerberError};
 use crate::gerber::apertures::Aperture;
@@ -24,11 +24,11 @@ impl PcbModel {
             }
             let (outer, holes) = pour_rings(pour).map_err(invalid("pcb_copper_pour", i))?;
             let net = self.nets.source_net(pour.source_net_id.as_deref());
-            features.push(Feature::Region(outer));
+            features.push(Feature::Region(outer.clone()));
             features.push(Feature::Polarity(false));
             features.extend(holes.into_iter().map(Feature::Region));
             features.extend(self.cutouts(layer, &net)?);
-            features.extend(self.edge_clip()?);
+            features.extend(self.edge_clip(&outer)?);
             features.push(Feature::Polarity(true));
         }
         Ok(features)
@@ -49,6 +49,7 @@ impl PcbModel {
             Ok(foreign.then_some(POUR_CLEARANCE_MM))
         })?);
         features.extend(self.foreign_vias_and_traces(layer, net)?);
+        features.extend(self.hole_clearances()?);
         Ok(features)
     }
 
@@ -95,24 +96,6 @@ impl PcbModel {
                 }
             }
         }
-        Ok(features)
-    }
-
-    fn edge_clip(&self) -> Result<Vec<Feature>, GerberError> {
-        let Some(board) = self.boards.first() else {
-            return Ok(Vec::new());
-        };
-        let ring: Vec<[f64; 2]> = board.outline_points().iter().map(|p| [p.x, p.y]).collect();
-        if ring.len() < 3 || ring.iter().flatten().any(|v| !v.is_finite()) {
-            return Ok(Vec::new());
-        }
-        let ap = Aperture::circle(2.0 * POUR_CLEARANCE_MM).map_err(invalid("pcb_board", 0))?;
-        let mut features = vec![Feature::Region(outside_region(&ring))];
-        features.extend(
-            ring.windows(2)
-                .map(|w| Feature::Stroke(ap.clone(), w[0], w[1])),
-        );
-        features.push(Feature::Stroke(ap, ring[ring.len() - 1], ring[0]));
         Ok(features)
     }
 }

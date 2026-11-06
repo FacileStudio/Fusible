@@ -13,6 +13,7 @@ mod math;
 mod nets;
 mod parse;
 mod pour;
+mod pour_clip;
 mod pour_shape;
 mod rounded;
 mod shapes;

@@ -8,17 +8,21 @@ pub(super) type PourRings = (Contour, Vec<Contour>);
 
 const OUTSIDE_MARGIN_MM: f64 = 1.0;
 
-/// Returns a region covering everything outside `ring`: a bounding frame joined to the ring by a cut-in.
-pub(super) fn outside_region(ring: &[[f64; 2]]) -> Vec<[f64; 2]> {
+/// Returns a region covering everything outside the `rings`.
+/// A frame around the rings and `pour` is joined to each ring by a cut-in.
+pub(super) fn outside_region(rings: &[Contour], pour: &[[f64; 2]]) -> Vec<[f64; 2]> {
+    let all = || rings.iter().flatten().chain(pour);
     let span = |axis: usize| {
-        let lo = ring.iter().map(|p| p[axis]).fold(f64::MAX, f64::min);
-        let hi = ring.iter().map(|p| p[axis]).fold(f64::MIN, f64::max);
+        let lo = all().map(|p| p[axis]).fold(f64::MAX, f64::min);
+        let hi = all().map(|p| p[axis]).fold(f64::MIN, f64::max);
         (lo - OUTSIDE_MARGIN_MM, hi + OUTSIDE_MARGIN_MM)
     };
     let ((x0, x1), (y0, y1)) = (span(0), span(1));
-    let mut region = vec![[x0, y0], [x1, y0], [x1, y1], [x0, y1], [x0, y0], ring[0]];
-    region.extend_from_slice(&ring[1..]);
-    region.extend([ring[0], [x0, y0]]);
+    let mut region = vec![[x0, y0], [x1, y0], [x1, y1], [x0, y1], [x0, y0]];
+    for ring in rings {
+        region.extend_from_slice(ring);
+        region.extend([ring[0], [x0, y0]]);
+    }
     region
 }
 
