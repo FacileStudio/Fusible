@@ -5,6 +5,7 @@ mod authored;
 mod authored_cache;
 mod bind;
 mod bodies;
+mod bodies_list;
 mod body;
 mod bom;
 mod desktop;

@@ -75,6 +75,7 @@ pub(super) fn handle(request: Request, state: &State, port: u16) {
         "/api/runs" => api::runs(request, state),
         "/api/rules" => rules_api::serve(request),
         p if assembly::owns(p) => assembly::serve(request, p),
+        "/api/bodies" => bodies::list(request),
         p if p.starts_with("/api/bodies/") => bodies::serve(request, p),
         "/api/kicad" => api::kicad(request, state),
         "/api/firmware" => firmware::serve(request, state),

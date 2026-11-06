@@ -58,8 +58,23 @@ pub struct BodyConfig {
     /// boards. An authored body is modeled in this board's coordinate frame.
     #[serde(default, alias = "around")]
     pub board: Option<String>,
+    /// Key in the material library (`pla`, `petg`, `al6061`, ...); sets the mass and the cost.
+    #[serde(default)]
+    pub material: Option<String>,
+    /// Manufacturing process: `fdm`, `sla`, `mjf`, `injection` or `cnc`.
+    #[serde(default)]
+    pub process: Option<String>,
     #[serde(flatten)]
     pub enclosure: EnclosureConfig,
+}
+
+impl BodyConfig {
+    /// A code part: its `source` is a TypeScript module that builds the shape.
+    pub fn is_code(&self) -> bool {
+        self.source
+            .as_ref()
+            .is_some_and(|s| s.extension().is_some_and(|e| e.eq_ignore_ascii_case("ts")))
+    }
 }
 
 /// Settings of the `enclosure` generator (base + lid around a board outline).
@@ -113,6 +128,19 @@ pub struct AssemblyConfig {
     /// Board and body names, each with its placement.
     #[serde(default)]
     pub parts: BTreeMap<String, PlacementConfig>,
+    /// Holes narrower than this (mm) need no boss; default 1.0.
+    #[serde(default, alias = "hole-min-diameter")]
+    pub hole_min_diameter: Option<f64>,
+}
+
+/// Narrowest hole that needs a boss, in mm; narrower holes are acoustic ports or vias.
+pub const DEFAULT_HOLE_MIN: f64 = 1.0;
+
+impl AssemblyConfig {
+    /// The narrowest hole that needs a boss, in mm.
+    pub fn hole_min(&self) -> f64 {
+        self.hole_min_diameter.unwrap_or(DEFAULT_HOLE_MIN)
+    }
 }
 
 /// A pin of a connector, written as a number (`1`) or a name (`GND`).

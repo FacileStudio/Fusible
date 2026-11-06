@@ -6,7 +6,7 @@ use crate::config::PlacementConfig;
 pub(super) const BOARD: &str = r#"[
   {"type":"pcb_board","width":40,"height":30,"center":{"x":0,"y":0},"thickness":1.4},
   {"type":"pcb_hole","x":-15,"y":10,"hole_diameter":3.2},
-  {"type":"source_component","source_component_id":"sc1","name":"J1"},
+  {"type":"source_component","source_component_id":"sc1","name":"J1","ftype":"simple_pin_header"},
   {"type":"pcb_component","pcb_component_id":"pc1","source_component_id":"sc1",
    "center":{"x":18,"y":0},"width":6,"height":8,"layer":"top"},
   {"type":"cad_component","pcb_component_id":"pc1","position":{"x":18,"y":0,"z":3.5},"size":{"x":6,"y":8,"z":4.0}}
@@ -18,7 +18,7 @@ pub(super) fn near_eq(a: f64, b: f64) -> bool {
 
 pub(super) fn built(frame: &[f64; 12]) -> Vec<Probe> {
     let kit = build_kit(BOARD, Some("main".into())).unwrap();
-    probes("main", &kit, frame)
+    probes("main", &kit, frame, 1.0)
 }
 
 #[test]
@@ -138,7 +138,7 @@ fn every_hole_face_gets_four_ring_quadrants() {
 fn a_connector_without_a_model_height_is_assumed_two_millimetres_tall() {
     let bare = BOARD.replace(r#""size":{"x":6,"y":8,"z":4.0}"#, r#""size":{}"#);
     let kit = build_kit(&bare, None).unwrap();
-    let all = probes("main", &kit, &IDENTITY);
+    let all = probes("main", &kit, &IDENTITY, 1.0);
     let opening = all
         .iter()
         .find(|p| matches!(p.role, Role::Opening { .. }))

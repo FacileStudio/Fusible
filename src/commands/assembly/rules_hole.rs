@@ -107,6 +107,7 @@ pub(super) fn missing_bosses(
             side: Side::Top,
             at,
             plated: false,
+            exempt: false,
         } => Some((hole, at)),
         _ => None,
     };

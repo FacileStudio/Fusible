@@ -16,6 +16,7 @@
 //! methods, so a hub module keeps every rule comfortably under the limit.
 
 mod autoroute;
+mod autoroute_scan;
 mod bypass_cap;
 mod bypass_distance;
 mod copper;

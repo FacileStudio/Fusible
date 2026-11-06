@@ -8,6 +8,20 @@ use super::kit_data::KitComponent;
 use super::BodyError;
 use crate::gerber::layers::PcbComponentElm;
 
+/// Verified part heights: LCSC id and the height of the part above the board's top face, in mm.
+///
+/// The model height of a part in the Circuit JSON can disagree with the real part. An entry here
+/// was measured on the real part and replaces the model's top.
+pub(super) const VERIFIED_PARTS: &[(&str, f64)] = &[("C2765186", 3.16)];
+
+/// The verified height above the top face of the part with one of `ids`, when it is in the table.
+pub(super) fn verified_top(ids: &[String]) -> Option<f64> {
+    VERIFIED_PARTS
+        .iter()
+        .find(|(lcsc, _)| ids.iter().any(|id| id == lcsc))
+        .map(|&(_, top)| top)
+}
+
 /// The volume a component occupies: its footprint box from `z0` to `z1` (cad Z, mm).
 #[derive(Debug, Serialize)]
 pub(crate) struct KitKeepOut {

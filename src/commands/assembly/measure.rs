@@ -14,6 +14,7 @@ use super::rules::{missing_bosses, violations, write_report, Response, Violation
 use super::rules_validate::validate;
 use super::{blow_if_any, AssemblyError, FORMATS};
 use crate::commands::body::{build_kit, generator_dir, run_script};
+use crate::config::{AssemblyConfig, DEFAULT_HOLE_MIN};
 
 static REPORT_COUNTER: AtomicU64 = AtomicU64::new(0);
 
@@ -30,13 +31,18 @@ struct Job<'a> {
 
 fn all_probes(ctx: &Context) -> Result<Vec<Probe>, AssemblyError> {
     let mut all = Vec::new();
+    let min_hole = ctx
+        .cfg
+        .assembly
+        .as_ref()
+        .map_or(DEFAULT_HOLE_MIN, AssemblyConfig::hole_min);
     for (name, (_, json)) in ctx.circuits {
         let kit = build_kit(json, Some(name.clone()))?;
         for line in warnings(name, &kit) {
             eprintln!("warning: {line}");
         }
         let frame = ctx.frames.get(name).unwrap_or(&IDENTITY);
-        all.extend(probes(name, &kit, frame));
+        all.extend(probes(name, &kit, frame, min_hole));
     }
     Ok(all)
 }
@@ -45,7 +51,7 @@ fn fitted(ctx: &Context, bodies: &[Part]) -> Vec<(String, String)> {
     bodies
         .iter()
         .filter_map(|part| {
-            let board = ctx.cfg.body_board(ctx.cfg.bodies.get(&part.name)?)?;
+            let board = ctx.cfg.fitted_board(ctx.cfg.bodies.get(&part.name)?)?;
             Some((part.name.clone(), board.to_string()))
         })
         .collect()

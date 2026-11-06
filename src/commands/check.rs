@@ -6,6 +6,7 @@ use miette::Diagnostic;
 use thiserror::Error;
 
 use crate::commands::assembly::{self, AssemblyError};
+use crate::commands::body;
 use crate::commands::check_lint::lint_board;
 use crate::commands::check_merge::{label, merge};
 use crate::commands::links::check_links;
@@ -135,14 +136,17 @@ fn check_manifest_assembly(boards: &[BoardTarget]) -> Result<(), CheckError> {
     let Some((manifest, cfg)) = FusibleConfig::nearest() else {
         return Ok(());
     };
-    if cfg.assembly.is_none() || !checked_every_board(&cfg, boards) {
+    if !checked_every_board(&cfg, boards) {
         return Ok(());
     }
     let root = manifest.parent().unwrap_or(Path::new("."));
-    assembly::verify(&cfg, root).map_err(|error| match error {
-        AssemblyError::Check(inner) => inner,
-        other => CheckError::Assembly(Box::new(other)),
-    })
+    if cfg.assembly.is_some() {
+        assembly::verify(&cfg, root).map_err(|error| match error {
+            AssemblyError::Check(inner) => inner,
+            other => CheckError::Assembly(Box::new(other)),
+        })?;
+    }
+    body::verify_mech(&cfg, root)
 }
 
 fn check_board(

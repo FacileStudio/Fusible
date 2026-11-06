@@ -37,6 +37,7 @@ fn prices_picks_and_prints_feed_the_totals() {
         &[Body {
             name: "case".into(),
             grams: None,
+            ..Default::default()
         }],
         &file(yaml),
     );
@@ -94,6 +95,7 @@ fn a_measured_weight_prices_the_print_until_grams_are_typed() {
     let body = [Body {
         name: "case".into(),
         grams: Some(50.0),
+        ..Default::default()
     }];
     let report = build(Vec::new(), &body, &BomFile::default());
     assert!(report.lines[0].estimated);

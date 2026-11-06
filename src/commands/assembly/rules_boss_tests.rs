@@ -23,6 +23,7 @@ fn plated_board_probes() -> Vec<super::probe::Probe> {
         "main",
         &build_kit(json, Some("main".into())).unwrap(),
         &IDENTITY,
+        1.0,
     )
 }
 

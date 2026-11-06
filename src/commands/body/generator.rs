@@ -7,12 +7,13 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use super::generator_setup::{prepare_generator, OCCT_WASM_VERSION};
+use super::part_features::PartReport;
 use super::spec::Spec;
 use super::BodyError;
 use crate::tscircuit::bun_path;
 
 const SCRIPT_TIMEOUT: Duration = Duration::from_secs(120);
-const MAX_STDERR: u64 = 64 * 1024;
+const MAX_OUTPUT: u64 = 64 * 1024;
 
 /// Returns the cache directory of the generator, keyed by the occt-wasm version so upgrades reuse the install.
 pub(crate) fn generator_dir() -> PathBuf {
@@ -26,16 +27,21 @@ pub(crate) fn generator_dir() -> PathBuf {
 }
 
 /// Pipes `spec` to the generator, which writes every file listed in `spec.outputs`.
-pub(super) fn run_generator(spec: &Spec) -> Result<(), BodyError> {
+pub(super) fn run_generator(spec: &Spec) -> Result<Option<PartReport>, BodyError> {
     println!("🧊 Building body model with OpenCascade...");
     let payload = serde_json::to_vec(spec).map_err(std::io::Error::other)?;
-    run_script("generator.ts", &payload)
+    run_capture("generator.ts", &payload).map(|out| PartReport::from_output(&out))
 }
 
 /// Runs the embedded script `script` under bun with `payload` on stdin; stdout is discarded.
 ///
 /// Bun is killed when it runs longer than [`SCRIPT_TIMEOUT`].
 pub(crate) fn run_script(script: &str, payload: &[u8]) -> Result<(), BodyError> {
+    run_capture(script, payload).map(|_| ())
+}
+
+/// Like [`run_script`], and returns what the script wrote to stdout.
+pub(crate) fn run_capture(script: &str, payload: &[u8]) -> Result<String, BodyError> {
     let bun = bun_path().ok_or(BodyError::BunMissing)?;
     let dir = generator_dir();
     prepare_generator(&bun, &dir)?;
@@ -43,21 +49,23 @@ pub(crate) fn run_script(script: &str, payload: &[u8]) -> Result<(), BodyError> 
         .arg(script)
         .current_dir(&dir)
         .stdin(Stdio::piped())
-        .stdout(Stdio::null())
+        .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()?;
-    let stderr = capture_stderr(&mut child);
+    let stdout = child.stdout.take().map(capture);
+    let stderr = child.stderr.take().map(capture);
     let wrote = child
         .stdin
         .take()
         .expect("stdin is piped")
         .write_all(payload);
     let status = wait_or_kill(&mut child, SCRIPT_TIMEOUT);
-    let stderr = stderr
-        .and_then(|reader| reader.join().ok())
-        .unwrap_or_default();
+    let joined = |reader: Option<thread::JoinHandle<String>>| {
+        reader.and_then(|r| r.join().ok()).unwrap_or_default()
+    };
+    let (stdout, stderr) = (joined(stdout), joined(stderr));
     let command = format!("bun {}", dir.join(script).display());
-    outcome(status, wrote.is_ok(), command, stderr)
+    outcome(status, wrote.is_ok(), command, stderr).map(|()| stdout)
 }
 
 /// Maps how bun ended to the result of the script: killed, failed, or done.
@@ -81,14 +89,13 @@ fn outcome(
     }
 }
 
-/// Reads at most [`MAX_STDERR`] bytes of the child's stderr on a thread, so the pipe never fills.
-fn capture_stderr(child: &mut Child) -> Option<thread::JoinHandle<String>> {
-    let pipe = child.stderr.take()?;
-    Some(thread::spawn(move || {
+/// Reads at most [`MAX_OUTPUT`] bytes of a child pipe on a thread, so the pipe never fills.
+fn capture(pipe: impl Read + Send + 'static) -> thread::JoinHandle<String> {
+    thread::spawn(move || {
         let mut text = Vec::new();
-        let _ = pipe.take(MAX_STDERR).read_to_end(&mut text);
+        let _ = pipe.take(MAX_OUTPUT).read_to_end(&mut text);
         String::from_utf8_lossy(&text).trim().to_string()
-    }))
+    })
 }
 
 /// Waits for `child` up to `timeout`; kills it and returns `None` when it is still running.

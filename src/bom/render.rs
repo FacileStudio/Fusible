@@ -1,5 +1,6 @@
 //! Text renderings of a report: an aligned table for the terminal, and CSV.
 
+use super::print_label::print_label;
 use super::report::{Kind, Line, Report};
 
 const HEADER: [&str; 6] = ["PICK", "QTY", "PART", "REFS", "UNIT", "TOTAL"];
@@ -11,7 +12,7 @@ fn price(value: Option<f64>, estimated: bool) -> String {
 
 fn label(line: &Line) -> String {
     match line.kind {
-        Kind::Print => line.description.clone(),
+        Kind::Print => print_label(line),
         _ => line.mpn.as_ref().map_or_else(
             || line.description.clone(),
             |mpn| format!("{} ({mpn})", line.description),

@@ -8,11 +8,13 @@ use clap::builder::ValueHint;
 use clap::{Parser, Subcommand};
 
 mod args;
+mod args_body;
 
 pub use args::{
-    AssemblyArgs, BodyAction, BodyArgs, BomArgs, BomFormat, CheckArgs, EjectArgs, ExportArgs,
-    InitArgs, KitArgs, ReleaseArgs, RouteArgs, SyncArgs,
+    AssemblyArgs, BodyAction, BodyArgs, BomArgs, BomFormat, CheckArgs, ExportArgs, InitArgs,
+    ReleaseArgs, RouteArgs, SyncArgs,
 };
+pub use args_body::{EjectArgs, KitArgs, NewArgs};
 
 /// Fusible — electronic linter & hardware-firmware bridge for tscircuit.
 #[derive(Debug, Parser)]

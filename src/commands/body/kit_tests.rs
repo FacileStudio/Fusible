@@ -5,7 +5,7 @@ const BOARD: &str = r#"[
   {"type":"pcb_board","width":40,"height":30,"center":{"x":0,"y":0},"thickness":1.4},
   {"type":"pcb_hole","x":-15,"y":10,"hole_diameter":3.2},
   {"type":"pcb_plated_hole","x":5,"y":5,"shape":"circle","hole_diameter":1.0,"outer_diameter":1.6},
-  {"type":"source_component","source_component_id":"sc1","name":"J1"},
+  {"type":"source_component","source_component_id":"sc1","name":"J1","ftype":"simple_pin_header"},
   {"type":"source_component","source_component_id":"sc2","name":"R1"},
   {"type":"pcb_component","pcb_component_id":"pc1","source_component_id":"sc1",
    "center":{"x":18,"y":0},"width":6,"height":8,"layer":"top"},

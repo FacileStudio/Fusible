@@ -1,14 +1,8 @@
 //! `autoroute`: tscircuit placement and routing failures must blow the fuse.
 
-use serde_json::Value;
-
 use crate::linter::{Diagnostic, LintContext, Rule};
 
-const HELP: &str =
-    "fix the placement or routing error; fab files from an unrouted board are unusable";
-const THERMALPAD_HINT: &str =
-    "a thermalpad only connects when the chip has a pinLabel named thermalpad";
-const UNROUTED: &str = "board has nets but no routed traces";
+use super::autoroute_scan::{error_help, error_message, is_unrouted, type_of, HELP, UNROUTED};
 
 /// tscircuit records a failed placement or autoroute as an `*_error` element and keeps going.
 /// Without this rule the fuse stays intact on a board whose copper was never routed.
@@ -50,31 +44,4 @@ impl AutorouteRule {
             ..Default::default()
         }
     }
-}
-
-fn type_of(el: &Value) -> Option<&str> {
-    el.get("type").and_then(Value::as_str)
-}
-
-fn error_message(el: &Value) -> String {
-    let message = el
-        .get("message")
-        .and_then(Value::as_str)
-        .unwrap_or("no message");
-    format!("{}: {message}", type_of(el).unwrap_or("error"))
-}
-
-fn error_help(el: &Value) -> String {
-    let thermalpad = error_message(el).contains("thermalpad");
-    match thermalpad {
-        true => format!("{HELP}; {THERMALPAD_HINT}"),
-        false => HELP.to_string(),
-    }
-}
-
-fn is_unrouted(raw: &[Value]) -> bool {
-    let has = |pred: &dyn Fn(&str) -> bool| raw.iter().filter_map(type_of).any(pred);
-    has(&|t| t.starts_with("pcb_"))
-        && has(&|t| t == "source_net" || t == "source_trace")
-        && !has(&|t| t == "pcb_trace")
 }

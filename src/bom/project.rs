@@ -3,7 +3,8 @@
 use std::path::{Path, PathBuf};
 
 use super::estimate::Body;
-use super::stl::stl_grams;
+use super::materials::{library, resolve};
+use super::stl::stl_mass;
 use crate::config::{BodyConfig, FusibleConfig};
 
 fn stl_of(name: &str, body: &BodyConfig, root: &Path) -> PathBuf {
@@ -29,9 +30,18 @@ pub fn bodies_of(cfg: &FusibleConfig, boards: &[&str], root: &Path) -> Vec<Body>
     cfg.bodies
         .iter()
         .filter(|(_, body)| body.board.as_deref().is_none_or(|b| boards.contains(&b)))
-        .map(|(name, body)| Body {
-            name: name.clone(),
-            grams: stl_grams(&stl_of(name, body, root)),
-        })
+        .map(|(name, body)| printed(name, body, root))
         .collect()
+}
+
+fn printed(name: &str, body: &BodyConfig, root: &Path) -> Body {
+    let (key, process) = resolve(body.material.as_deref(), body.process.as_deref());
+    let material = library().get(&key);
+    Body {
+        name: name.to_string(),
+        grams: material.and_then(|m| stl_mass(&stl_of(name, body, root), m, &process)),
+        material: body.material.clone(),
+        process: body.process.clone(),
+        cost_per_kg: body.material.as_ref().and(material).map(|m| m.cost_per_kg),
+    }
 }

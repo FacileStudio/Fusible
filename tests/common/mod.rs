@@ -2,7 +2,7 @@
 
 #![allow(dead_code)]
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
@@ -50,4 +50,38 @@ impl Drop for TestDir {
     fn drop(&mut self) {
         let _ = std::fs::remove_dir_all(&self.path);
     }
+}
+
+pub fn copy_dir(from: &Path, to: &Path) {
+    std::fs::create_dir_all(to).unwrap();
+    for entry in std::fs::read_dir(from).unwrap().flatten() {
+        let target = to.join(entry.file_name());
+        match entry.file_type().unwrap().is_dir() {
+            true => copy_dir(&entry.path(), &target),
+            false => drop(std::fs::copy(entry.path(), target).unwrap()),
+        }
+    }
+}
+
+pub fn mech_project(name: &str) -> TestDir {
+    let dir = TestDir::new(name);
+    let example = Path::new(env!("CARGO_MANIFEST_DIR")).join("examples/mech");
+    for entry in ["fusible.yml", "circuit.json"] {
+        std::fs::copy(example.join(entry), dir.path.join(entry)).unwrap();
+    }
+    copy_dir(&example.join("mech"), &dir.path.join("mech"));
+    dir
+}
+
+pub fn run_in(dir: &Path, args: &[&str]) -> (Option<i32>, String, String) {
+    let out = fusible()
+        .current_dir(dir)
+        .args(args)
+        .output()
+        .expect("binary should run");
+    (
+        out.status.code(),
+        String::from_utf8_lossy(&out.stdout).into_owned(),
+        String::from_utf8_lossy(&out.stderr).into_owned(),
+    )
 }

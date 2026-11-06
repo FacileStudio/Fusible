@@ -5,6 +5,8 @@
 
 #[cfg(test)]
 mod assembly_tests;
+#[cfg(test)]
+mod code_part_tests;
 mod design;
 #[cfg(test)]
 mod design_tests;
@@ -37,7 +39,7 @@ use raw::RawConfig;
 pub use raw::LEGACY_BOARD;
 pub use types::{
     AssemblyConfig, BoardConfig, BodyConfig, EnclosureConfig, FirmwareConfig, LinkConfig, PinId,
-    PlacementConfig, WireConfig,
+    PlacementConfig, WireConfig, DEFAULT_HOLE_MIN,
 };
 pub use validate::GENERATORS;
 

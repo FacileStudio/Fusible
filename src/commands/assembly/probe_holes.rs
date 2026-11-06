@@ -10,6 +10,7 @@ struct Hole {
     center: [f64; 2],
     radius: f64,
     plated: bool,
+    exempt: bool,
 }
 
 struct Face {
@@ -32,6 +33,7 @@ fn near_probe(frame: &Frame, kit: &Kit, hole: &Hole, face: &Face) -> Probe {
         side: face.side,
         at: hole.center,
         plated: hole.plated,
+        exempt: hole.exempt,
     };
     frame.probe(format!("{}:near", face.tag), role, near)
 }
@@ -85,8 +87,17 @@ fn bore_probe(frame: &Frame, kit: &Kit, hole: &Hole) -> Option<Probe> {
     Some(frame.probe(format!("hole:{}:bore", hole.index), role, bore))
 }
 
+/// Whether a component footprint of the kit covers the center of the hole.
+fn under_a_part(kit: &Kit, center: [f64; 2]) -> bool {
+    kit.components
+        .iter()
+        .any(|c| (center[0] - c.x).abs() <= c.w / 2.0 && (center[1] - c.y).abs() <= c.h / 2.0)
+}
+
 /// The probes of every hole of the kit, bottom face first.
-pub(super) fn hole_probes(frame: &Frame, kit: &Kit) -> Vec<Probe> {
+///
+/// A hole under a part or narrower than `min_hole` is exempt from the missing boss rule.
+pub(super) fn hole_probes(frame: &Frame, kit: &Kit, min_hole: f64) -> Vec<Probe> {
     kit.holes
         .iter()
         .enumerate()
@@ -96,6 +107,7 @@ pub(super) fn hole_probes(frame: &Frame, kit: &Kit) -> Vec<Probe> {
                 center: [h.x, h.y],
                 radius: h.diameter / 2.0,
                 plated: h.plated,
+                exempt: h.diameter < min_hole || under_a_part(kit, [h.x, h.y]),
             };
             let faces = [Side::Bottom, Side::Top]
                 .into_iter()

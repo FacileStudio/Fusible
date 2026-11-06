@@ -2,6 +2,7 @@
 
 use std::path::PathBuf;
 
+use super::args_body::{EjectArgs, KitArgs, NewArgs};
 use clap::{Args, Subcommand};
 
 #[derive(Debug, Args, PartialEq)]
@@ -150,37 +151,9 @@ pub enum BodyAction {
 
     /// Export a reference kit (outline, holes, openings, board STEP) to model parts around a board
     Kit(KitArgs),
-}
 
-#[derive(Debug, Args, PartialEq)]
-pub struct EjectArgs {
-    /// Name of the generated body to eject
-    #[arg(value_name = "BODY")]
-    pub name: String,
-
-    /// Output file; its extension (step, stl, glb, brep) picks the format
-    /// [default: bodies/<BODY>.<first configured format, step when unset>]
-    #[arg(short = 'o', long, value_name = "FILE")]
-    pub output: Option<PathBuf>,
-
-    /// Skip electrical rule verification before generating the model
-    #[arg(long)]
-    pub skip_lint: bool,
-}
-
-#[derive(Debug, Args, PartialEq)]
-pub struct KitArgs {
-    /// Board name or circuit file [default: the only board]
-    #[arg(value_name = "BOARD")]
-    pub board: Option<PathBuf>,
-
-    /// Output directory [default: bodies/kit/<BOARD>, or the file name of a bare circuit file]
-    #[arg(short = 'o', long, value_name = "DIR")]
-    pub output: Option<PathBuf>,
-
-    /// Skip electrical rule verification before writing the kit
-    #[arg(long)]
-    pub skip_lint: bool,
+    /// Scaffold a code part: mech/<NAME>.ts, editor types, and its fusible.yml entry
+    New(NewArgs),
 }
 
 #[derive(Debug, Args, PartialEq)]

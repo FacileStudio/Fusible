@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { OcctKernel, type ShapeHandle } from "occt-wasm";
 import { buildProbe, type Probe, type Vec3 } from "./probes.ts";
+import { slimGlb } from "./slim";
 
 type Part = {
   name: string;
@@ -53,7 +54,7 @@ const merge = () => {
   }
   const writers = {
     step: () => doc.exportSTEP(),
-    glb: () => doc.exportGLTF(),
+    glb: () => slimGlb(doc.exportGLTF()),
   };
   for (const { format, path } of job.outputs) writeFileSync(path, writers[format]());
   doc.close();

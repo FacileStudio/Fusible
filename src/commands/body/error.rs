@@ -133,4 +133,12 @@ pub enum BodyError {
         code: Option<i32>,
         stderr: String,
     },
+
+    #[error("cannot create body `{name}`: {reason}")]
+    #[diagnostic(code(fusible::body::cannot_create), help("{help}"))]
+    CannotCreate {
+        name: String,
+        reason: String,
+        help: String,
+    },
 }

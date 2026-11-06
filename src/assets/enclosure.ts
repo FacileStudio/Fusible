@@ -65,3 +65,11 @@ const writers = {
 };
 
 for (const { format, path } of spec.outputs) writeFileSync(path, writers[format]());
+
+const features = [
+  { kind: "wall", part: "wall", thickness: spec.wall },
+  { kind: "clearance", gap: spec.clearance },
+  ...spec.bosses.map((b) => ({ kind: "boss", outer: b.outer, pilot: b.pilot })),
+  ...spec.vents.map((v) => ({ kind: "vent", w: v.round ? v.w : Math.min(v.w, v.h) })),
+];
+console.log(JSON.stringify({ features }));

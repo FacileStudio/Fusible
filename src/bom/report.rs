@@ -34,6 +34,10 @@ pub struct Line {
     pub supplier: Option<String>,
     pub url: Option<String>,
     pub grams: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub material: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub process: Option<String>,
     pub picked: bool,
     pub estimated: bool,
     pub total: Option<f64>,
@@ -91,6 +95,8 @@ fn line(id: &str, kind: Kind, entry: &PartEntry) -> Line {
         supplier: entry.supplier.clone(),
         url: entry.url.clone(),
         grams: None,
+        material: None,
+        process: None,
         picked: entry.picked.unwrap_or(true),
         estimated: false,
         total: None,
@@ -120,18 +126,21 @@ fn detected_line(part: Part, entry: &PartEntry, rate: f64) -> Line {
     }
 }
 
-fn print_line(body: &Body, entry: &PrintEntry, price_per_kg: f64) -> Line {
+fn print_line(body: &Body, entry: &PrintEntry, price_per_kg: f64, rate: f64) -> Line {
     let grams = entry.grams.or(body.grams);
+    let per_kg = body.cost_per_kg.map_or(price_per_kg, |eur| eur * rate);
     let base = PartEntry {
         description: Some(format!("3D print: {}", body.name)),
         quantity: entry.quantity,
-        unit_price: grams.map(|g| g / 1000.0 * price_per_kg),
+        unit_price: grams.map(|g| g / 1000.0 * per_kg),
         picked: entry.picked,
         ..Default::default()
     };
     Line {
         grams,
-        estimated: entry.grams.is_none() && body.grams.is_some(),
+        material: body.material.clone(),
+        process: body.process.clone(),
+        estimated: body.cost_per_kg.is_some() || (entry.grams.is_none() && body.grams.is_some()),
         ..line(&format!("print-{}", body.name), Kind::Print, &base)
     }
 }
@@ -177,7 +186,7 @@ fn collect_lines(
     });
     let printed = bodies.iter().map(|body| {
         let entry = file.prints.get(&body.name).cloned().unwrap_or_default();
-        print_line(body, &entry, file.print.price_per_kg)
+        print_line(body, &entry, file.print.price_per_kg, rate)
     });
     detected.chain(manual).chain(printed).collect()
 }

@@ -43,7 +43,7 @@ pub(super) struct Vent {
     pub(super) round: bool,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub(super) struct Output {
     pub(super) format: &'static str,
     pub(super) path: PathBuf,
