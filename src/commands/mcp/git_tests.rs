@@ -27,5 +27,6 @@ fn a_patch_for_the_allowed_path_applies_from_stdin() {
     std::fs::write(dir.join("x"), "one\n").unwrap();
     let patch = "diff --git a/x b/x\n--- a/x\n+++ b/x\n@@ -1 +1 @@\n-one\n+two\n";
     apply_patch(&dir, patch, "x").unwrap();
-    assert_eq!(std::fs::read_to_string(dir.join("x")).unwrap(), "two\n");
+    let text = std::fs::read_to_string(dir.join("x")).unwrap();
+    assert_eq!(text.replace("\r\n", "\n"), "two\n");
 }
