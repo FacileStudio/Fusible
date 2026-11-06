@@ -152,6 +152,9 @@ export interface Content {
   pillars: PillarsContent;
   rules: RulesContent;
   agents: AgentsContent;
+  board3d: ShotContent;
+  checks: ShotContent;
+  bodies: ShotContent;
   mobile: ShotContent;
   desktop: ShotContent;
   suite: SuiteContent;

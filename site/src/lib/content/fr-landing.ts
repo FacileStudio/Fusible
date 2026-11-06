@@ -3,7 +3,18 @@ import { ARXIV, BULLE_SNIPPET, SOURCES, SUITE_LINKS } from "./shared";
 
 type Landing = Pick<
   Content,
-  "hero" | "loop" | "pillars" | "rules" | "agents" | "mobile" | "desktop" | "suite" | "footer"
+  | "hero"
+  | "loop"
+  | "pillars"
+  | "rules"
+  | "agents"
+  | "board3d"
+  | "checks"
+  | "bodies"
+  | "mobile"
+  | "desktop"
+  | "suite"
+  | "footer"
 >;
 
 export const frLanding: Landing = {
@@ -138,6 +149,27 @@ export const frLanding: Landing = {
     sources: ARXIV,
     snippetLabel: "Configuration de Bulle, ~/.config/bulle/config.yml",
     snippet: BULLE_SNIPPET,
+  },
+  board3d: {
+    title: "Voyez la carte telle qu'elle sera fabriquée",
+    text:
+      "Le schéma, le PCB et la 3D se mettent à jour à chaque enregistrement, " +
+      "avec des pièces inspectables pastille par pastille.",
+    alt: "Le studio Fusible affichant un PCB rond en 3D",
+  },
+  checks: {
+    title: "Chaque violation cite sa règle",
+    text:
+      "Chaque vérification nomme sa norme et renvoie à sa source. " +
+      "Ce sont des vérifications de conception, pas des certifications.",
+    alt: "Le studio Fusible listant les vérifications et leurs normes",
+  },
+  bodies: {
+    title: "Boîtiers et pièces en code",
+    text:
+      "Écrivez vos pièces mécaniques en TypeScript, choisissez matière et procédé, " +
+      "et obtenez un vrai fichier STEP, la masse et le coût.",
+    alt: "Le studio Fusible affichant un boîtier généré en 3D",
   },
   mobile: {
     title: "Votre projet dans la poche",

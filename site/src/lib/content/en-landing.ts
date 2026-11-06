@@ -3,7 +3,18 @@ import { ARXIV, BULLE_SNIPPET, SOURCES, SUITE_LINKS } from "./shared";
 
 type Landing = Pick<
   Content,
-  "hero" | "loop" | "pillars" | "rules" | "agents" | "mobile" | "desktop" | "suite" | "footer"
+  | "hero"
+  | "loop"
+  | "pillars"
+  | "rules"
+  | "agents"
+  | "board3d"
+  | "checks"
+  | "bodies"
+  | "mobile"
+  | "desktop"
+  | "suite"
+  | "footer"
 >;
 
 export const enLanding: Landing = {
@@ -124,6 +135,23 @@ export const enLanding: Landing = {
     sources: ARXIV,
     snippetLabel: "Bulle config, ~/.config/bulle/config.yml",
     snippet: BULLE_SNIPPET,
+  },
+  board3d: {
+    title: "See the board as it will be built",
+    text: "Live schematic, PCB and 3D views update on every save, with parts you can inspect pad by pad.",
+    alt: "The Fusible studio showing a round PCB in 3D",
+  },
+  checks: {
+    title: "Every violation cites its rule",
+    text: "Each check names its standard and links its source. They are design pre-checks, not certifications.",
+    alt: "The Fusible studio listing checks with their standards",
+  },
+  bodies: {
+    title: "Enclosures and parts from code",
+    text:
+      "Write mechanical parts in TypeScript, pick a material and a process, " +
+      "and get a real STEP file, mass and cost.",
+    alt: "The Fusible studio showing a generated enclosure in 3D",
   },
   mobile: {
     title: "Your project in your pocket",
