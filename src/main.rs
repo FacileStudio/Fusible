@@ -62,7 +62,8 @@ fn run_command(command: Commands) -> ExitCode {
             port,
             legacy,
             desktop,
-        } => dispatch::dev(file, port, legacy, desktop),
+            share,
+        } => dispatch::dev(file, port, legacy, desktop, share),
         Commands::Check(args) => {
             dispatch::check(args.file, args.mcu, args.pins_rs, args.json, args.opus)
         }

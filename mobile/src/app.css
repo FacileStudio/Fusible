@@ -1,0 +1,18 @@
+@import "tailwindcss";
+@import "@facile/muse/styles";
+@source "../node_modules/@facile/muse/src";
+
+html,
+body {
+  min-height: 100dvh;
+}
+
+body {
+  padding-top: env(safe-area-inset-top);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+.pb-nav {
+  padding-bottom: calc(6.5rem + env(safe-area-inset-bottom));
+}

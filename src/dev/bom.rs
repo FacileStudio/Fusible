@@ -6,6 +6,7 @@ use serde_json::json;
 use tiny_http::{Method, Request};
 
 use super::api::{error_body, respond_json};
+use super::bom_read::file_for_read;
 use super::run_api::forbidden;
 use super::state::State;
 use crate::bom::{self, BomError, BomFile, Part};
@@ -27,7 +28,8 @@ fn parts_of(state: &State) -> (Vec<Part>, usize) {
     (parts, pending)
 }
 
-fn reply(state: &State, file: &BomFile, editable: bool) -> String {
+/// The priced report of every served board with `file` applied, and how many boards are still building.
+pub(super) fn report_of(state: &State, file: &BomFile) -> (bom::Report, usize) {
     let (parts, pending) = parts_of(state);
     let (manifest, cfg) = FusibleConfig::nearest().unzip();
     let root = manifest.as_deref().and_then(std::path::Path::parent);
@@ -37,11 +39,12 @@ fn reply(state: &State, file: &BomFile, editable: bool) -> String {
         .iter()
         .filter_map(|s| s.name.as_deref())
         .collect();
-    let report = bom::build(
-        parts,
-        &bom::bodies_of(&cfg, &names, root.unwrap_or(std::path::Path::new("."))),
-        file,
-    );
+    let bodies = bom::bodies_of(&cfg, &names, root.unwrap_or(std::path::Path::new(".")));
+    (bom::build(parts, &bodies, file), pending)
+}
+
+fn reply(state: &State, file: &BomFile, editable: bool) -> String {
+    let (report, pending) = report_of(state, file);
     json!({ "report": report, "file": file, "editable": editable, "pending": pending }).to_string()
 }
 
@@ -89,7 +92,7 @@ fn read(request: Request, state: &State) {
     let Some((manifest, _)) = FusibleConfig::nearest() else {
         return respond_json(request, 200, reply(state, &BomFile::default(), false));
     };
-    match BomFile::load_or_create(&bom::bom_path(&manifest)) {
+    match file_for_read(&bom::bom_path(&manifest)) {
         Ok(file) => respond_json(request, 200, reply(state, &file, true)),
         Err(err) => respond_json(request, 422, error_body(&err.to_string())),
     }

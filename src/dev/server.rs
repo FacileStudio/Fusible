@@ -10,10 +10,11 @@ use super::bom;
 use super::desktop::{announce_ready, exit_on_stdin_eof};
 use super::firmware;
 use super::git_api;
-use super::guard::{is_allowed_host, is_same_origin};
+use super::guard::admit;
 use super::hub::stream_events;
 use super::kicad_watch::start_kicad_watchers;
 use super::limiter::handlers;
+use super::pair::{self, enable_sharing, lan_ip};
 use super::refresh::{load_bundle, rebuild_trigger, refresh, warn_if_bundle_missing, watch_dir};
 use super::rules_api;
 use super::run_api;
@@ -55,17 +56,11 @@ pub(super) fn route_path(url: &str) -> &str {
 }
 
 pub(super) fn handle(request: Request, state: &State, port: u16) {
-    let host = request.headers().iter().find(|h| h.field.equiv("Host"));
-    if !is_allowed_host(host.map(|h| h.value.as_str()), port) {
-        let _ = request.respond(Response::from_string("Forbidden").with_status_code(403));
+    if let Err(status) = admit(&request, state, port) {
+        let _ = request.respond(Response::from_string("Forbidden").with_status_code(status));
         return;
     }
     let path = route_path(request.url()).to_string();
-    let guarded = path.starts_with("/api/") || path == "/events";
-    if guarded && !is_same_origin(&request, port) {
-        let _ = request.respond(Response::from_string("Forbidden").with_status_code(403));
-        return;
-    }
     match path.as_str() {
         "/api/mechanical" => api::body_preview(request, state, false),
         "/api/mechanical.glb" => api::body_preview(request, state, true),
@@ -74,6 +69,7 @@ pub(super) fn handle(request: Request, state: &State, port: u16) {
         "/api/bom" => bom::serve(request, state, port),
         "/api/runs" => api::runs(request, state),
         "/api/rules" => rules_api::serve(request),
+        p if pair::owns(p) => pair::serve(request, state, p),
         p if assembly::owns(p) => assembly::serve(request, p),
         "/api/bodies" => bodies::list(request),
         p if p.starts_with("/api/bodies/") => bodies::serve(request, p),
@@ -129,13 +125,16 @@ pub fn run_dev_server(
     boards: Vec<BoardTarget>,
     asked: u16,
     desktop: bool,
+    share: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let (server, port) = bind(asked)?;
+    let lan = share.then(lan_ip).transpose()?;
+    let (server, port) = bind(asked, share)?;
     if port != asked {
         println!("ℹ Port {asked} is in use, using {port} instead.");
     }
     let mut state = State::new(&boards);
     state.desktop = desktop;
+    enable_sharing(&mut state, lan, port);
     if desktop {
         announce_ready(port);
         exit_on_stdin_eof();

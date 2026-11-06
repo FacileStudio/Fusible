@@ -1,0 +1,42 @@
+{
+	"name": "fusible-mobile",
+	"private": true,
+	"version": "1.0.0",
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview --host 127.0.0.1 --port 4173",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"test": "bun test src"
+	},
+	"devDependencies": {
+		"@capacitor/assets": "^4.0.0",
+		"@capacitor/cli": "8.6.0",
+		"@iconify-json/solar": "^1.2.13",
+		"@sveltejs/adapter-static": "^3",
+		"@sveltejs/kit": "^2",
+		"@sveltejs/vite-plugin-svelte": "^6",
+		"@tailwindcss/vite": "^4",
+		"@types/bun": "^1.4.4",
+		"@types/three": "^0.187.0",
+		"svelte": "^5",
+		"svelte-check": "^4",
+		"tailwindcss": "^4",
+		"typescript": "^5",
+		"vite": "^7"
+	},
+	"dependencies": {
+		"@capacitor/android": "8.6.0",
+		"@capacitor/app": "8.1.2",
+		"@capacitor/barcode-scanner": "^3.1.3",
+		"@capacitor/core": "8.6.0",
+		"@capacitor/preferences": "8.0.1",
+		"@facile/muse": "github:FacileStudio/muse#v0.10.0",
+		"buffer": "^6.0.3",
+		"circuit-json-to-gltf": "^0.0.164",
+		"circuit-to-svg": "^0.0.456",
+		"gsap": "^3.13",
+		"three": "^0.186"
+	}
+}

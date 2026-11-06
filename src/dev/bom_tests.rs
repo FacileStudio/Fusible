@@ -1,4 +1,5 @@
 use super::bom::save;
+use super::bom_read::file_for_read;
 
 #[test]
 fn a_saved_bom_round_trips_and_a_bad_one_writes_nothing() {
@@ -25,5 +26,15 @@ fn a_missing_bom_is_created_with_a_currency() {
     assert!(std::fs::read_to_string(&path)
         .unwrap()
         .contains("currency: EUR"));
+    std::fs::remove_dir_all(&dir).unwrap();
+}
+
+#[test]
+fn reading_a_missing_bom_writes_nothing() {
+    let dir = std::env::temp_dir().join(format!("fusible-bom-read-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    let path = dir.join("bom.yml");
+    assert!(file_for_read(&path).is_ok());
+    assert!(!path.exists());
     std::fs::remove_dir_all(&dir).unwrap();
 }

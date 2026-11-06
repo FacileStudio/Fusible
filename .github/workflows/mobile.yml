@@ -1,0 +1,131 @@
+name: mobile
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to attach the APK to (optional)"
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  android:
+    name: android-universal
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      GH_TOKEN: ${{ github.token }}
+      TAG_INPUT: ${{ inputs.tag }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check signing secrets
+        run: |
+          missing=0
+          for v in KEYSTORE_B64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD; do
+            if [ -z "${!v}" ]; then
+              echo "::error::secret for $v is empty"
+              missing=1
+            fi
+          done
+          exit "$missing"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: android-actions/setup-android@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.11
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Decode keystore
+        run: |
+          umask 077
+          printf '%s' "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/fusible.keystore"
+          test -s "$RUNNER_TEMP/fusible.keystore"
+          echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/fusible.keystore" >> "$GITHUB_ENV"
+
+      - name: Compute version
+        run: |
+          tag="${TAG_INPUT:-}"
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            tag="$GITHUB_REF_NAME"
+          fi
+          version="${tag#v}"
+          version="${version:-0.0.0}"
+          core="${version%%[-+]*}"
+          major="$(echo "$core" | cut -d. -f1)"
+          minor="$(echo "$core" | cut -d. -f2)"
+          patch="$(echo "$core" | cut -d. -f3)"
+          code=$((major * 1000000 + minor * 1000 + patch))
+          echo "RELEASE_TAG=$tag" >> "$GITHUB_ENV"
+          echo "FUSIBLE_VERSION_NAME=$version" >> "$GITHUB_ENV"
+          echo "FUSIBLE_VERSION_CODE=$code" >> "$GITHUB_ENV"
+          echo "version $version, code $code"
+
+      - name: Build the web app
+        working-directory: mobile
+        run: |
+          bun install --frozen-lockfile
+          bun test
+          bun run build
+          bunx cap sync android
+
+      - name: Build the APK
+        working-directory: mobile/android
+        run: ./gradlew assembleRelease --no-daemon
+
+      - name: Verify and name the APK
+        run: |
+          dir=mobile/android/app/build/outputs/apk/release
+          apk="$dir/app-release.apk"
+          test -f "$apk"
+          apksigner="$(find "$ANDROID_HOME"/build-tools -maxdepth 2 -name apksigner | sort -V | tail -n1)"
+          "$apksigner" verify --print-certs "$apk"
+          count="$(find "$dir" -name '*.apk' | wc -l)"
+          if [ "$count" -ne 1 ]; then
+            echo "::error::expected one universal APK, found $count"
+            exit 1
+          fi
+          mkdir -p out
+          cp "$apk" out/Fusible-android.apk
+          (cd out && sha256sum Fusible-android.apk > Fusible-android.apk.sha256)
+          cat out/Fusible-android.apk.sha256
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-universal
+          path: out/*
+          retention-days: 7
+
+      - name: Attach the APK to the release
+        if: env.RELEASE_TAG != ''
+        run: |
+          gh release create "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --latest=false || true
+          gh release upload "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --clobber \
+            out/Fusible-android.apk out/Fusible-android.apk.sha256
+
+      - name: Remove keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/fusible.keystore"
