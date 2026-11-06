@@ -9,7 +9,24 @@ permissions:
   contents: write
 
 jobs:
+  versions:
+    name: version check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Crate, app, and tag versions agree
+        shell: bash
+        run: |
+          crate=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)
+          shell_crate=$(sed -n 's/^version = "\(.*\)"/\1/p' desktop/src-tauri/Cargo.toml | head -1)
+          app=$(sed -n 's/^ *"version": "\(.*\)",/\1/p' desktop/src-tauri/tauri.conf.json | head -1)
+          echo "crate=$crate shell=$shell_crate app=$app tag=${GITHUB_REF_NAME}"
+          test "$crate" = "$shell_crate"
+          test "$crate" = "$app"
+          test "v$crate" = "${GITHUB_REF_NAME}"
+
   build:
+    needs: versions
     name: ${{ matrix.os_name }}/${{ matrix.arch }}
     runs-on: ${{ matrix.runner }}
     strategy:
