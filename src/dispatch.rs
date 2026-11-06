@@ -2,16 +2,18 @@
 
 mod body;
 mod json;
+mod misc;
 mod release;
 
 pub use body::body;
 use json::check_json;
+pub use misc::{init, share};
 pub use release::release;
 
 use std::path::PathBuf;
 use std::process::ExitCode;
 
-use crate::cli::{AssemblyArgs, ExportArgs, RouteArgs, SyncArgs};
+use crate::cli::{AssemblyArgs, ExportArgs, OpusArgs, RouteArgs, SyncArgs};
 use crate::commands;
 use crate::commands::check::CheckError;
 use crate::router::RouteOptions;
@@ -25,19 +27,25 @@ pub fn dev(file: Option<PathBuf>, port: Option<u16>, legacy: bool, desktop: bool
     }
 }
 
-/// Runs the electrical linter.
+/// Runs the electrical linter; with `--opus`, a blown fuse also opens Opus tasks.
 pub fn check(
     file: Option<PathBuf>,
     mcu: Option<String>,
     pins_rs: Option<PathBuf>,
     json: bool,
+    opus: OpusArgs,
 ) -> ExitCode {
     if json {
         return check_json(file, mcu);
     }
-    match commands::check::run(file, mcu, pins_rs) {
+    match commands::check::run(file.clone(), mcu, pins_rs) {
         Ok(()) => ExitCode::SUCCESS,
-        Err(CheckError::FuseBlown(blown)) => fail(blown, EXIT_VIOLATIONS),
+        Err(CheckError::FuseBlown(blown)) => {
+            if opus.opus {
+                commands::opus::report_check(file, &opus);
+            }
+            fail(blown, EXIT_VIOLATIONS)
+        }
         Err(err) => fail(err, EXIT_TOOL_ERROR),
     }
 }

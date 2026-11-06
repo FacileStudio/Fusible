@@ -9,12 +9,14 @@ use clap::{Parser, Subcommand};
 
 mod args;
 mod args_body;
+mod mcp_args;
 
 pub use args::{
     AssemblyArgs, BodyAction, BodyArgs, BomArgs, BomFormat, CheckArgs, ExportArgs, InitArgs,
     ReleaseArgs, RouteArgs, SyncArgs,
 };
 pub use args_body::{EjectArgs, KitArgs, NewArgs};
+pub use mcp_args::{McpArgs, McpClient, NuageArgs, OpusArgs, ShareArgs, ShareTarget};
 
 /// Fusible — electronic linter & hardware-firmware bridge for tscircuit.
 #[derive(Debug, Parser)]
@@ -94,6 +96,12 @@ pub enum Commands {
     /// List the parts of the project with quantities and prices (bill of materials)
     #[command(alias = "parts")]
     Bom(BomArgs),
+
+    /// Serve the project to AI agents over MCP (stdio)
+    Mcp(McpArgs),
+
+    /// Send the fuse-gated export to a Facile app
+    Share(ShareArgs),
 
     /// Run the autorouter to solve circuit traces
     Route(RouteArgs),

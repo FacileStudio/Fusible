@@ -3,6 +3,7 @@
 use std::path::PathBuf;
 
 use super::args_body::{EjectArgs, KitArgs, NewArgs};
+use super::mcp_args::OpusArgs;
 use clap::{Args, Subcommand};
 
 #[derive(Debug, Args, PartialEq)]
@@ -20,8 +21,11 @@ pub struct CheckArgs {
     pub pins_rs: Option<PathBuf>,
 
     /// Print one JSON document with the fuse verdict and every diagnostic
-    #[arg(long, conflicts_with = "pins_rs")]
+    #[arg(long, conflicts_with_all = ["pins_rs", "opus"])]
     pub json: bool,
+
+    #[command(flatten)]
+    pub opus: OpusArgs,
 }
 
 #[derive(Debug, Args, PartialEq)]
@@ -98,6 +102,9 @@ pub struct BomArgs {
     /// Write the output to this file instead of stdout
     #[arg(short = 'o', long, value_name = "PATH")]
     pub output: Option<PathBuf>,
+
+    #[command(flatten)]
+    pub opus: super::OpusArgs,
 }
 
 #[derive(Debug, Args, PartialEq)]

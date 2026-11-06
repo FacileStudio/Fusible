@@ -1,0 +1,18 @@
+#!/bin/sh
+printf '%s\n' "$*" >> "$FAKE_LOG"
+case "$1 $2" in
+  "spaces list")
+    if [ -n "$FAKE_SYNC_DIR" ]; then
+      printf '{"spaces":[{"id":"s1","name":"hardware","role":"owner","sync_dir":"%s"}]}\n' "$FAKE_SYNC_DIR"
+    else
+      printf '{"spaces":[{"id":"s1","name":"hardware","role":"owner","sync_dir":null}]}\n'
+    fi
+    ;;
+esac
+case "$1" in
+  sync) printf '{"synced":true}\n' ;;
+  share)
+    if [ -n "$FAKE_SHARE_FAIL" ]; then echo 'no such remote path' >&2; exit 1; fi
+    printf '{"url":"https://nuage.test/s/abc"}\n'
+    ;;
+esac
