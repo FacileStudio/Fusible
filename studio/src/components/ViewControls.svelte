@@ -55,6 +55,7 @@
         variant="ghost"
         size="sm"
         icon="solar:box-minimalistic-linear"
+        aria-label="Enclosure"
         aria-pressed={mech.overlay}
         class={mech.overlay ? on : ""}
         onclick={() => toggleMechanical("overlay", hosts["3d"] ?? null)}
@@ -63,13 +64,14 @@
       </Button>
     {/if}
     {#if studio.view === "mechanical" && mech.lidAvailable}
-      <Button variant="ghost" size="sm" icon="solar:eye-linear" aria-pressed={mech.lid} class={mech.lid ? on : ""} onclick={() => toggleMechanical("lid", null)}>
+      <Button variant="ghost" size="sm" icon="solar:eye-linear" aria-label="Lid" aria-pressed={mech.lid} class={mech.lid ? on : ""} onclick={() => toggleMechanical("lid", null)}>
         <span class="max-md:hidden">Lid</span>
       </Button>
       <Button
         variant="ghost"
         size="sm"
         icon="solar:maximize-square-2-linear"
+        aria-label="Explode"
         aria-pressed={mech.explode}
         class={mech.explode ? on : ""}
         onclick={() => toggleMechanical("explode", null)}
@@ -78,7 +80,7 @@
       </Button>
     {/if}
     {#if studio.view === "assembly"}
-      <Button variant="ghost" size="sm" icon="solar:layers-linear" onclick={() => launch("assembly")}>
+      <Button variant="ghost" size="sm" icon="solar:layers-linear" aria-label="Build assembly" onclick={() => launch("assembly")}>
         <span class="max-md:hidden">Build assembly</span>
       </Button>
     {/if}

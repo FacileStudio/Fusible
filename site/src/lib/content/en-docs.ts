@@ -22,7 +22,8 @@ export const enDocs: DocsContent = {
           kind: "p",
           text:
             "The desktop app for Windows, macOS and Linux is attached to each GitHub release. " +
-            "The installers are not code-signed yet.",
+            "Installers are not code-signed with Apple or Microsoft certificates, so your OS will warn you. " +
+          "In-app updates are verified against Fusible's own signing key.",
         },
       ],
     },

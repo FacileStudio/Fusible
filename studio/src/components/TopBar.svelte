@@ -27,6 +27,7 @@
       type="button"
       id="btn-projects"
       class="inline-flex h-9 shrink-0 items-center gap-2 rounded-full bg-fc-surface px-4 text-fc-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fc-ring"
+      aria-label="Back to projects"
       title="Back to projects"
       onclick={openProjects}
     >

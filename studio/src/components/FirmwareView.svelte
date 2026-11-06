@@ -49,7 +49,7 @@
         {@const part = pin.remote ? pin.remote.split(".")[0] : ""}
         <button
           type="button"
-          class="flex flex-col gap-0.5 rounded-2xl px-4 py-2 text-left hover:bg-fc-component focus-visible:outline-2 focus-visible:outline-fc-ring {firmware.picked === pin.pin
+          class="flex flex-col gap-0.5 rounded-full px-4 py-2 text-left hover:bg-fc-component focus-visible:outline-2 focus-visible:outline-fc-ring {firmware.picked === pin.pin
             ? 'bg-fc-component'
             : ''}"
           title={pin.net}

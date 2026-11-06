@@ -24,9 +24,9 @@
     </button>
     {#if open}
       <div class="absolute right-0 top-full z-40 mt-2 max-h-[50dvh] w-85 max-w-[calc(100vw-16px)] overflow-y-auto rounded-3xl bg-fc-surface p-4 text-fc-xs select-text">
-        <h3 class="mb-2 text-fc-sm font-medium">
+        <h2 class="mb-2 text-fc-sm font-medium">
           {summary.kind === "error" ? "KiCad could not be compared" : "KiCad differs from the design"}
-        </h3>
+        </h2>
         <ul class="flex flex-col gap-1 text-fc-fg-muted">
           {#each lines as line}
             <li class="wrap-anywhere">{line}</li>

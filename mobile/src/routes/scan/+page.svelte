@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { Alert, Button, Input, Spinner } from "@facile/muse";
+  import { Alert, Button, Icon, Input } from "@facile/muse";
   import {
     CapacitorBarcodeScanner,
     CapacitorBarcodeScannerAndroidScanningLibrary as Lib,
@@ -70,6 +70,6 @@
     {t("pasteAction")}
   </Button>
   {#if busy}
-    <div class="flex items-center gap-2 text-fc-fg-muted"><Spinner /> {t("pairing")}</div>
+    <div class="flex items-center gap-2 text-fc-fg-muted"><Icon icon={ICON.spinner} size={20} class="motion-safe:animate-spin" /> {t("pairing")}</div>
   {/if}
 </main>

@@ -8,7 +8,7 @@
   const t = useT();
 </script>
 
-<div class="relative flex items-center gap-3 rounded-3xl bg-fc-surface p-5">
+<div class="relative flex items-center gap-3 rounded-full bg-fc-surface px-7 py-4">
   <Icon icon={ICON.logo} size={32} class="shrink-0 text-fc-fg-muted" />
   <a
     href={`/host?id=${encodeURIComponent(host.id)}`}

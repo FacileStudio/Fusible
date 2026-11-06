@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Spinner } from "@facile/muse";
+  import { Icon } from "@facile/muse";
   import Onboarding from "./components/onboarding/Onboarding.svelte";
   import ProjectList from "./components/ProjectList.svelte";
   import Settings from "./components/Settings.svelte";
@@ -29,7 +29,7 @@
 <div class="flex h-full flex-col bg-fc-page text-fc-fg">
   <TitleBar />
   {#if booting}
-    <div class="flex flex-1 items-center justify-center"><Spinner /></div>
+    <div class="flex flex-1 items-center justify-center"><span role="status" aria-label="Loading" class="inline-flex"><Icon icon="solar:refresh-linear" size={24} class="motion-safe:animate-spin" /></span></div>
   {:else if settings.value && !settings.value.onboarded}
     <Onboarding />
   {:else}

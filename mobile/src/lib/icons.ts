@@ -17,6 +17,7 @@ export const ICON = {
   ok: "solar:check-circle-linear",
   chevron: "mdi:chevron-right",
   back: "mdi:chevron-left",
+  spinner: "solar:refresh-linear",
 } as const;
 
 /** Registers the Solar glyphs this app draws, so no icon is fetched at runtime. */

@@ -64,7 +64,8 @@ export const fr: Content = {
     cliLines: ["cargo install fusible", "facile install fusible"],
     actionLine: "GitHub Action : uses: FacileStudio/Fusible@v1",
     androidNote: "Autorisez les installations depuis cette source quand Android le demande.",
-    desktopNote: "Les installeurs ne sont pas encore signés ; votre système demandera une confirmation.",
+    desktopNote: "Les installateurs ne sont pas signés avec des certificats Apple ou Microsoft : votre système vous avertira. " +
+      "Les mises à jour intégrées sont vérifiées avec la clé de signature de Fusible.",
   },
   docs: frDocs,
 };

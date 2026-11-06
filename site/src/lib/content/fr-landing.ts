@@ -151,7 +151,7 @@ export const frLanding: Landing = {
     title: "Une application de bureau",
     text:
       "Projets, outils et mises à jour dans une seule fenêtre. " +
-      "Les mises à jour sont signées et s'installent en arrière-plan.",
+      "Les mises à jour sont vérifiées et s'installent en arrière-plan.",
     alt: "L'application de bureau Fusible listant des projets",
     cta: { label: "Télécharger l'application de bureau", href: "/download" },
   },

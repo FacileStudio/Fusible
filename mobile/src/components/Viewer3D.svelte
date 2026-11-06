@@ -1,8 +1,9 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { Spinner } from "@facile/muse";
+  import { Icon } from "@facile/muse";
   import { mountGlb } from "$lib/board3d";
   import { useT } from "$lib/i18n";
+  import { ICON } from "$lib/icons";
 
   let { load }: { load: () => Promise<ArrayBuffer> } = $props();
   const t = useT();
@@ -30,7 +31,7 @@
   <div bind:this={target} class="absolute inset-0"></div>
   {#if phase !== "ready"}
     <div class="absolute inset-0 flex items-center justify-center gap-2 text-fc-fg-muted">
-      {#if phase === "loading"}<Spinner /> {t("loading")}{:else}{t("nothingToShow")}{/if}
+      {#if phase === "loading"}<Icon icon={ICON.spinner} size={24} class="motion-safe:animate-spin" /> {t("loading")}{:else}{t("nothingToShow")}{/if}
     </div>
   {/if}
 </div>

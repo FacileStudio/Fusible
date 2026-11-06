@@ -33,7 +33,7 @@ export const en: Content = {
       title: "Download Fusible",
       description:
         "Download Fusible for Windows, macOS, Linux and Android, or install the command line tool with cargo. " +
-        "Free and open source under the MIT license, signed updates.",
+        "Free and open source under the MIT license, verified updates.",
       imageAlt: "Download Fusible",
     },
     docs: {
@@ -62,7 +62,8 @@ export const en: Content = {
     cliLines: ["cargo install fusible", "facile install fusible"],
     actionLine: "GitHub Action: uses: FacileStudio/Fusible@v1",
     androidNote: "Allow installs from this source when Android asks.",
-    desktopNote: "The installers are not code-signed yet; your OS will ask to confirm.",
+    desktopNote: "Installers are not code-signed with Apple or Microsoft certificates, so your OS will warn you. " +
+      "In-app updates are verified against Fusible's own signing key.",
   },
   docs: enDocs,
 };

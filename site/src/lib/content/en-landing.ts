@@ -133,7 +133,7 @@ export const enLanding: Landing = {
   },
   desktop: {
     title: "A desktop app",
-    text: "Projects, toolchain and updates in one window. Updates are signed and install in the background.",
+    text: "Projects, toolchain and updates in one window. Updates are verified and install in the background.",
     alt: "The Fusible desktop app listing projects",
     cta: { label: "Download the desktop app", href: "/download" },
   },

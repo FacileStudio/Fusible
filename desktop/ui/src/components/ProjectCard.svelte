@@ -17,7 +17,7 @@
 
 <article class="flex items-center gap-4 rounded-3xl bg-fc-surface p-5">
   <div class="flex min-w-0 flex-1 flex-col gap-1.5">
-    <h3 class="truncate text-fc-md font-semibold">{project.name}</h3>
+    <h2 class="truncate text-fc-md font-semibold">{project.name}</h2>
     <p class="truncate text-fc-xs text-fc-fg-muted" title={project.path}>{shortenPath(project.path, 64)}</p>
     <div class="flex flex-wrap items-center gap-1.5">
       {#if project.missing}

@@ -30,7 +30,7 @@
   {/if}
   {#each summary?.bodies ?? [] as body (body.name)}
     <button
-      class="flex min-h-14 items-center justify-between gap-3 rounded-3xl p-5 text-left {picked === body.name
+      class="flex min-h-14 items-center justify-between gap-3 rounded-full px-7 py-5 text-left {picked === body.name
         ? 'bg-fc-accent text-fc-accent-fg'
         : 'bg-fc-surface'}"
       aria-pressed={picked === body.name}

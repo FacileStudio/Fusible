@@ -20,7 +20,7 @@
     {#each bodies as body (body.name)}
       <button
         type="button"
-        class="flex items-center justify-between gap-3 rounded-2xl px-4 py-2 text-left text-fc-sm hover:bg-fc-component focus-visible:outline-2 focus-visible:outline-fc-ring"
+        class="flex items-center justify-between gap-3 rounded-full px-4 py-2 text-left text-fc-sm hover:bg-fc-component focus-visible:outline-2 focus-visible:outline-fc-ring"
         onclick={() => selectItem("body", body.name)}
       >
         <span class="min-w-0">

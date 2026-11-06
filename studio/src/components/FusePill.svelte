@@ -10,6 +10,7 @@
   class="inline-flex h-9 shrink-0 items-center gap-2 rounded-full px-4 text-fc-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fc-ring {studio.fuseBlown
     ? 'bg-fc-danger text-fc-danger-fg'
     : 'bg-fc-surface text-fc-fg'}"
+  aria-label={studio.fuseBlown ? `Show checks, fuse blown, ${count}` : "Show checks, fuse intact"}
   title="Show checks"
   onclick={() => openPane("checks")}
 >
