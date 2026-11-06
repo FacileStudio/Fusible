@@ -2,6 +2,7 @@
   import type { Content } from "$lib/content/types";
   import { scrollToSection } from "$lib/motion";
   import CodeBlock from "./CodeBlock.svelte";
+  import Rich from "./Rich.svelte";
   import Seo from "./Seo.svelte";
   import SiteShell from "./SiteShell.svelte";
 
@@ -42,12 +43,12 @@
           <h2 id="{section.id}-title" class="text-fc-xl font-semibold tracking-tight text-fc-fg">{section.title}</h2>
           {#each section.blocks as block, i (i)}
             {#if block.kind === "p"}
-              <p class="max-w-2xl text-fc-sm text-fc-fg-muted">{block.text}</p>
+              <p class="max-w-2xl text-fc-sm text-fc-fg-muted"><Rich text={block.text} /></p>
             {:else if block.kind === "code"}
               <CodeBlock code={block.code} {content} />
             {:else if block.kind === "list"}
               <ul class="flex max-w-2xl list-disc flex-col gap-1.5 pl-5 text-fc-sm text-fc-fg-muted">
-                {#each block.items as item (item)}<li>{item}</li>{/each}
+                {#each block.items as item (item)}<li><Rich text={item} /></li>{/each}
               </ul>
             {:else}
               <div class="overflow-x-auto rounded-fc-md bg-fc-surface p-2">
@@ -64,7 +65,7 @@
                       <tr>
                         {#each row as cell, c (c)}
                           <td class="px-3 py-2.5 align-top {c === 0 ? 'font-mono text-fc-xs text-fc-fg' : 'text-fc-fg-muted'}"
-                            >{cell}</td
+                            ><Rich text={cell} /></td
                           >
                         {/each}
                       </tr>

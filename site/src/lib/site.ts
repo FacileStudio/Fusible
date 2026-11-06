@@ -9,3 +9,5 @@ export function pageUrl(prefix: string, page: string): string {
   const path = `${prefix}${page}` || "/";
   return `${SITE_URL}${path}`;
 }
+
+export const RELEASE_API = "https://api.github.com/repos/FacileStudio/Fusible/releases/latest";

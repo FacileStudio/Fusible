@@ -15,7 +15,7 @@ export const enDocs: DocsContent = {
           kind: "p",
           text:
             "Linting Circuit JSON, Gerbers and SVG needs nothing else. " +
-            "To compile .tsx boards or export STEP, install tscircuit and check the toolchain.",
+            "To compile `.tsx` boards or export STEP, install tscircuit and check the toolchain.",
         },
         { kind: "code", code: "bun add -g tscircuit\nfusible doctor\nfusible doctor --install" },
         {
@@ -32,12 +32,15 @@ export const enDocs: DocsContent = {
       title: "Quick start",
       blocks: [
         { kind: "code", code: "fusible init --name sensor-node\nfusible check\nfusible studio" },
-        { kind: "p", text: "init writes a fusible.yml. check lints every board. studio opens the live viewer." },
+        {
+          kind: "p",
+          text: "`init` writes a `fusible.yml`. `check` lints every board. `studio` opens the live viewer.",
+        },
         {
           kind: "p",
           text:
             "Exit codes: 0 means the fuse is intact, 1 means it is blown, 2 means a tool error. " +
-            "fusible check --json prints the verdict and every diagnostic as JSON.",
+            "`fusible check --json` prints the verdict and every diagnostic as JSON.",
         },
       ],
     },
@@ -49,11 +52,11 @@ export const enDocs: DocsContent = {
         {
           kind: "list",
           items: [
-            "boards, firmware and bodies are named things. Names are unique across all three.",
-            "nets declares the voltage and current of a net. The physics rules read it.",
-            "fab picks a fab profile: jlcpcb-2l, jlcpcb-4l, or your own limits.",
-            "clearance_class is B1, B2 or B4. The default is B2.",
-            "copper sets the copper weight: outer_oz and inner_oz.",
+            "`boards`, `firmware` and `bodies` are named things. Names are unique across all three.",
+            "`nets` declares the voltage and current of a net. The physics rules read it.",
+            "`fab` picks a fab profile: `jlcpcb-2l`, `jlcpcb-4l`, or your own limits.",
+            "`clearance_class` is `B1`, `B2` or `B4`. The default is `B2`.",
+            "`copper` sets the copper weight: `outer_oz` and `inner_oz`.",
           ],
         },
       ],
@@ -70,7 +73,7 @@ export const enDocs: DocsContent = {
             ["voltage_clearance", "IPC-2221B (classes B1, B2, B4)"],
             ["fab_profile", "JLCPCB 2-layer and 4-layer"],
             ["trace_clearance, shorted_nets, unconnected_net, pin_mux", "Topology and silicon checks"],
-            ["bypass_cap", "Layout guideline, 3 mm"],
+            ["decoupling_capacitor", "Layout guideline, 3 mm"],
             ["body_interference", "Board and body geometry"],
             ["mech.wall_thickness, mech.standoff_height, mech.draft", "DFAM Academy, RTP Company"],
           ],
@@ -86,15 +89,15 @@ export const enDocs: DocsContent = {
         {
           kind: "p",
           text:
-            "body new writes mech/bracket.ts, mech/fusible.d.ts and a bodies entry in fusible.yml. " +
+            "`fusible body new` writes `mech/bracket.ts`, `mech/fusible.d.ts` and a `bodies` entry in `fusible.yml`. " +
             "Building a code part writes STEP, STL and GLB. Processes are fdm, sla, mjf, injection and cnc.",
         },
         {
           kind: "p",
           text:
             "A part is a TypeScript function that receives the board and a Cad object. " +
-            "Cad has box, cylinder, extrude, union, cut, intersect, move, rotate, shell, boss, " +
-            "standoff, ventSlots, cutout and draft. Use the helpers to get rule coverage.",
+            "`Cad` has `box`, `cylinder`, `extrude`, `union`, `cut`, `intersect`, `move`, `rotate`, `shell`, " +
+            "`boss`, `standoff`, `ventSlots`, `cutout` and `draft`. Use the helpers to get rule coverage.",
         },
       ],
     },
@@ -102,7 +105,7 @@ export const enDocs: DocsContent = {
       id: "agents",
       title: "Agents",
       blocks: [
-        { kind: "p", text: "fusible mcp serves these tools over stdio. Every write returns the diff and the fuse." },
+        { kind: "p", text: "`fusible mcp` serves these tools over stdio. Every write returns the diff and the fuse." },
         { kind: "table", head: ["Tool", "What it does"], rows: MCP_TOOLS },
         {
           kind: "code",

@@ -1,8 +1,9 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { Button, Icon, icons } from "@facile/muse";
   import type { Content } from "$lib/content/types";
-  import type { Release } from "$lib/release";
-  import { RELEASES_URL } from "$lib/site";
+  import { parseRelease, type Release } from "$lib/release";
+  import { RELEASES_URL, RELEASE_API } from "$lib/site";
   import CodeBlock from "./CodeBlock.svelte";
   import Seo from "./Seo.svelte";
   import SiteShell from "./SiteShell.svelte";
@@ -10,7 +11,20 @@
 
   let { content, release }: { content: Content; release: Release } = $props();
 
+  let live = $state<Release | null>(null);
+  const current = $derived(live ?? release);
   const dl = $derived(content.download);
+
+  onMount(async () => {
+    try {
+      const response = await fetch(RELEASE_API, { headers: { Accept: "application/vnd.github+json" } });
+      if (!response.ok) return;
+      const next = parseRelease(await response.json());
+      if (next.version) live = next;
+    } catch {
+      live = null;
+    }
+  });
   const ICONS = { windows: "solar:monitor-linear", macos: "solar:monitor-linear", linux: "solar:monitor-linear", android: "solar:smartphone-linear" };
 
   /** Formats a byte count as megabytes. */
@@ -25,14 +39,14 @@
     <div data-reveal-item class="flex max-w-2xl flex-col gap-3">
       <h1 class="text-fc-2xl font-semibold tracking-tight text-fc-fg sm:text-fc-3xl">{dl.title}</h1>
       <p class="text-fc-md text-fc-fg-muted">{dl.intro}</p>
-      {#if release.version}
-        <p class="text-fc-sm text-fc-fg-muted">{dl.versionLabel}: <span class="font-mono">{release.version}</span></p>
+      {#if current.version}
+        <p class="text-fc-sm text-fc-fg-muted">{dl.versionLabel}: <span class="font-mono">{current.version}</span></p>
       {/if}
     </div>
 
     <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2">
       {#each dl.platforms as platform (platform.key)}
-        {@const asset = release.assets[platform.key]}
+        {@const asset = current.assets[platform.key]}
         <li
           id={platform.key}
           data-reveal-item

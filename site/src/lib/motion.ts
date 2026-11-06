@@ -97,30 +97,3 @@ export function watchActiveSection(
     window.removeEventListener("resize", onScroll);
   };
 }
-
-/**
- * Pins a horizontal track on wide screens and scrubs it sideways with the scroll position.
- * Returns a cleanup function. Pins only at 1024px and wider.
- */
-export async function pinHorizontal(section: HTMLElement, track: HTMLElement): Promise<() => void> {
-  if (prefersReducedMotion()) return () => {};
-  const { ScrollTrigger } = await import("gsap/ScrollTrigger");
-  gsap.registerPlugin(ScrollTrigger);
-  const mm = gsap.matchMedia();
-  mm.add("(min-width: 1024px)", () => {
-    const distance = () => Math.max(0, track.scrollWidth - section.clientWidth);
-    gsap.to(track, {
-      x: () => -distance(),
-      ease: "none",
-      scrollTrigger: {
-        trigger: section,
-        start: "top top+=72",
-        end: () => `+=${distance()}`,
-        pin: true,
-        scrub: 0.6,
-        invalidateOnRefresh: true,
-      },
-    });
-  });
-  return () => mm.revert();
-}

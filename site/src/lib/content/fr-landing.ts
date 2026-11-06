@@ -111,7 +111,7 @@ export const frLanding: Landing = {
       { id: "unconnected_net", summary: "Chaque réseau relie au moins deux pastilles ou ports." },
       { id: "pin_mux", summary: "Chaque broche gère la fonction de périphérique demandée sur la puce choisie." },
       {
-        id: "bypass_cap",
+        id: "decoupling_capacitor",
         summary:
           "Chaque broche d'alimentation d'un circuit intégré a un condensateur de découplage, " +
           "à 3 mm au plus quand le placement est connu.",

@@ -16,7 +16,7 @@ export const frDocs: DocsContent = {
           kind: "p",
           text:
             "Vérifier du Circuit JSON, des Gerbers et du SVG ne demande rien de plus. " +
-            "Pour compiler des cartes .tsx ou exporter du STEP, installez tscircuit et contrôlez les outils.",
+            "Pour compiler des cartes `.tsx` ou exporter du STEP, installez tscircuit et contrôlez les outils.",
         },
         { kind: "code", code: "bun add -g tscircuit\nfusible doctor\nfusible doctor --install" },
         {
@@ -37,14 +37,14 @@ export const frDocs: DocsContent = {
         {
           kind: "p",
           text:
-            "init écrit un fusible.yml. check vérifie chaque carte. " +
-            "studio ouvre la vue en direct.",
+            "`init` écrit un `fusible.yml`. `check` vérifie chaque carte. " +
+            "`studio` ouvre la vue en direct.",
         },
         {
           kind: "p",
           text:
             "Codes de sortie : 0 fusible intact, 1 fusible sauté, 2 erreur d'outil. " +
-            "fusible check --json affiche le verdict et chaque diagnostic en JSON.",
+            "`fusible check --json` affiche le verdict et chaque diagnostic en JSON.",
         },
       ],
     },
@@ -56,11 +56,11 @@ export const frDocs: DocsContent = {
         {
           kind: "list",
           items: [
-            "boards, firmware et bodies sont des éléments nommés. Les noms sont uniques entre les trois.",
-            "nets déclare la tension et le courant d'un réseau. Les règles physiques le lisent.",
-            "fab choisit un profil de fabricant : jlcpcb-2l, jlcpcb-4l, ou vos propres limites.",
-            "clearance_class vaut B1, B2 ou B4. La valeur par défaut est B2.",
-            "copper fixe l'épaisseur de cuivre : outer_oz et inner_oz.",
+            "`boards`, `firmware` et `bodies` sont des éléments nommés. Les noms sont uniques entre les trois.",
+            "`nets` déclare la tension et le courant d'un réseau. Les règles physiques le lisent.",
+            "`fab` choisit un profil de fabricant : `jlcpcb-2l`, `jlcpcb-4l`, ou vos propres limites.",
+            "`clearance_class` vaut `B1`, `B2` ou `B4`. La valeur par défaut est `B2`.",
+            "`copper` fixe l'épaisseur de cuivre : `outer_oz` et `inner_oz`.",
           ],
         },
       ],
@@ -77,7 +77,7 @@ export const frDocs: DocsContent = {
             ["voltage_clearance", "IPC-2221B (classes B1, B2, B4)"],
             ["fab_profile", "JLCPCB 2 couches et 4 couches"],
             ["trace_clearance, shorted_nets, unconnected_net, pin_mux", "Contrôles de topologie et de puce"],
-            ["bypass_cap", "Guide de placement, 3 mm"],
+            ["decoupling_capacitor", "Guide de placement, 3 mm"],
             ["body_interference", "Géométrie de la carte et des corps"],
             ["mech.wall_thickness, mech.standoff_height, mech.draft", "DFAM Academy, RTP Company"],
           ],
@@ -98,16 +98,18 @@ export const frDocs: DocsContent = {
         {
           kind: "p",
           text:
-            "body new écrit mech/bracket.ts, mech/fusible.d.ts et une entrée bodies dans fusible.yml. " +
+            "`fusible body new` écrit `mech/bracket.ts`, `mech/fusible.d.ts` et une entrée `bodies` " +
+            "dans `fusible.yml`. " +
             "Construire une pièce en code écrit du STEP, du STL et du GLB. " +
             "Les procédés sont fdm, sla, mjf, injection et cnc.",
         },
         {
           kind: "p",
           text:
-            "Une pièce est une fonction TypeScript qui reçoit la carte et un objet Cad. " +
-            "Cad propose box, cylinder, extrude, union, cut, intersect, move, rotate, shell, boss, " +
-            "standoff, ventSlots, cutout et draft. Utilisez ces aides pour que les règles s'appliquent.",
+            "Une pièce est une fonction TypeScript qui reçoit la carte et un objet `Cad`. " +
+            "`Cad` propose `box`, `cylinder`, `extrude`, `union`, `cut`, `intersect`, `move`, `rotate`, `shell`, " +
+            "`boss`, `standoff`, `ventSlots`, `cutout` et `draft`. " +
+            "Utilisez ces aides pour que les règles s'appliquent.",
         },
       ],
     },
@@ -118,7 +120,7 @@ export const frDocs: DocsContent = {
         {
           kind: "p",
           text:
-            "fusible mcp expose ces outils sur stdio. " +
+            "`fusible mcp` expose ces outils sur stdio. " +
             "Chaque écriture renvoie le diff et le verdict du fusible.",
         },
         { kind: "table", head: ["Outil", "Rôle"], rows: frTools },

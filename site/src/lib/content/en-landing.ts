@@ -103,7 +103,7 @@ export const enLanding: Landing = {
       { id: "unconnected_net", summary: "Every net connects at least two pads or ports." },
       { id: "pin_mux", summary: "Each pin supports the peripheral function you gave it on the chosen chip." },
       {
-        id: "bypass_cap",
+        id: "decoupling_capacitor",
         summary: "Every IC power pin has a decoupling capacitor, within 3 mm when placement is known.",
         standard: { label: "layout guideline", href: SOURCES.bypass },
       },
