@@ -285,7 +285,7 @@ dependencies = [
 
 [[package]]
 name = "fusible"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "clap",
  "getrandom 0.3.4",

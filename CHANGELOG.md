@@ -7,6 +7,8 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-11-07
+
 ### Fixed
 
 - The desktop app icon is a black squircle with the chip mark, like Bulle and Courrier. It no longer sits on a circular plate.
