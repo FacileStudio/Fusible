@@ -7,6 +7,10 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 
 ## [Unreleased]
 
+### Fixed
+
+- The desktop app icon is a black squircle with the chip mark, like Bulle and Courrier. It no longer sits on a circular plate.
+
 ## [1.0.0] - 2026-11-06
 
 Fusible moves to Facile Studio (`FacileStudio/Fusible`, site at https://fusible.facile.studio).
