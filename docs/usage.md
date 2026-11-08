@@ -304,7 +304,7 @@ copper pours made it into the gerbers. It writes nothing when any step fails.
 ```sh
 fusible check --opus                       # a task in Opus for each new blown-fuse error
 fusible bom --opus                         # a task for each unpriced part
-fusible share nuage --space Kono --link    # export the fab files into a Nuage space
+fusible share nuage --space Facile --link    # export the fab files into a Nuage space
 ```
 
 These call the `opus` and `nuage` command line tools you already signed in to. Without them,

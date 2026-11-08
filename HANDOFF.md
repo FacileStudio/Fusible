@@ -4,7 +4,7 @@ Written 2026-10-22, after Fusible v0.10.0 and FieldCam v0.10.1 shipped. FieldCam
 
 | Project | Path | Latest release |
 |---|---|---|
-| Fusible (Rust CLI: tscircuit linter, Gerber, studio, enclosures) | `/home/yann/Code/Kono/Fusible` | v0.10.0 on GitHub and crates.io |
+| Fusible (Rust CLI: tscircuit linter, Gerber, studio, enclosures) | `/home/yann/Code/Facile/Fusible` | v0.10.0 on GitHub and crates.io |
 | FieldCam (ESP32-S3 field camera: hardware, firmware, API, client) | `/home/yann/Code/Kono/FieldCam` | v0.10.1 on GitHub |
 
 Read `AGENTS.md` in each repo before you start. FieldCam's `CHANGELOG.md` lists known issues under 0.10.0.

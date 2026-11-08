@@ -68,7 +68,7 @@ describe("toolchainReport", () => {
 describe("display helpers", () => {
   test("shortenPath keeps short paths and elides long ones", () => {
     expect(shortenPath("/home/a/Fusible")).toBe("/home/a/Fusible");
-    const long = shortenPath("/home/yann/Code/Kono/Fusible/projects/FieldCam", 36);
+    const long = shortenPath("/home/yann/Code/Facile/Fusible/projects/FieldCam", 36);
     expect(long.length).toBeLessThanOrEqual(36);
     expect(long.endsWith("projects/FieldCam")).toBe(true);
   });

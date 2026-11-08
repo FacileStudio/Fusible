@@ -7,6 +7,19 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-11-08
+
+### Added
+
+- Site: Bulle link and animated blob avatar in the landing page agents section and interactive demo.
+
+### Fixed
+
+- Desktop: shell bundle identifier moves from dev.kono to studio.facile.fusible, matching mobile.
+- License: copyright updated to Facile Studio.
+- Site: trace rendering in board demos terminates at pad edges with rounded corners and highlights hero code syntax.
+- Site: demo tiles, rules length and icon alignments.
+
 ## [1.1.0] - 2026-11-08
 
 ### Added
@@ -226,7 +239,7 @@ The exit codes, the manifest and every existing command keep working.
 
 ### Added
 
-- The repository is a GitHub Action (`uses: KonoLabs/Fusible@vX.Y.Z`). It installs a release binary, sets up bun, runs `fusible check`, and fails the job when the fuse blows. Inputs: `target`, `version`, `working-directory`, `install-deps`. The `fuse` output is `intact`, `blown`, or `error`.
+- The repository is a GitHub Action (`uses: FacileStudio/Fusible@vX.Y.Z`). It installs a release binary, sets up bun, runs `fusible check`, and fails the job when the fuse blows. Inputs: `target`, `version`, `working-directory`, `install-deps`. The `fuse` output is `intact`, `blown`, or `error`.
 - `assembly:` in `fusible.yml` places boards and bodies in one frame with `at` (mm) and `rotate` (degrees around X, then Y, then Z). `fusible assembly` (alias `asm`) writes `dist/assembly.glb` and/or `dist/assembly.step`, one named part per board and body. A body follows the board it is modeled on. It is fuse-gated, and it fails closed on a part that is neither a board nor a body, a body with no board and no `at`, and a board without a `.tsx` entry.
 
 ## [0.16.0] - 2026-10-24
