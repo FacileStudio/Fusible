@@ -27,7 +27,7 @@
   });
 </script>
 
-<div class="relative h-[60dvh] overflow-hidden rounded-3xl bg-fc-surface">
+<div class="relative h-[60dvh] overflow-hidden rounded-fc-lg bg-fc-surface">
   <div bind:this={target} class="absolute inset-0"></div>
   {#if phase !== "ready"}
     <div class="absolute inset-0 flex items-center justify-center gap-2 text-fc-fg-muted">

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { page } from "$app/state";
-  import { EmptyState } from "@facile/muse";
+  import { EmptyState, Tabs } from "@facile/muse";
   import { convertCircuitJsonToPcbSvg, convertCircuitJsonToSchematicSvg } from "circuit-to-svg";
   import FusePill from "../../../components/FusePill.svelte";
   import Viewer3D from "../../../components/Viewer3D.svelte";
@@ -63,24 +63,10 @@
     <h1 class="truncate text-fc-2xl font-semibold">{board}</h1>
     {#if payload}<FusePill blown={payload.fuse_blown} />{/if}
   </div>
-  <div class="inline-flex gap-1 self-start rounded-full bg-fc-surface p-1" role="group">
-    {#each names as name (name)}
-      <button
-        class="min-h-11 rounded-full px-4 text-fc-sm {board === name ? 'bg-fc-accent text-fc-accent-fg' : 'text-fc-fg-muted'}"
-        aria-pressed={board === name}
-        onclick={() => open(name)}>{name}</button
-      >
-    {/each}
-  </div>
-  <div class="inline-flex gap-1 self-start rounded-full bg-fc-surface p-1" role="group">
-    {#each views as v (v.id)}
-      <button
-        class="min-h-11 rounded-full px-4 text-fc-sm {view === v.id ? 'bg-fc-accent text-fc-accent-fg' : 'text-fc-fg-muted'}"
-        aria-pressed={view === v.id}
-        onclick={() => (view = v.id)}>{t(v.label)}</button
-      >
-    {/each}
-  </div>
+  {#if names.length > 1}
+    <Tabs items={names.map((name) => ({ id: name, label: name }))} value={board} label={t("navBoards")} onChange={open} />
+  {/if}
+  <Tabs items={views.map((v) => ({ id: v.id, label: t(v.label) }))} value={view} label={t("navBoards")} onChange={(id) => (view = id as typeof view)} />
   {#if view === "3d" && payload?.circuit_json}
     {#key board}
       <Viewer3D load={() => circuitToGlb(payload!.circuit_json)} />

@@ -30,14 +30,14 @@
   {/if}
   {#each summary?.bodies ?? [] as body (body.name)}
     <button
-      class="flex min-h-14 items-center justify-between gap-3 rounded-full px-7 py-5 text-left {picked === body.name
+      class="flex min-h-14 items-center justify-between gap-3 rounded-fc-lg px-5 py-4 text-left {picked === body.name
         ? 'bg-fc-accent text-fc-accent-fg'
         : 'bg-fc-surface'}"
       aria-pressed={picked === body.name}
       onclick={() => (picked = body.name)}
     >
       <span class="truncate text-fc-md font-medium">{body.name}</span>
-      <Badge class="rounded-full">{body.kind}</Badge>
+      <Badge>{body.kind}</Badge>
     </button>
   {/each}
   {#if picked}

@@ -34,7 +34,7 @@
   <h1 class="text-fc-2xl font-semibold">{t("navBom")}</h1>
   {#if bom}
     {#each bom.report.lines as line (line.id)}
-      <div class="flex items-center justify-between gap-3 rounded-3xl bg-fc-surface p-5">
+      <div class="flex items-center justify-between gap-3 rounded-fc-lg bg-fc-surface p-5">
         <div class="min-w-0">
           <span class="block truncate text-fc-md font-medium">{line.value ?? line.description}</span>
           <span class="block truncate text-fc-xs text-fc-fg-muted">
@@ -46,7 +46,7 @@
     {:else}
       <EmptyState title={t("bomEmpty")} bare />
     {/each}
-    <div class="flex items-center justify-between rounded-3xl bg-fc-component p-5 text-fc-lg font-semibold">
+    <div class="flex items-center justify-between rounded-fc-lg bg-fc-component p-5 text-fc-lg font-semibold">
       <span>{t("total")}</span>
       <span>{money(bom.report.totals.total, bom.report.currency)}</span>
     </div>

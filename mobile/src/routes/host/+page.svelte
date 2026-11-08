@@ -34,7 +34,7 @@
   {#each summary?.boards ?? [] as board (board.name)}
     <a
       href={`/host/board?id=${encodeURIComponent(id)}&board=${encodeURIComponent(board.name)}`}
-      class="flex flex-col gap-3 rounded-[2rem] bg-fc-surface px-7 py-5 focus-visible:outline-2 focus-visible:outline-fc-ring"
+      class="flex flex-col gap-3 rounded-fc-lg bg-fc-surface px-7 py-5 focus-visible:outline-2 focus-visible:outline-fc-ring"
     >
       <span class="flex items-center justify-between gap-2">
         <span class="truncate text-fc-lg font-semibold">{board.name}</span>
@@ -47,20 +47,20 @@
   {/each}
   {#if summary}
     <div class="grid grid-cols-2 gap-3">
-      <div class="flex flex-col gap-1 rounded-3xl bg-fc-surface p-5">
+      <div class="flex flex-col gap-1 rounded-fc-lg bg-fc-surface p-5">
         <Icon icon={ICON.bom} size={18} class="text-fc-fg-muted" />
         <span class="text-fc-xs text-fc-fg-muted">{t("total")}</span>
         <span class="text-fc-lg font-semibold">
           {summary.bom_total ? money(summary.bom_total.amount, summary.bom_total.currency) : "-"}
         </span>
       </div>
-      <div class="flex flex-col gap-1 rounded-3xl bg-fc-surface p-5">
+      <div class="flex flex-col gap-1 rounded-fc-lg bg-fc-surface p-5">
         <Icon icon={ICON.bodies} size={18} class="text-fc-fg-muted" />
         <span class="text-fc-xs text-fc-fg-muted">{t("bodiesCount", { count: summary.bodies.length })}</span>
         <span class="text-fc-lg font-semibold">{summary.bodies.length}</span>
       </div>
     </div>
-    <div class="rounded-3xl bg-fc-surface p-5">
+    <div class="rounded-fc-lg bg-fc-surface p-5">
       <span class="block text-fc-xs text-fc-fg-muted">{t("lastRun")}</span>
       <span class="text-fc-md font-medium">
         {summary.last_run ? `${summary.last_run.label ?? ""} ${summary.last_run.status ?? ""}` : t("noRun")}

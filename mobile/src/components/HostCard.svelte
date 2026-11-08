@@ -8,11 +8,11 @@
   const t = useT();
 </script>
 
-<div class="relative flex items-center gap-3 rounded-full bg-fc-surface px-7 py-4">
+<div class="relative flex items-center gap-3 rounded-fc-lg bg-fc-surface px-5 py-4">
   <Icon icon={ICON.logo} size={32} class="shrink-0 text-fc-fg-muted" />
   <a
     href={`/host?id=${encodeURIComponent(host.id)}`}
-    class="min-w-0 flex-1 rounded-full focus-visible:outline-2 focus-visible:outline-fc-ring"
+    class="min-w-0 flex-1 rounded-fc-pill focus-visible:outline-2 focus-visible:outline-fc-ring"
   >
     <span class="block truncate text-fc-md font-semibold">{host.name}</span>
     <span class="block truncate text-fc-xs text-fc-fg-muted">

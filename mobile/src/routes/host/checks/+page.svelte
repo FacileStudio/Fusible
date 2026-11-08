@@ -42,9 +42,9 @@
 <main class="mx-auto flex max-w-xl flex-col gap-4 px-4 pt-8 pb-nav">
   <h1 class="text-fc-2xl font-semibold">{t("navChecks")}</h1>
   {#each findings as f, i (i)}
-    <article class="flex flex-col gap-2 rounded-3xl bg-fc-surface p-5">
+    <article class="flex flex-col gap-2 rounded-fc-lg bg-fc-surface p-5">
       <div class="flex flex-wrap items-center gap-2">
-        <Badge tone={f.severity === "error" ? "danger" : "warning"} class="rounded-full">{f.rule}</Badge>
+        <Badge tone={f.severity === "error" ? "danger" : "warning"} class="rounded-fc-pill">{f.rule}</Badge>
         <span class="text-fc-xs text-fc-fg-muted">{f.board}</span>
       </div>
       <p class="text-fc-md">{f.message}</p>
@@ -54,13 +54,13 @@
           href={f.source_url}
           target="_blank"
           rel="noopener noreferrer"
-          class="inline-flex min-h-11 items-center gap-2 self-start rounded-full bg-fc-component px-4 text-fc-sm focus-visible:outline-2 focus-visible:outline-fc-ring"
+          class="inline-flex min-h-11 items-center gap-2 self-start rounded-fc-pill bg-fc-component px-4 text-fc-sm focus-visible:outline-2 focus-visible:outline-fc-ring"
         >
           <Icon icon={ICON.link} size={14} />
           {f.standard}
         </a>
       {:else if f.standard}
-        <span class="self-start rounded-full bg-fc-component px-4 py-2 text-fc-sm">{f.standard}</span>
+        <span class="self-start rounded-fc-pill bg-fc-component px-4 py-2 text-fc-sm">{f.standard}</span>
       {/if}
     </article>
   {:else}

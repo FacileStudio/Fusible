@@ -7,7 +7,9 @@
   const t = useT();
 </script>
 
-<Badge tone={blown ? "danger" : "success"} class="gap-1.5 rounded-full px-3 py-1">
-  <Icon icon={blown ? ICON.warn : ICON.ok} size={14} />
-  {blown ? t("fuseBlown") : t("fuseIntact")}
+<Badge tone={blown ? "danger" : "success"}>
+  <span class="inline-flex items-center gap-1.5">
+    <Icon icon={blown ? ICON.warn : ICON.ok} size={14} />
+    {blown ? t("fuseBlown") : t("fuseIntact")}
+  </span>
 </Badge>

@@ -45,7 +45,7 @@
 </script>
 
 <div
-  class="h-[60dvh] touch-none overflow-hidden rounded-3xl bg-fc-surface"
+  class="aspect-[4/3] max-h-[60dvh] touch-none overflow-hidden rounded-fc-lg bg-fc-surface"
   role="img"
   aria-label="Board view"
   onpointerdown={down}

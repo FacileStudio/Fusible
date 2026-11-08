@@ -31,7 +31,7 @@
 
 <section class="flex min-h-dvh flex-col justify-between gap-8 px-6 py-10">
   <div bind:this={panel} class="flex flex-1 flex-col items-center justify-center gap-5 text-center">
-    <div class="rounded-full bg-fc-surface p-6 text-fc-fg">
+    <div class="rounded-fc-pill bg-fc-surface p-6 text-fc-fg">
       <Icon icon={step.icon} size={step.size} />
     </div>
     <h1 class="text-fc-2xl font-semibold">{t(step.title)}</h1>
