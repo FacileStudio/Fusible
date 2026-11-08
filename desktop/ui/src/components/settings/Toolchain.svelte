@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Alert, Badge, Icon, SettingsRow, SettingsSection } from "@facile/muse";
+  import { Alert, Badge, Icon, SettingsRow, SettingsSection, Spinner } from "@facile/muse";
   import { api, message } from "../../lib/api";
   import type { ToolchainStatus } from "../../lib/types";
   import CodeBlock from "../CodeBlock.svelte";
@@ -23,7 +23,7 @@
   {#if error}
     <Alert tone="danger">{error}</Alert>
   {:else if !status}
-    <span role="status" aria-label="Loading" class="inline-flex"><Icon icon="solar:refresh-linear" size={24} class="motion-safe:animate-spin" /></span>
+    <Spinner />
   {:else}
     {#each rows as row (row.name)}
       <SettingsRow label={row.name} description={row.tool?.path ?? "Not found"}>

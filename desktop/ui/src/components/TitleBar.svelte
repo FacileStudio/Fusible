@@ -12,10 +12,6 @@
 </script>
 
 <header data-tauri-drag-region class="flex h-11 shrink-0 select-none items-center gap-2 px-3 {mac ? 'pl-24' : ''}">
-  <span class="pointer-events-none flex items-center gap-2">
-    <Icon icon="solar:cpu-bolt-bold-duotone" size={20} />
-    <span class="text-fc-sm font-semibold">Fusible</span>
-  </span>
   <span data-tauri-drag-region class="flex-1 self-stretch"></span>
   {#if !mac}
     <div role="group" aria-label="Window controls" class="flex items-center gap-1">

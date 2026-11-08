@@ -10,6 +10,8 @@ export const NAMES = [
   "close-square-linear",
   "code-square-bold-duotone",
   "copy-linear",
+  "cpu-bolt-linear",
+  "smartphone-linear",
   "cpu-bolt-bold-duotone",
   "download-minimalistic-linear",
   "folder-open-bold-duotone",

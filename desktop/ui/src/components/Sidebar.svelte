@@ -18,7 +18,7 @@
 
 <aside class="flex w-60 shrink-0 flex-col gap-2">
   <SideBar title="Fusible" icon="solar:cpu-bolt-bold-duotone" showCollapse={false} {pages} class="min-h-0 flex-1" />
-  <div class="flex items-center justify-between gap-2 rounded-3xl bg-fc-component px-4 py-3">
+  <div class="flex items-center justify-between gap-2 rounded-fc-lg bg-fc-component px-4 py-3">
     <span class="text-fc-xs text-fc-fg-muted">{version ? `v${version}` : ""}</span>
     <UpdateBadge />
   </div>

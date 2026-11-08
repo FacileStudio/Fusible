@@ -13,11 +13,3 @@ body {
   color: var(--color-fc-fg);
   overflow: hidden;
 }
-
-input[role="switch"] + span {
-  border: 0;
-}
-
-input[role="switch"]:not(:checked) + span {
-  background-color: var(--color-fc-component);
-}

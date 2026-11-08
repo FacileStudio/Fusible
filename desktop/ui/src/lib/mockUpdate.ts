@@ -6,7 +6,7 @@ const listeners: ((progress: UpdateProgress) => void)[] = [];
 
 const AVAILABLE: UpdateCheck = {
   status: "available",
-  version: "0.19.0",
+  version: "1.2.0",
   notes: "- Self-update from the Projects page.",
   date: "2026-11-01T09:00:00Z",
 };

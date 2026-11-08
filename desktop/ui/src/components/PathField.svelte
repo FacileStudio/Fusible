@@ -14,6 +14,6 @@
 </script>
 
 <div class="flex items-center gap-2">
-  <Input bind:value aria-label={label} spellcheck={false} class="border-0 bg-fc-surface" onchange={() => onPick?.(value.trim())} />
-  <Button variant="ghost" icon="solar:folder-open-linear" onclick={browse}>Browse</Button>
+  <Input bind:value aria-label={label} spellcheck={false} onchange={() => onPick?.(value.trim())} />
+  <Button variant="secondary" icon="solar:folder-open-linear" onclick={browse}>Browse</Button>
 </div>

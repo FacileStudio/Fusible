@@ -31,7 +31,7 @@
 </script>
 
 <div class="flex min-h-0 flex-1 items-center justify-center p-6">
-  <div class="flex w-full max-w-xl flex-col gap-8 overflow-hidden rounded-3xl bg-fc-component p-10">
+  <div class="flex w-full max-w-xl flex-col gap-8 overflow-hidden rounded-fc-lg bg-fc-component p-10">
     <div bind:this={panel} class="flex flex-col gap-6" aria-live="polite">
       <Step />
     </div>

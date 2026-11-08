@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Alert, Tabs } from "@facile/muse";
+  import { Alert, SettingsLayout } from "@facile/muse";
   import { nav, type SettingsTab } from "../lib/nav.svelte";
   import { settings } from "../lib/settings.svelte";
   import General from "./settings/General.svelte";
@@ -7,30 +7,30 @@
   import Toolchain from "./settings/Toolchain.svelte";
   import Updates from "./settings/Updates.svelte";
 
-  const items = [
-    { id: "general", label: "General" },
-    { id: "toolchain", label: "Toolchain" },
-    { id: "updates", label: "Updates" },
-    { id: "phone", label: "Phone" },
+  const sections: { id: SettingsTab; label: string; icon: string; href: string }[] = [
+    { id: "general", label: "General", icon: "solar:settings-linear", href: "#/settings/general" },
+    { id: "toolchain", label: "Toolchain", icon: "solar:cpu-bolt-linear", href: "#/settings/toolchain" },
+    { id: "updates", label: "Updates", icon: "solar:refresh-linear", href: "#/settings/updates" },
+    { id: "phone", label: "Phone", icon: "solar:smartphone-linear", href: "#/settings/phone" },
   ];
 </script>
 
-<section class="mx-auto flex max-w-3xl flex-col gap-6">
-  <header class="flex items-center justify-between gap-4">
-    <h1 class="text-fc-2xl font-semibold">Settings</h1>
-    <p class="text-fc-sm text-fc-fg-muted" role="status" aria-live="polite">{settings.saved ? "Saved" : ""}</p>
-  </header>
-  <Tabs {items} value={nav.tab} label="Settings sections" onChange={(id) => (nav.tab = id as SettingsTab)} />
-  {#if settings.error}<Alert tone="danger">{settings.error}</Alert>{/if}
-  {#if settings.value}
-    {#if nav.tab === "general"}
-      <General />
-    {:else if nav.tab === "toolchain"}
-      <Toolchain />
-    {:else if nav.tab === "updates"}
-      <Updates />
-    {:else}
-      <Phone />
-    {/if}
-  {/if}
-</section>
+<SettingsLayout {sections} active={nav.tab} backHref="#/settings" title="Settings" ordered={false} class="mx-auto max-w-4xl">
+  {#snippet children(section)}
+    <div class="flex flex-col gap-4">
+      {#if settings.error}<Alert tone="danger">{settings.error}</Alert>{/if}
+      <p class="sr-only" role="status" aria-live="polite">{settings.saved ? "Saved" : ""}</p>
+      {#if settings.value}
+        {#if section === "general"}
+          <General />
+        {:else if section === "toolchain"}
+          <Toolchain />
+        {:else if section === "updates"}
+          <Updates />
+        {:else}
+          <Phone />
+        {/if}
+      {/if}
+    </div>
+  {/snippet}
+</SettingsLayout>

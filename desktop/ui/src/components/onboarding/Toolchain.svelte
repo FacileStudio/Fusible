@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Icon } from "@facile/muse";
+  import { Icon, Spinner } from "@facile/muse";
   import { api } from "../../lib/api";
   import type { ToolchainStatus } from "../../lib/types";
   import CodeBlock from "../CodeBlock.svelte";
@@ -22,11 +22,11 @@
   <p class="text-fc-md text-fc-fg-muted">Fusible compiles boards and firmware with these tools.</p>
 </div>
 {#if !status}
-  <span role="status" aria-label="Loading" class="inline-flex"><Icon icon="solar:refresh-linear" size={24} class="motion-safe:animate-spin" /></span>
+  <Spinner />
 {:else}
   <ul class="flex flex-col gap-2">
     {#each rows as row (row.name)}
-      <li class="flex items-center gap-3 rounded-2xl bg-fc-surface px-4 py-3">
+      <li class="flex items-center gap-3 rounded-fc-lg bg-fc-surface px-4 py-3">
         <Icon
           icon={row.tool ? "solar:check-circle-linear" : "solar:close-circle-linear"}
           size={20}

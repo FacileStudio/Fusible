@@ -53,7 +53,7 @@ export function toolchain(): ToolchainStatus {
     node: { path: "/usr/bin/node", version: "22.11.0" },
     tsci: null,
     bundled_bun: "1.2.19",
-    fusible_version: "0.14.3",
+    fusible_version: "1.1.0",
   };
 }
 

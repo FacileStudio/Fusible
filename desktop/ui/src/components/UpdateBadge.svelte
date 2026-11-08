@@ -9,7 +9,7 @@
 {#if visible}
   <button
     type="button"
-    class="rounded-full bg-fc-accent px-3 py-1 text-fc-xs font-medium text-fc-accent-fg hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fc-ring"
+    class="rounded-fc-pill bg-fc-accent px-3 py-1 text-fc-xs font-medium text-fc-accent-fg hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fc-ring"
     onclick={() => nav.go("settings", "updates")}
   >
     {label}

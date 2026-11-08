@@ -52,7 +52,7 @@
   <form class="flex flex-col gap-4" onsubmit={(e) => { e.preventDefault(); if (valid && !busy) void create(); }}>
     <Field label="Name" error={nameError ?? undefined}>
       {#snippet children()}
-        <Input bind:value={name} placeholder="My board" maxlength={120} autocomplete="off" class="border-0 bg-fc-surface" oninput={() => (touched = true)} />
+        <Input bind:value={name} placeholder="My board" maxlength={120} autocomplete="off" oninput={() => (touched = true)} />
       {/snippet}
     </Field>
     <Field label="Location">
@@ -63,7 +63,7 @@
     <Switch bind:checked={createFolder} label="Create a folder named after the project" />
     <Field label="Currency">
       {#snippet children()}
-        <Select bind:value={currency} class="border-0 bg-fc-surface">
+        <Select bind:value={currency}>
           {#each currencyChoices(currency) as code (code)}<option value={code}>{code}</option>{/each}
         </Select>
       {/snippet}

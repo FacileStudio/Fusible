@@ -71,7 +71,7 @@ const handlers: Record<string, (args: Args) => Promise<unknown>> = {
   "plugin:window|close": () => delay(undefined),
   "plugin:window|minimize": () => delay(undefined),
   "plugin:window|toggle_maximize": () => delay(undefined),
-  "plugin:app|version": () => delay("0.14.3"),
+  "plugin:app|version": () => delay("1.1.0"),
   "plugin:dialog|open": () => delay(query.get("pick") ?? "/home/yann/Code/Scratch"),
 };
 

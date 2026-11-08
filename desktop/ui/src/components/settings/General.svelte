@@ -1,11 +1,10 @@
 <script lang="ts">
-  import { Field, Input, Select, SettingsRow, SettingsSection, Switch } from "@facile/muse";
+  import { Field, Input, RadioGroup, Select, SettingsRow, SettingsSection, Switch } from "@facile/muse";
   import { currencyChoices } from "../../lib/labels";
   import { settings } from "../../lib/settings.svelte";
   import type { Theme } from "../../lib/types";
   import { validatePort } from "../../lib/validate";
   import PathField from "../PathField.svelte";
-  import Segmented from "../Segmented.svelte";
 
   const s = $derived(settings.value!);
   let dir = $state(settings.value?.projects_dir ?? "");
@@ -23,14 +22,14 @@
     <PathField bind:value={dir} title="Choose the projects folder" label="Projects folder" onPick={(p) => settings.save({ projects_dir: p })} />
   </SettingsRow>
   <SettingsRow label="Default currency" description="Used for the BOM of new projects.">
-    <Select value={s.default_currency} class="w-32 border-0 bg-fc-surface" onchange={(e) => settings.save({ default_currency: e.currentTarget.value })}>
+    <Select value={s.default_currency} class="w-32" onchange={(e) => settings.save({ default_currency: e.currentTarget.value })}>
       {#each currencyChoices(s.default_currency) as code (code)}<option value={code}>{code}</option>{/each}
     </Select>
   </SettingsRow>
   <SettingsRow label="Studio port" description="The local port the studio listens on.">
     <Field error={portError ?? undefined}>
       {#snippet children()}
-        <Input type="number" bind:value={port} min={1024} max={65535} class="w-32 border-0 bg-fc-surface" onchange={() => { if (!portError) void settings.save({ port }); }} />
+        <Input type="number" bind:value={port} min={1024} max={65535} class="w-32" onchange={() => { if (!portError) void settings.save({ port }); }} />
       {/snippet}
     </Field>
   </SettingsRow>
@@ -38,6 +37,13 @@
     <Switch checked={s.open_last_project} aria-label="Open the last project on launch" onchange={(e) => settings.save({ open_last_project: e.currentTarget.checked })} />
   </SettingsRow>
   <SettingsRow label="Theme">
-    <Segmented options={themes} value={s.theme} label="Theme" onChange={(theme) => settings.save({ theme })} />
+    <RadioGroup
+      options={themes}
+      value={s.theme}
+      name="theme"
+      orientation="horizontal"
+      aria-label="Theme"
+      onchange={(e) => settings.save({ theme: (e.target as HTMLInputElement).value as Theme })}
+    />
   </SettingsRow>
 </SettingsSection>

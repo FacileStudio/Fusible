@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Alert, Button, SettingsRow, SettingsSection, Switch } from "@facile/muse";
+  import { Alert, Button, Progress, SettingsRow, SettingsSection, Switch } from "@facile/muse";
   import { api } from "../../lib/api";
   import { settings } from "../../lib/settings.svelte";
   import { checkedLabel, releaseUrl } from "../../lib/updateText";
@@ -28,9 +28,7 @@
   <SettingsRow label={status || "Check for updates"} stacked>
     <div class="flex flex-col gap-3">
     {#if updater.state === "downloading"}
-      <div class="h-2 w-full overflow-hidden rounded-full bg-fc-surface" role="progressbar" aria-label="Download progress" aria-valuenow={updater.percent ?? undefined} aria-valuemin={0} aria-valuemax={100}>
-        <div class="h-full rounded-full bg-fc-accent transition-[width]" style:width="{updater.percent ?? 0}%"></div>
-      </div>
+      <Progress value={updater.percent} label="Download progress" />
     {/if}
     {#if updater.state === "error"}
       <Alert tone="danger">
@@ -43,10 +41,10 @@
       </Alert>
     {/if}
     {#if updater.notes && (updater.state === "available" || updater.state === "ready")}
-      <pre class="whitespace-pre-wrap rounded-2xl bg-fc-surface p-3 text-fc-xs">{updater.notes}</pre>
+      <pre class="whitespace-pre-wrap rounded-fc-lg bg-fc-surface p-3 text-fc-xs">{updater.notes}</pre>
     {/if}
     <div class="flex flex-wrap gap-2">
-      <Button variant="ghost" icon="solar:refresh-linear" disabled={busy} onclick={() => updater.checkNow(false)}>Check now</Button>
+      <Button variant="secondary" icon="solar:refresh-linear" disabled={busy} onclick={() => updater.checkNow(false)}>Check now</Button>
       {#if updater.state === "available"}
         <Button icon="solar:download-minimalistic-linear" onclick={updater.installNow}>Download and install</Button>
       {/if}

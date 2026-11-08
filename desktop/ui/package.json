@@ -1,6 +1,6 @@
 {
   "name": "fusible-desktop-ui",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -22,7 +22,7 @@
     "vite": "^7"
   },
   "dependencies": {
-    "@facile/muse": "github:FacileStudio/muse#v0.10.0",
+    "@facile/muse": "github:FacileStudio/muse#v0.16.1",
     "gsap": "^3.13"
   }
 }

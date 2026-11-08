@@ -13,6 +13,6 @@
 >
   <div class="flex gap-2">
     <Button icon="solar:add-circle-linear" onclick={onNew}>New project</Button>
-    <Button variant="ghost" icon="solar:folder-open-linear" onclick={onOpen}>Open folder</Button>
+    <Button variant="secondary" icon="solar:folder-open-linear" onclick={onOpen}>Open folder</Button>
   </div>
 </EmptyState>

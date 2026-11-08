@@ -17,7 +17,7 @@
 </div>
 <ul class="flex flex-col gap-2">
   {#each features as feature (feature.icon)}
-    <li class="flex items-center gap-3 rounded-2xl bg-fc-surface px-4 py-3">
+    <li class="flex items-center gap-3 rounded-fc-lg bg-fc-surface px-4 py-3">
       <Icon icon={feature.icon} size={24} />
       <span class="text-fc-sm">{feature.text}</span>
     </li>

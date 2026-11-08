@@ -15,7 +15,7 @@
   ].filter((c) => c.n > 0));
 </script>
 
-<article class="flex items-center gap-4 rounded-3xl bg-fc-surface p-5">
+<article class="flex items-center gap-4 rounded-fc-lg bg-fc-surface p-5">
   <div class="flex min-w-0 flex-1 flex-col gap-1.5">
     <h2 class="truncate text-fc-md font-semibold">{project.name}</h2>
     <p class="truncate text-fc-xs text-fc-fg-muted" title={project.path}>{shortenPath(project.path, 64)}</p>
@@ -38,7 +38,7 @@
     <IconButton variant="ghost" aria-label="Reveal {project.name} in the file manager" onclick={() => projects.reveal(project.path)}>
       <Icon icon="solar:folder-open-linear" />
     </IconButton>
-    <IconButton variant="danger" aria-label="Forget {project.name}" onclick={() => projects.forget(project.path)}>
+    <IconButton variant="ghost-danger" aria-label="Forget {project.name}" onclick={() => projects.forget(project.path)}>
       <Icon icon="solar:trash-bin-2-linear" />
     </IconButton>
   </div>

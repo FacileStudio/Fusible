@@ -21,7 +21,7 @@
   <header class="flex items-center justify-between gap-4">
     <h1 class="text-fc-2xl font-semibold">Projects</h1>
     <div class="flex items-center gap-2">
-      <Button variant="ghost" icon="solar:folder-open-linear" onclick={openFolder}>Open folder</Button>
+      <Button variant="secondary" icon="solar:folder-open-linear" onclick={openFolder}>Open folder</Button>
       <Button icon="solar:add-circle-linear" onclick={startNew}>New project</Button>
     </div>
   </header>
@@ -41,7 +41,7 @@
     <label class="relative block">
       <span class="sr-only">Filter projects</span>
       <Icon icon="solar:magnifer-linear" class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-fc-fg-muted" />
-      <Input bind:value={projects.query} placeholder="Filter by name or path" class="rounded-full border-0 bg-fc-surface pl-11" />
+      <Input bind:value={projects.query} placeholder="Filter by name or path" class="pl-11" />
     </label>
     <div class="flex flex-col gap-3">
       {#each projects.visible as project (project.path)}
