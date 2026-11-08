@@ -76,7 +76,7 @@
 
 {#snippet code()}
   <span class="hd-file">hardware/index.tsx</span>
-  <code>&lt;trace net="VBUS" width="<span bind:this={value} class="hd-value">{width}mm</span>" /&gt;</code>
+  <code><span class="text-fc-fg-muted">&lt;</span><span class="text-fc-info font-medium">trace</span> <span class="text-fc-admin font-medium">net</span><span class="text-fc-fg-muted">=</span><span class="text-fc-success">"VBUS"</span> <span class="text-fc-admin font-medium">width</span><span class="text-fc-fg-muted">=</span><span class="text-fc-success">"<span bind:this={value} class="hd-value">{width}mm</span>"</span> <span class="text-fc-fg-muted">/&gt;</span></code>
 {/snippet}
 
 {#snippet panel()}
@@ -231,6 +231,7 @@
     padding: 0 2px;
     border-radius: 4px;
     background: var(--color-fc-field);
+    color: var(--color-fc-success);
   }
   .hd-side {
     display: flex;

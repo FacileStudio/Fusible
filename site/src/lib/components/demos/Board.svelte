@@ -2,12 +2,12 @@
   let { blown, wide }: { blown: boolean; wide: boolean } = $props();
 
   const TRACES = [
-    "M212 120 H262 V92 H300",
-    "M212 150 H250 V176 H300",
-    "M212 180 H238 V214 H296",
-    "M150 196 V226 H114",
+    "M212 120 H254 Q262 120 262 112 V100 Q262 92 270 92 H300",
+    "M212 150 H242 Q250 150 250 158 V168 Q250 176 258 176 H300",
+    "M212 180 H230 Q238 180 238 188 V206 Q238 214 246 214 H296",
+    "M150 196 V218 Q150 226 142 226 H114",
     "M120 150 H78",
-    "M180 96 V62 H262",
+    "M180 96 V70 Q180 62 188 62 H262",
   ];
   const PADS = [
     [300, 86], [300, 170], [296, 208], [262, 56], [100, 220], [64, 144], [330, 120], [330, 150],
@@ -17,7 +17,7 @@
 <svg viewBox="0 0 400 280" class="board" aria-hidden="true">
   <rect x="24" y="20" width="352" height="240" rx="14" class="plate" />
   {#each TRACES as d (d)}<path {d} class="trace" />{/each}
-  <path d="M64 134 H92 V116 H120" class="vbus" class:blown class:wide />
+  <path d="M64 134 H86 Q92 134 92 128 V122 Q92 116 98 116 H120" class="vbus" class:blown class:wide />
   {#each PADS as [x, y] (`${x}-${y}`)}
     <rect {x} {y} width="14" height="10" rx="2" class="pad-base" />
     <rect {x} {y} width="14" height="10" rx="2" class="pad" />
@@ -45,6 +45,8 @@
     stroke: var(--color-fc-fg-muted);
     stroke-opacity: 0.45;
     stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
   }
   .pad,
   .chip {
@@ -58,6 +60,8 @@
     fill: none;
     stroke: var(--color-fc-fg);
     stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
     transition: stroke 0.25s ease, stroke-width 0.5s ease;
   }
   .vbus.blown {
