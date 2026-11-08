@@ -12,6 +12,8 @@ export const ICON_NAMES = [
   "solar:download-linear",
   "solar:copy-linear",
   "solar:check-circle-linear",
+  "solar:danger-triangle-bold-duotone",
+  "solar:shield-check-bold-duotone",
   "solar:sun-linear",
   "solar:moon-linear",
   "solar:pen-new-square-linear",

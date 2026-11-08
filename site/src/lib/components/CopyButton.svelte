@@ -19,7 +19,7 @@
   type="button"
   onclick={copy}
   aria-label={label ?? content.ui.copy}
-  class="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-fc-component text-fc-fg-muted
+  class="inline-flex size-8 shrink-0 items-center justify-center rounded-fc-pill bg-fc-component text-fc-fg-muted
     transition-colors hover:text-fc-fg focus-visible:outline-2 focus-visible:outline-offset-2
     focus-visible:outline-fc-ring"
 >

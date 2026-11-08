@@ -2,6 +2,7 @@
   import type { Content } from "$lib/content/types";
   import { scrollReveal } from "$lib/motion";
   import CodeBlock from "../CodeBlock.svelte";
+  import AgentDemo from "../demos/AgentDemo.svelte";
 
   let { content }: { content: Content } = $props();
   const agents = $derived(content.agents);
@@ -11,7 +12,7 @@
   id="agents"
   aria-labelledby="agents-title"
   use:scrollReveal={{ stagger: 0.08 }}
-  class="grid grid-cols-1 gap-8 rounded-3xl bg-fc-component p-6 sm:p-10 lg:grid-cols-2 lg:items-center"
+  class="grid grid-cols-1 gap-8 rounded-fc-lg bg-fc-component p-6 sm:p-10 lg:grid-cols-2 lg:items-center"
 >
   <div data-reveal-item class="flex flex-col gap-4">
     <h2 id="agents-title" class="text-fc-xl font-semibold tracking-tight text-fc-fg sm:text-fc-2xl">
@@ -29,8 +30,9 @@
         >{i < agents.sources.length - 1 ? ", " : "."}
       {/each}
     </p>
-  </div>
-  <div data-reveal-item>
     <CodeBlock code={agents.snippet} {content} label={agents.snippetLabel} />
+  </div>
+  <div data-reveal-item class="min-w-0">
+    <AgentDemo copy={content.demos.agent} />
   </div>
 </section>

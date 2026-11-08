@@ -147,7 +147,7 @@ export default config;
   - Reference it from `AndroidManifest.xml` (`android:networkSecurityConfig="@xml/network_security_config"`).
   - In code, `lib/hosts.ts` refuses any host that isn't an RFC 1918 IPv4 address with a port. That's the real guard. Write a unit test for it.
 - Signing: copy the `signingConfigs` block from `/home/yann/Code/Facile/Sablier/apps/client/android/app/build.gradle` (env `ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`).
-- Icons: generate from `../assets/logo-mark.svg` (`bunx @capacitor/assets generate --android` with `assets/icon.png` made by `magick -background none -density 384 ../assets/logo-mark.svg -resize 1024x1024 assets/icon.png`).
+- Icons: generate from `../assets/logo-mark.svg` (`bunx @capacitor/assets generate --android --iconBackgroundColor '#000000'` from `assets/icon-only.png`, `icon-foreground.png` and `icon-background.png`: the white glyph of `desktop/src-tauri/icons/icon.svg` on black).
 
 ### 2.2 Code
 

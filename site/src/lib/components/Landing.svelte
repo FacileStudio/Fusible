@@ -5,7 +5,7 @@
   import Agents from "./sections/Agents.svelte";
   import FuseLoop from "./sections/FuseLoop.svelte";
   import Hero from "./sections/Hero.svelte";
-  import Pillars from "./sections/Pillars.svelte";
+  import Demos from "./sections/Demos.svelte";
   import Rules from "./sections/Rules.svelte";
   import ShotSection from "./sections/ShotSection.svelte";
   import Suite from "./sections/Suite.svelte";
@@ -17,9 +17,8 @@
 <SiteShell {content}>
   <Hero {content} />
   <FuseLoop {content} />
-  <Pillars {content} />
+  <Demos {content} />
   <ShotSection id="board3d" data={content.board3d} {content} src="/screenshots/studio-3d.png" width={1600} height={1000} />
-  <ShotSection id="checks" data={content.checks} {content} src="/screenshots/studio-checks.png" width={1600} height={1000} reverse />
   <Rules {content} />
   <Agents {content} />
   <ShotSection id="bodies" data={content.bodies} {content} src="/screenshots/studio-bodies.png" width={1600} height={1000} />

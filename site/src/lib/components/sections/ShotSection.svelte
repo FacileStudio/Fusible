@@ -45,8 +45,8 @@
         <img {src} alt={data.alt} {width} {height} loading="lazy" class="h-auto w-full rounded-[1.75rem]" />
       </div>
     {:else}
-      <div class="w-full rounded-3xl bg-fc-surface p-2">
-        <img {src} alt={data.alt} {width} {height} loading="lazy" class="h-auto w-full rounded-[1.25rem]" />
+      <div class="w-full rounded-fc-lg bg-fc-surface p-2">
+        <img {src} alt={data.alt} {width} {height} loading="lazy" class="h-auto w-full rounded-fc-xs" />
       </div>
     {/if}
   </div>

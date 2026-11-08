@@ -14,13 +14,13 @@
     </h2>
     <p class="text-fc-md text-fc-fg-muted">{content.rules.intro}</p>
   </div>
-  <ul class="flex flex-col gap-2 rounded-3xl bg-fc-component p-3 sm:p-4">
+  <ul class="flex flex-col gap-2 rounded-fc-lg bg-fc-component p-3 sm:p-4">
     {#each content.rules.items as rule (rule.id)}
       <li
         data-reveal-item
-        class="grid grid-cols-1 gap-2 rounded-2xl bg-fc-surface px-5 py-4 md:grid-cols-[14rem_11rem_1fr] md:items-center md:gap-4"
+        class="grid grid-cols-1 gap-2 rounded-fc-lg bg-fc-surface px-5 py-4 md:grid-cols-[14rem_11rem_1fr] md:items-center md:gap-4"
       >
-        <code class="font-mono text-fc-sm font-medium text-fc-fg">{rule.id}</code>
+        <code class="font-fc-mono text-fc-sm font-medium text-fc-fg">{rule.id}</code>
         <div>
           {#if rule.standard}
             <Pill href={rule.standard.href}>{rule.standard.label}</Pill>

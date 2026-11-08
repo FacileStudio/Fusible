@@ -17,7 +17,7 @@
     aria-multiline="true"
     aria-label={label ?? content.ui.code}
   >
-    <pre class="font-mono text-fc-xs leading-relaxed text-fc-fg"><code>{code}</code></pre>
+    <pre class="font-fc-mono text-fc-xs leading-relaxed text-fc-fg"><code>{code}</code></pre>
   </div>
   <div class="absolute right-2 top-2"><CopyButton text={code} {content} /></div>
 </div>

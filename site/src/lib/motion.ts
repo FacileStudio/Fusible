@@ -34,21 +34,6 @@ export function scrollReveal(node: HTMLElement, opts: { delay?: number; stagger?
   };
 }
 
-/**
- * Slides the active navigation pill under the target link.
- */
-export function moveNavPill(pill: HTMLElement | null, target: HTMLElement | undefined, animate = true) {
-  if (!pill || !target) {
-    if (pill) gsap.set(pill, { autoAlpha: 0 });
-    return;
-  }
-  const to = { x: target.offsetLeft, width: target.offsetWidth, autoAlpha: 1 };
-  if (!animate || prefersReducedMotion()) {
-    gsap.set(pill, to);
-    return;
-  }
-  gsap.to(pill, { ...to, duration: 0.32, ease: "power3.inOut", overwrite: "auto" });
-}
 
 /**
  * Smoothly scrolls to a section id on the current page.
@@ -77,23 +62,3 @@ function detectActiveSection(ids: string[]): string {
   return current;
 }
 
-/**
- * Reports scroll state and the active section while the window scrolls or resizes.
- */
-export function watchActiveSection(
-  ids: string[],
-  onActive: (id: string) => void,
-  onScrollState: (scrolled: boolean) => void,
-) {
-  const onScroll = () => {
-    onScrollState(window.scrollY > 16);
-    onActive(detectActiveSection(ids));
-  };
-  onScroll();
-  window.addEventListener("scroll", onScroll, { passive: true });
-  window.addEventListener("resize", onScroll, { passive: true });
-  return () => {
-    window.removeEventListener("scroll", onScroll);
-    window.removeEventListener("resize", onScroll);
-  };
-}

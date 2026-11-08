@@ -5,11 +5,10 @@ type Landing = Pick<
   Content,
   | "hero"
   | "loop"
-  | "pillars"
+  | "demos"
   | "rules"
   | "agents"
   | "board3d"
-  | "checks"
   | "bodies"
   | "mobile"
   | "desktop"
@@ -25,7 +24,6 @@ export const enLanding: Landing = {
       "When one fails, the fuse blows and nothing gets exported, generated or flashed.",
     download: "Download",
     copyLabel: "Copy the install command",
-    shotAlt: "Fusible studio showing a PCB layout with its checks",
   },
   loop: {
     title: "The fuse loop",
@@ -44,40 +42,36 @@ export const enLanding: Landing = {
       },
     ],
   },
-  pillars: {
-    title: "One workspace, from board to box",
-    items: [
-      {
-        icon: "solar:cpu-bolt-bold-duotone",
-        title: "Boards",
-        text: "tscircuit TSX, with live PCB, schematic and 3D views.",
-      },
-      {
-        icon: "solar:bolt-circle-bold-duotone",
-        title: "Physics rules",
-        text: "IPC-2152 current, IPC-2221B clearance and fab capability.",
-      },
-      {
-        icon: "solar:code-square-bold-duotone",
-        title: "Firmware",
-        text: "Typed Rust pins for Embassy and ESP-IDF, blocked when the board is wrong.",
-      },
-      {
-        icon: "solar:box-bold-duotone",
-        title: "Mechanical",
-        text: "Parts written in TypeScript on OpenCascade, with real STEP and process-aware checks.",
-      },
-      {
-        icon: "solar:bill-list-bold-duotone",
-        title: "BOM",
-        text: "Prices, picks, materials, print mass and cost.",
-      },
-      {
-        icon: "solar:layers-linear",
-        title: "Fab and KiCad",
-        text: "Gerbers, drill files, STEP, GLB and a KiCad round-trip.",
-      },
-    ],
+  demos: {
+    hero: {
+      label: "The Fusible studio blocks an export until a too narrow trace is fixed",
+      intact: "Fuse intact",
+      blown: "Fuse blown",
+      check: "Check all",
+      export: "Export fab",
+      checks: "Checks",
+      violation: "VBUS carries 2 A. A 0.2 mm trace overheats, it needs 0.8 mm.",
+      refused: "Export blocked: the fuse is blown.",
+      views: ["Schematic", "PCB", "3D", "Bodies", "Parts"],
+    },
+    agent: {
+      prompt: "Add USB power to the board.",
+      placeholder: "Message the agent",
+      answer: "Done. The first VBUS trace was too narrow, so I widened it to 0.8 mm. The fuse is intact.",
+      blown: "Fuse blown",
+      intact: "Fuse intact",
+    },
+    title: "Nothing ships until the fuse holds",
+    intro: "The same verdict in the terminal, in your firmware and in your costs.",
+    check: {
+      title: "A blown fuse stops the export",
+      text: "Exit code 1, and no Gerber, STEP or firmware file gets written.",
+    },
+    firmware: {
+      title: "Firmware follows the board",
+      text: "Move a pin in the TSX and the typed Rust constants follow on the next check.",
+    },
+    cost: { title: "Costs stay up to date", text: "Parts, prints and prices roll up into one BOM.", label: "Total" },
   },
   rules: {
     title: "Rules that name their source",
@@ -140,11 +134,6 @@ export const enLanding: Landing = {
     title: "See the board as it will be built",
     text: "Live schematic, PCB and 3D views update on every save, with parts you can inspect pad by pad.",
     alt: "The Fusible studio showing a round PCB in 3D",
-  },
-  checks: {
-    title: "Every violation cites its rule",
-    text: "Each check names its standard and links its source. They are design pre-checks, not certifications.",
-    alt: "The Fusible studio listing checks with their standards",
   },
   bodies: {
     title: "Enclosures and parts from code",

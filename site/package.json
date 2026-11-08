@@ -24,7 +24,8 @@
     "vite": "^7"
   },
   "dependencies": {
-    "@facile/muse": "github:FacileStudio/muse#v0.10.0",
+    "@facile/mise-en-scene": "github:FacileStudio/mise-en-scene#v0.1.1",
+    "@facile/muse": "github:FacileStudio/muse#v0.16.1",
     "gsap": "^3.13"
   }
 }

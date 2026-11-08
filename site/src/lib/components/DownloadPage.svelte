@@ -40,7 +40,7 @@
       <h1 class="text-fc-2xl font-semibold tracking-tight text-fc-fg sm:text-fc-3xl">{dl.title}</h1>
       <p class="text-fc-md text-fc-fg-muted">{dl.intro}</p>
       {#if current.version}
-        <p class="text-fc-sm text-fc-fg-muted">{dl.versionLabel}: <span class="font-mono">{current.version}</span></p>
+        <p class="text-fc-sm text-fc-fg-muted">{dl.versionLabel}: <span class="font-fc-mono">{current.version}</span></p>
       {/if}
     </div>
 
@@ -50,17 +50,17 @@
         <li
           id={platform.key}
           data-reveal-item
-          class="flex flex-col justify-between gap-5 rounded-3xl bg-fc-surface p-6"
+          class="flex flex-col justify-between gap-5 rounded-fc-lg bg-fc-surface p-6"
         >
           <div class="flex items-start gap-3">
-            <span class="inline-flex size-12 items-center justify-center rounded-full bg-fc-component text-fc-fg">
+            <span class="inline-flex size-12 items-center justify-center rounded-fc-pill bg-fc-component text-fc-fg">
               <Icon icon={ICONS[platform.key]} size={24} />
             </span>
             <div class="flex flex-col gap-0.5">
               <h2 class="text-fc-lg font-semibold text-fc-fg">{platform.title}</h2>
               <p class="text-fc-sm text-fc-fg-muted">{platform.hint}</p>
               {#if asset}
-                <p class="font-mono text-fc-xs text-fc-fg-muted">{asset.name} · {megabytes(asset.size)}</p>
+                <p class="font-fc-mono text-fc-xs text-fc-fg-muted">{asset.name} · {megabytes(asset.size)}</p>
               {/if}
             </div>
           </div>
@@ -84,10 +84,10 @@
       {/each}
     </ul>
 
-    <div data-reveal-item class="flex flex-col gap-3 rounded-3xl bg-fc-component p-6 sm:p-8">
+    <div data-reveal-item class="flex flex-col gap-3 rounded-fc-lg bg-fc-component p-6 sm:p-8">
       <h2 class="text-fc-lg font-semibold text-fc-fg">{dl.cliTitle}</h2>
       <CodeBlock code={dl.cliLines.join("\n")} {content} />
-      <p class="font-mono text-fc-xs text-fc-fg-muted">{dl.actionLine}</p>
+      <p class="font-fc-mono text-fc-xs text-fc-fg-muted">{dl.actionLine}</p>
     </div>
 
     <div data-reveal-item>

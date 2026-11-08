@@ -5,11 +5,10 @@ type Landing = Pick<
   Content,
   | "hero"
   | "loop"
-  | "pillars"
+  | "demos"
   | "rules"
   | "agents"
   | "board3d"
-  | "checks"
   | "bodies"
   | "mobile"
   | "desktop"
@@ -25,7 +24,6 @@ export const frLanding: Landing = {
       "Quand une règle échoue, le fusible saute : rien n'est exporté, généré ni flashé.",
     download: "Télécharger",
     copyLabel: "Copier la commande d'installation",
-    shotAlt: "Le studio Fusible affichant un circuit imprimé et ses vérifications",
   },
   loop: {
     title: "La boucle du fusible",
@@ -52,40 +50,40 @@ export const frLanding: Landing = {
       },
     ],
   },
-  pillars: {
-    title: "Un seul espace, de la carte au boîtier",
-    items: [
-      {
-        icon: "solar:cpu-bolt-bold-duotone",
-        title: "Cartes",
-        text: "TSX tscircuit, avec vues PCB, schéma et 3D en direct.",
-      },
-      {
-        icon: "solar:bolt-circle-bold-duotone",
-        title: "Règles physiques",
-        text: "Courant IPC-2152, isolement IPC-2221B et capacités de fabrication.",
-      },
-      {
-        icon: "solar:code-square-bold-duotone",
-        title: "Firmware",
-        text: "Broches Rust typées pour Embassy et ESP-IDF, bloquées quand la carte est fausse.",
-      },
-      {
-        icon: "solar:box-bold-duotone",
-        title: "Mécanique",
-        text: "Pièces écrites en TypeScript sur OpenCascade, vrai STEP et vérifications selon le procédé.",
-      },
-      {
-        icon: "solar:bill-list-bold-duotone",
-        title: "Nomenclature",
-        text: "Prix, choix de pièces, matières, masse et coût d'impression.",
-      },
-      {
-        icon: "solar:layers-linear",
-        title: "Fabrication et KiCad",
-        text: "Gerbers, fichiers de perçage, STEP, GLB et aller-retour avec KiCad.",
-      },
-    ],
+  demos: {
+    hero: {
+      label: "Le studio Fusible bloque un export jusqu'à ce qu'une piste trop fine soit corrigée",
+      intact: "Fusible intact",
+      blown: "Fusible grillé",
+      check: "Tout vérifier",
+      export: "Exporter",
+      checks: "Contrôles",
+      violation: "VBUS transporte 2 A. Une piste de 0,2 mm chauffe trop, il lui faut 0,8 mm.",
+      refused: "Export bloqué : le fusible est grillé.",
+      views: ["Schéma", "PCB", "3D", "Boîtiers", "Pièces"],
+    },
+    agent: {
+      prompt: "Ajoute l'alimentation USB à la carte.",
+      placeholder: "Écrire à l'agent",
+      answer: "C'est fait. La première piste VBUS était trop fine, je l'ai élargie à 0,8 mm. Le fusible est intact.",
+      blown: "Fusible grillé",
+      intact: "Fusible intact",
+    },
+    title: "Rien ne part tant que le fusible ne tient pas",
+    intro: "Le même verdict dans le terminal, dans votre firmware et dans vos coûts.",
+    check: {
+      title: "Un fusible grillé arrête l'export",
+      text: "Code de sortie 1, et aucun fichier Gerber, STEP ou firmware n'est écrit.",
+    },
+    firmware: {
+      title: "Le firmware suit la carte",
+      text: "Déplacez une broche dans le TSX, les constantes Rust typées suivent au prochain contrôle.",
+    },
+    cost: {
+      title: "Des coûts toujours à jour",
+      text: "Composants, impressions et prix se retrouvent dans une seule nomenclature.",
+      label: "Total",
+    },
   },
   rules: {
     title: "Des règles qui citent leur source",
@@ -156,13 +154,6 @@ export const frLanding: Landing = {
       "Le schéma, le PCB et la 3D se mettent à jour à chaque enregistrement, " +
       "avec des pièces inspectables pastille par pastille.",
     alt: "Le studio Fusible affichant un PCB rond en 3D",
-  },
-  checks: {
-    title: "Chaque violation cite sa règle",
-    text:
-      "Chaque vérification nomme sa norme et renvoie à sa source. " +
-      "Ce sont des vérifications de conception, pas des certifications.",
-    alt: "Le studio Fusible listant les vérifications et leurs normes",
   },
   bodies: {
     title: "Boîtiers et pièces en code",

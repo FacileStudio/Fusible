@@ -21,7 +21,7 @@
 
 <IconButton
   variant="ghost"
-  class="size-9 pointer-coarse:size-11 border-0 bg-fc-surface/70 text-fc-fg hover:bg-fc-surface"
+  class="size-9 pointer-coarse:size-11 bg-fc-surface/70 text-fc-fg hover:bg-fc-surface"
   aria-label={theme === "dark" ? content.ui.themeToLight : content.ui.themeToDark}
   onclick={toggle}
 >

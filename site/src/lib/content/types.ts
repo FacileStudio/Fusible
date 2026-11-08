@@ -62,17 +62,11 @@ export interface HeroContent {
   sub: string;
   download: string;
   copyLabel: string;
-  shotAlt: string;
 }
 
 export interface LoopContent {
   title: string;
   steps: Card[];
-}
-
-export interface PillarsContent {
-  title: string;
-  items: Card[];
 }
 
 export interface RulesContent {
@@ -139,8 +133,45 @@ export interface DocsContent {
   sections: DocSection[];
 }
 
+export interface HeroDemoCopy {
+  label: string;
+  intact: string;
+  blown: string;
+  check: string;
+  export: string;
+  checks: string;
+  violation: string;
+  refused: string;
+  views: string[];
+}
+
+export interface AgentDemoCopy {
+  prompt: string;
+  placeholder: string;
+  answer: string;
+  blown: string;
+  intact: string;
+}
+
+export interface DemoTile {
+  title: string;
+  text: string;
+  label?: string;
+}
+
+export interface DemosContent {
+  hero: HeroDemoCopy;
+  agent: AgentDemoCopy;
+  title: string;
+  intro: string;
+  check: DemoTile;
+  firmware: DemoTile;
+  cost: DemoTile;
+}
+
 export interface Content {
   locale: Locale;
+  demos: DemosContent;
   htmlLang: string;
   ogLocale: string;
   prefix: string;
@@ -149,11 +180,9 @@ export interface Content {
   meta: { home: Meta; download: Meta; docs: Meta };
   hero: HeroContent;
   loop: LoopContent;
-  pillars: PillarsContent;
   rules: RulesContent;
   agents: AgentsContent;
   board3d: ShotContent;
-  checks: ShotContent;
   bodies: ShotContent;
   mobile: ShotContent;
   desktop: ShotContent;

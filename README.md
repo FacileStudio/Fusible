@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo.svg" alt="Fusible logo" width="72" height="72">
+  <img src="assets/logo-mark.svg" alt="Fusible logo" width="72" height="72">
 </p>
 
 <h1 align="center">Fusible</h1>

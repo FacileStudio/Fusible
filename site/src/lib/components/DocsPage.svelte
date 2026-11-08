@@ -23,7 +23,7 @@
               <a
                 href="#{section.id}"
                 onclick={(e) => scrollToSection(section.id, e)}
-                class="inline-flex h-8 items-center rounded-full bg-fc-surface px-3.5 text-fc-xs font-medium
+                class="inline-flex h-8 items-center rounded-fc-pill bg-fc-surface px-3.5 text-fc-xs font-medium
                   text-fc-fg-muted transition-colors hover:text-fc-fg focus-visible:outline-2
                   focus-visible:outline-offset-2 focus-visible:outline-fc-ring">{section.title}</a
               >
@@ -64,7 +64,7 @@
                     {#each block.rows as row (row[0])}
                       <tr>
                         {#each row as cell, c (c)}
-                          <td class="px-3 py-2.5 align-top {c === 0 ? 'font-mono text-fc-xs text-fc-fg' : 'text-fc-fg-muted'}"
+                          <td class="px-3 py-2.5 align-top {c === 0 ? 'font-fc-mono text-fc-xs text-fc-fg' : 'text-fc-fg-muted'}"
                             ><Rich text={cell} /></td
                           >
                         {/each}
