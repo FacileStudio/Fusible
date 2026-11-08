@@ -1,5 +1,6 @@
 <script lang="ts">
   import { fade } from "svelte/transition";
+  import { Blob } from "@facile/blob";
   import { Bar, Stage, Stream, Window, grow, type Act } from "@facile/mise-en-scene";
   import { Icon } from "@facile/muse";
   import type { AgentDemoCopy } from "$lib/content/types";
@@ -55,12 +56,22 @@
 
 <Stage width={560} height={430} compact={{ below: 480, width: 358, height: 460 }} {script} {reset} {poster} label={copy.prompt}>
   {#snippet children({ compact })}
-    <Window style={compact ? "top:16px;left:16px;width:326px;height:428px" : "top:20px;left:28px;width:504px;height:390px"}>
+    <Window title="Bulle" style={compact ? "top:16px;left:16px;width:326px;height:428px" : "top:20px;left:28px;width:504px;height:390px"}>
+      {#snippet trailing()}
+        <span class="flex items-center">
+          <Blob name="Bulle" size={16} />
+        </span>
+      {/snippet}
       <div class="ad-thread">
         <div class="ad-past">
           <span class="ad-bubble"></span>
-          <Bar w="86%" />
-          <Bar w="62%" />
+          <div class="ad-agent-row">
+            <Blob name="Bulle" size={18} class="shrink-0 opacity-60" />
+            <div class="ad-bars">
+              <Bar w="86%" />
+              <Bar w="62%" />
+            </div>
+          </div>
         </div>
         {#if sent}
           <div class="ad-q" in:grow out:fade={{ duration: 200, delay: 180 }}><p>{copy.prompt}</p></div>
@@ -78,7 +89,8 @@
           </ul>
         {/if}
         {#if streamed > 0}
-          <div in:grow={{ duration: 300 }} out:fade={{ duration: 200 }}>
+          <div class="ad-agent-row ad-answer-row" in:grow={{ duration: 300 }} out:fade={{ duration: 200 }}>
+            <Blob name="Bulle" size={22} class="shrink-0" />
             <Stream class="ad-answer" text={copy.answer} count={streamed} />
           </div>
         {/if}
@@ -111,6 +123,20 @@
     display: grid;
     gap: 8px;
     padding-bottom: 8px;
+  }
+  .ad-agent-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .ad-bars {
+    display: grid;
+    gap: 6px;
+    flex: 1;
+    padding-top: 3px;
+  }
+  .ad-answer-row {
+    padding-top: 10px;
   }
   .ad-bubble {
     justify-self: end;
@@ -181,7 +207,6 @@
   }
   :global(.ad-answer) {
     margin: 0;
-    padding-top: 10px;
     line-height: 1.55;
   }
   .ad-composer {
