@@ -7,6 +7,29 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-08
+
+### Added
+
+- Landing page: animated product demos built with mise-en-scene. The hero shows a blown fuse blocking an export until the trace is fixed, three tiles show the check, the firmware pins and the costs, and a chat shows an agent working from the fuse verdict.
+
+### Changed
+
+- All four interfaces move to muse v0.16.1: no borders, filled form controls, and muse's `Select`, `Checkbox`, `Input`, `Alert`, `Collapsible`, `Progress` and `Spinner` instead of hand-made copies.
+- Studio: the panel picker is one row of icons with a tooltip and a title under it, so no tab is clipped or hidden. A red dot on Checks shows open violations. The project tree docks on the left on wide screens. Window controls sit on the right, as in the desktop pages.
+- Studio: the Parts panel is now Components, so it no longer shares a name with the Parts view.
+- Desktop: Settings uses muse's section layout, and the theme is a radio group.
+- Mobile: the Parts tab is now Bodies, so it no longer shares a name with the parts list.
+- Site: muse's landing header and footer replace the hand-made ones. The Features cards become the demo tiles.
+
+### Fixed
+
+- The logo no longer sits on a circle anywhere. The Android launcher, site icons, README and social card use the white chip on black, like the desktop app.
+- Studio: rules without a standard no longer show an empty chip, the project name no longer shows twice, an empty run log no longer draws a blank box, and the PCB refits when a side panel opens or closes.
+- Studio: panels no longer put darker cards on a lighter panel.
+- Mobile: the board view no longer leaves empty bands above and below the board.
+- A failed tscircuit command reports `exit code 1` instead of `exit code Some(1)`.
+
 ## [1.0.1] - 2026-11-07
 
 ### Fixed
