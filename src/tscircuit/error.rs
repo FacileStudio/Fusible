@@ -33,7 +33,7 @@ pub enum RunnerError {
     },
 
     /// The tscircuit command executed but exited with a failure status.
-    #[error("tscircuit command `{command}` failed with exit code {code:?}")]
+    #[error("tscircuit command `{command}` {}", exit_phrase(*.code))]
     #[diagnostic(code(fusible::tscircuit::command_failed), help("{help}"))]
     CommandFailed {
         command: String,
@@ -49,4 +49,12 @@ pub enum RunnerError {
         help("verify that tscircuit build completed and generated circuit.json in the output directory")
     )]
     OutputNotFound { path: PathBuf },
+}
+
+/// Words for how a command ended: a signal or a kill leaves no exit code.
+fn exit_phrase(code: Option<i32>) -> String {
+    code.map_or_else(
+        || "was killed before it finished".to_string(),
+        |code| format!("failed with exit code {code}"),
+    )
 }

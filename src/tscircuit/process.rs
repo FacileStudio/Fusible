@@ -25,7 +25,7 @@ pub fn extract_output_details(out: &Output) -> String {
     if !stdout.is_empty() {
         return stdout;
     }
-    format!("command failed with exit code {:?}", out.status.code())
+    format!("command failed: {}", out.status)
 }
 
 /// Connects the command's stdin, stdout and stderr to the terminal.
