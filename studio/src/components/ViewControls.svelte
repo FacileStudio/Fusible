@@ -22,7 +22,7 @@
 
 {#if studio.view !== "bom"}
   <div
-    class="absolute bottom-4 left-1/2 z-10 inline-flex max-w-[calc(100%-24px)] -translate-x-1/2 gap-1 overflow-x-auto rounded-full bg-fc-surface p-1"
+    class="absolute bottom-4 left-1/2 z-10 inline-flex max-w-[calc(100%-24px)] -translate-x-1/2 gap-1 overflow-x-auto rounded-fc-pill bg-fc-surface p-1 shadow-lg"
     role="toolbar"
     aria-label="View controls"
   >

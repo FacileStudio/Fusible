@@ -8,11 +8,11 @@
 
 {#if comp}
   <div class="flex flex-col gap-2 text-fc-sm select-text">
-    <div class="flex items-baseline justify-between gap-2 rounded-2xl bg-fc-component px-4 py-3">
+    <div class="flex items-baseline justify-between gap-2 rounded-fc-lg bg-fc-surface px-4 py-3">
       <span class="font-medium">{comp.name}{#if preview}<span class="ml-2 text-fc-xs text-fc-fg-muted">Preview</span>{/if}</span>
       <span class="text-fc-xs text-fc-fg-muted">{comp.ftype || "Component"}</span>
     </div>
-    <dl class="flex flex-col gap-1 rounded-2xl bg-fc-component px-4 py-3">
+    <dl class="flex flex-col gap-1 rounded-fc-lg bg-fc-surface px-4 py-3">
       {#if comp.mpn}
         <div class="flex justify-between gap-4"><dt class="text-fc-fg-muted">Part</dt><dd>{comp.mpn}</dd></div>
       {/if}
@@ -23,12 +23,12 @@
       <div class="flex justify-between gap-4"><dt class="text-fc-fg-muted">Layer</dt><dd>{comp.layer || "top"}</dd></div>
     </dl>
     {#if comp.pins.length}
-      <div class="flex flex-col gap-1 rounded-2xl bg-fc-component p-2">
+      <div class="flex flex-col gap-1 rounded-fc-lg bg-fc-surface p-2">
         <div class="px-2 py-1 text-fc-xs text-fc-fg-muted">Connected pins and signals</div>
         {#each comp.pins as pin (pin.pin)}
           <button
             type="button"
-            class="flex justify-between gap-4 rounded-full px-3 py-1.5 text-left hover:bg-fc-surface focus-visible:outline-2 focus-visible:outline-fc-ring"
+            class="flex justify-between gap-4 rounded-fc-pill px-3 py-1.5 text-left hover:bg-fc-field focus-visible:outline-2 focus-visible:outline-fc-ring"
             onclick={() => selectNet(pin.net)}
           >
             <span>{pin.pin}</span>

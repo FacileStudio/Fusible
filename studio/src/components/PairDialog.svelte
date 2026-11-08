@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Modal } from "@facile/muse";
+  import { Button, Modal } from "@facile/muse";
   import QRCode from "qrcode";
   import { ApiError, api } from "../lib/api";
   import { remaining } from "../lib/pair";
@@ -43,12 +43,12 @@
     {:else if error}
       <p class="text-fc-danger" role="alert">{error}</p>
     {:else if pair}
-      <div class="size-56 rounded-3xl bg-white p-4" aria-label="Pairing code">{@html svg}</div>
+      <div class="size-56 rounded-fc-lg bg-white p-4" aria-label="Pairing code">{@html svg}</div>
       <p class="text-fc-fg-muted">
         {left > 0 ? `Scan with the Fusible app. Expires in ${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}.` : "This code expired."}
       </p>
       {#if left <= 0}
-        <button type="button" class="h-9 rounded-full bg-fc-accent px-4 text-fc-accent-fg" onclick={start}>New code</button>
+        <Button size="sm" onclick={start}>New code</Button>
       {/if}
     {:else}
       <p class="text-fc-fg-muted">Creating a code...</p>

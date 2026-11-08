@@ -31,7 +31,7 @@ async function studio(browser: import("playwright").Browser): Promise<void> {
   }
   await page.keyboard.press("2");
   await page.waitForTimeout(2500);
-  await page.getByText("Checks", { exact: true }).first().click().catch(() => {});
+  await page.getByRole("tab", { name: "Checks", exact: true }).click().catch(() => {});
   await page.waitForTimeout(1500);
   await shot(page, "studio-checks");
   const mech = await browser.newPage({ viewport: { width: 1600, height: 1000 } });

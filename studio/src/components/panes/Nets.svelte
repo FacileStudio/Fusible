@@ -10,8 +10,8 @@
     {#each names as name (name)}
       <button
         type="button"
-        class="flex items-center justify-between gap-3 rounded-full px-4 py-2 text-left text-fc-sm hover:bg-fc-component focus-visible:outline-2 focus-visible:outline-fc-ring {selection.net === name
-          ? 'bg-fc-component'
+        class="flex items-center justify-between gap-3 rounded-fc-lg px-3 py-2 text-left text-fc-sm hover:bg-fc-surface focus-visible:outline-2 focus-visible:outline-fc-ring {selection.net === name
+          ? 'bg-fc-surface'
           : ''}"
         onclick={() => selectNet(name)}
       >

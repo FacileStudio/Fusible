@@ -6,7 +6,7 @@
 {#if studio.diagnostics.length}
   <div class="flex flex-col gap-2">
     {#each studio.diagnostics as diag, index (index)}
-      <div class="flex flex-col gap-2 rounded-2xl bg-fc-component px-4 py-3 text-fc-sm select-text">
+      <div class="flex flex-col gap-2 rounded-fc-lg bg-fc-surface px-4 py-3 text-fc-sm select-text">
         <div class="flex items-center gap-2 font-medium {diag.severity === 'warning' ? 'text-fc-warning' : 'text-fc-danger'}">
           <Icon icon="solar:danger-triangle-bold-duotone" size={16} />
           <span>{diag.rule || "violation"}</span>
@@ -18,7 +18,7 @@
           <div class="flex flex-wrap items-center gap-2 text-fc-xs">
             {#if diag.source_url}
               <a
-                class="inline-flex h-7 items-center rounded-full bg-fc-surface px-3 hover:text-fc-info focus-visible:outline-2 focus-visible:outline-fc-ring"
+                class="inline-flex h-7 items-center rounded-fc-pill bg-fc-field px-3 hover:text-fc-info focus-visible:outline-2 focus-visible:outline-fc-ring"
                 href={diag.source_url}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -26,7 +26,7 @@
                 {diag.standard}
               </a>
             {:else}
-              <span class="inline-flex h-7 items-center rounded-full bg-fc-surface px-3">{diag.standard}</span>
+              <span class="inline-flex h-7 items-center rounded-fc-pill bg-fc-field px-3">{diag.standard}</span>
             {/if}
             <span class="text-fc-fg-muted">Design pre-check, not certification.</span>
           </div>

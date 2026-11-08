@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { Drawer, Tabs } from "@facile/muse";
+  import { Drawer } from "@facile/muse";
+  import PaneTabs from "./PaneTabs.svelte";
   import Inspector from "./panes/Inspector.svelte";
   import Components from "./panes/Components.svelte";
   import Nets from "./panes/Nets.svelte";
@@ -11,11 +12,10 @@
   import Pins from "./panes/Pins.svelte";
   import { catalog, loadBodies, loadRules } from "../lib/catalog.svelte";
   import { studio } from "../lib/studio.svelte";
-  import type { PaneName } from "../lib/types";
 
   const ALL = [
     { id: "inspector", label: "Inspect", icon: "solar:cursor-linear" },
-    { id: "components", label: "Parts", icon: "solar:cpu-linear" },
+    { id: "components", label: "Components", icon: "solar:cpu-linear" },
     { id: "nets", label: "Nets", icon: "solar:share-circle-linear" },
     { id: "checks", label: "Checks", icon: "solar:checklist-minimalistic-linear" },
     { id: "rules", label: "Rules", icon: "solar:shield-check-linear" },
@@ -25,6 +25,8 @@
   ];
 
   const items = $derived(ALL.filter((tab) => tab.id !== "rules" || catalog.rulesAvailable));
+
+  const title = $derived(items.find((tab) => tab.id === studio.pane)?.label ?? "");
 
   onMount(() => {
     void loadRules();
@@ -38,8 +40,9 @@
 
 {#snippet content()}
   <div class="flex min-h-0 flex-1 flex-col gap-2">
-    <Tabs {items} value={studio.pane} label="Panels" class="shrink-0 border-0" onChange={(id) => (studio.pane = id as PaneName)} />
-    <div class="min-h-0 flex-1 overflow-y-auto" role="tabpanel">
+    <PaneTabs {items} />
+    <h2 class="px-2 pt-1 text-fc-sm font-medium">{title}</h2>
+    <div id="pane-panel" class="min-h-0 flex-1 overflow-y-auto" role="tabpanel" aria-label={title}>
       {#if studio.pane === "inspector"}<Inspector />
       {:else if studio.pane === "components"}<Components />
       {:else if studio.pane === "nets"}<Nets />
@@ -57,7 +60,7 @@
     <div class="flex h-[60dvh] flex-col">{@render content()}</div>
   </Drawer>
 {:else if studio.sidebarOpen}
-  <aside class="flex w-90 shrink-0 flex-col rounded-3xl bg-fc-surface p-3" aria-label="Panel">
+  <aside class="flex w-90 shrink-0 flex-col rounded-fc-lg bg-fc-component p-3" aria-label="Panel">
     {@render content()}
   </aside>
 {/if}

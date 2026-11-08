@@ -4,14 +4,14 @@ export const MAC_PILL = 78;
 export interface WindowButton {
   name: "close" | "min" | "max";
   label: string;
-  glyph: string;
+  icon: string;
   cmd: string;
 }
 
 export const WINDOW_BUTTONS: WindowButton[] = [
-  { name: "close", label: "Close", glyph: "×", cmd: "plugin:window|close" },
-  { name: "min", label: "Minimize", glyph: "−", cmd: "plugin:window|minimize" },
-  { name: "max", label: "Maximize", glyph: "+", cmd: "plugin:window|toggle_maximize" },
+  { name: "min", label: "Minimize", icon: "solar:minimize-square-linear", cmd: "plugin:window|minimize" },
+  { name: "max", label: "Maximize", icon: "solar:maximize-square-linear", cmd: "plugin:window|toggle_maximize" },
+  { name: "close", label: "Close", icon: "solar:close-square-linear", cmd: "plugin:window|close" },
 ];
 
 /** True on macOS, where the system draws the traffic lights in the reserved pill. */

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { EmptyState } from "@facile/muse";
+  import { Badge, EmptyState } from "@facile/muse";
   import { catalog } from "../../lib/catalog.svelte";
   import { project, selectItem } from "../../lib/project.svelte";
   import type { BodyInfo } from "../../lib/types";
@@ -20,14 +20,14 @@
     {#each bodies as body (body.name)}
       <button
         type="button"
-        class="flex items-center justify-between gap-3 rounded-full px-4 py-2 text-left text-fc-sm hover:bg-fc-component focus-visible:outline-2 focus-visible:outline-fc-ring"
+        class="flex items-center justify-between gap-3 rounded-fc-lg px-3 py-2 text-left text-fc-sm hover:bg-fc-surface focus-visible:outline-2 focus-visible:outline-fc-ring"
         onclick={() => selectItem("body", body.name)}
       >
         <span class="min-w-0">
           <span class="block truncate">{body.name}</span>
           <span class="block truncate text-fc-xs text-fc-fg-muted">{detail(body)}</span>
         </span>
-        <span class="shrink-0 rounded-full bg-fc-component px-3 py-0.5 text-fc-xs text-fc-fg-muted">{body.kind}</span>
+        <Badge class="shrink-0">{body.kind}</Badge>
       </button>
     {/each}
   </div>

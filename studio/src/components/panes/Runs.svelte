@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, EmptyState } from "@facile/muse";
+  import { Alert, Button, EmptyState } from "@facile/muse";
   import { launch } from "../../lib/dispatch.svelte";
   import { isBusy, runs } from "../../lib/runs.svelte";
 
@@ -10,7 +10,7 @@
   const ACTIONS = [
     ["check", "Check all"],
     ["build", "Build all"],
-    ["body", "Bodies"],
+    ["body", "Build bodies"],
   ];
   let logEl = $state<HTMLElement>();
 
@@ -21,19 +21,19 @@
 </script>
 
 <div class="flex flex-col gap-2">
-  <div class="inline-flex gap-1 self-start rounded-full bg-fc-component p-1">
+  <div class="flex flex-wrap gap-1">
     {#each ACTIONS as [action, label] (action)}
-      <Button variant="ghost" size="sm" disabled={busy} onclick={() => launch(action)}>{label}</Button>
+      <Button variant="secondary" size="sm" disabled={busy} onclick={() => launch(action)}>{label}</Button>
     {/each}
   </div>
   {#if runs.error}
-    <div class="rounded-2xl bg-fc-danger/10 px-4 py-3 text-fc-sm text-fc-danger" role="alert">{runs.error}</div>
+    <Alert tone="danger">{runs.error}</Alert>
   {/if}
   {#each [...runs.list].reverse() as run (run.id)}
     <button
       type="button"
-      class="flex items-center justify-between gap-3 rounded-full px-4 py-2 text-left text-fc-sm hover:bg-fc-component focus-visible:outline-2 focus-visible:outline-fc-ring {run.id === runs.active
-        ? 'bg-fc-component'
+      class="flex items-center justify-between gap-3 rounded-fc-lg px-3 py-2 text-left text-fc-sm hover:bg-fc-surface focus-visible:outline-2 focus-visible:outline-fc-ring {run.id === runs.active
+        ? 'bg-fc-surface'
         : ''}"
       aria-pressed={run.id === runs.active}
       onclick={() => {
@@ -47,5 +47,7 @@
   {:else}
     <EmptyState bare title="No runs yet" description="Press play on an item in the project." />
   {/each}
-  <pre bind:this={logEl} class="max-h-80 overflow-auto rounded-2xl bg-fc-component p-4 font-fc-mono text-fc-xs whitespace-pre-wrap select-text" aria-label="Run log">{log}</pre>
+  {#if log}
+    <pre bind:this={logEl} class="max-h-80 overflow-auto rounded-fc-lg bg-fc-surface p-4 font-fc-mono text-fc-xs whitespace-pre-wrap select-text" aria-label="Run log">{log}</pre>
+  {/if}
 </div>

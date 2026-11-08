@@ -12,6 +12,7 @@
   import { cameraPreset, parkViewers, refit, renderView, type Hosts } from "../lib/viewers";
 
   let hosts = $state<Hosts>({});
+  let laidOut = false;
 
   const HOSTS = [
     ["schematic", "schematic-container"],
@@ -41,8 +42,13 @@
 
   $effect(() => {
     void studio.sidebarOpen;
+    void studio.treeOpen;
     void studio.narrow;
-    requestAnimationFrame(refit);
+    requestAnimationFrame(() => {
+      refit();
+      if (laidOut && studio.view === "pcb") render();
+      laidOut = true;
+    });
   });
 
   $effect(() => {
@@ -58,7 +64,7 @@
   });
 </script>
 
-<section class="relative min-w-0 flex-1 overflow-hidden rounded-3xl bg-fc-component" aria-label="Viewport">
+<section class="relative min-w-0 flex-1 overflow-hidden rounded-fc-lg bg-fc-component" aria-label="Viewport">
   {#each HOSTS as [name, id] (name)}
     <div {id} class="view-host" class:hidden={studio.view !== name} bind:this={hosts[name]}></div>
   {/each}

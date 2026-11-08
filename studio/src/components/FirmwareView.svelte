@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, EmptyState, Icon } from "@facile/muse";
+  import { Alert, Button, EmptyState, Icon } from "@facile/muse";
   import { launch } from "../lib/dispatch.svelte";
   import { firmware, lastBuild, selectPin } from "../lib/firmware.svelte";
   import { isBusy } from "../lib/runs.svelte";
@@ -18,7 +18,7 @@
 </script>
 
 <div class="flex flex-col gap-2 text-fc-sm">
-  <div class="flex flex-col gap-2 rounded-2xl bg-fc-component px-4 py-3">
+  <div class="flex flex-col gap-2 rounded-fc-lg bg-fc-surface px-4 py-3">
     <div class="font-medium">{firmware.name}</div>
     <div class="text-fc-xs text-fc-fg-muted">{meta.filter(Boolean).join(" · ")}</div>
     <div class="flex items-center gap-3">
@@ -31,7 +31,7 @@
     </div>
   </div>
   {#if firmware.error}
-    <div class="rounded-2xl bg-fc-danger/10 px-4 py-3 text-fc-danger" role="alert">{firmware.error}</div>
+    <Alert tone="danger">{firmware.error}</Alert>
   {:else if !data}
     <EmptyState bare title="Loading pin map..." />
   {:else}
@@ -39,9 +39,7 @@
       <div class="px-2 text-fc-xs text-fc-fg-muted">{data.pins_rs} · {data.generated ? "Generated" : "Not generated yet"}</div>
     {/if}
     {#if data.violations.length}
-      <div class="rounded-2xl bg-fc-danger/10 px-4 py-2 text-fc-danger">
-        {data.violations.length} pin-mux conflict{data.violations.length === 1 ? "" : "s"}
-      </div>
+      <Alert tone="danger">{data.violations.length} pin-mux conflict{data.violations.length === 1 ? "" : "s"}</Alert>
     {/if}
     {#each Object.entries(groups) as [group, pins] (group)}
       <div class="px-2 pt-2 text-fc-xs text-fc-fg-muted">{group} · {pins.length}</div>
@@ -49,8 +47,8 @@
         {@const part = pin.remote ? pin.remote.split(".")[0] : ""}
         <button
           type="button"
-          class="flex flex-col gap-0.5 rounded-full px-4 py-2 text-left hover:bg-fc-component focus-visible:outline-2 focus-visible:outline-fc-ring {firmware.picked === pin.pin
-            ? 'bg-fc-component'
+          class="flex flex-col gap-0.5 rounded-fc-lg px-3 py-2 text-left hover:bg-fc-surface focus-visible:outline-2 focus-visible:outline-fc-ring {firmware.picked === pin.pin
+            ? 'bg-fc-surface'
             : ''}"
           title={pin.net}
           onclick={() => selectPin(pin.pin, pin.net, part)}

@@ -167,7 +167,7 @@ body {
 
 .mechanical-status,
 .assembly-status {
-  @apply absolute left-1/2 top-1/2 flex max-w-[min(560px,calc(100%-32px))] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-4 rounded-3xl bg-fc-surface p-6 text-center text-fc-sm text-fc-fg-muted;
+  @apply absolute left-1/2 top-1/2 flex max-w-[min(560px,calc(100%-32px))] -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-4 rounded-fc-lg bg-fc-surface p-6 text-center text-fc-sm text-fc-fg-muted;
   white-space: pre-wrap;
 }
 
@@ -180,7 +180,7 @@ body {
 }
 
 .assembly-list {
-  @apply absolute right-3 top-16 flex max-h-[calc(100%-160px)] w-[min(320px,calc(100%-24px))] flex-col overflow-y-auto rounded-3xl bg-fc-surface p-2 text-fc-xs;
+  @apply absolute right-3 top-16 flex max-h-[calc(100%-160px)] w-[min(320px,calc(100%-24px))] flex-col overflow-y-auto rounded-fc-lg bg-fc-surface p-2 text-fc-xs shadow-lg;
 }
 
 .assembly-list[hidden] {
@@ -196,7 +196,7 @@ body {
 }
 
 .assembly-item {
-  @apply flex flex-col gap-1 rounded-fc-lg bg-transparent px-3 py-2 text-left text-fc-fg-muted hover:bg-fc-component hover:text-fc-fg;
+  @apply flex flex-col gap-1 rounded-fc-md bg-transparent px-3 py-2 text-left text-fc-fg-muted hover:bg-fc-component hover:text-fc-fg;
 }
 
 .assembly-item.active {

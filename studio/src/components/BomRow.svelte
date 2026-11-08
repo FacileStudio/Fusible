@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Icon, IconButton } from "@facile/muse";
+  import { Checkbox, Icon, IconButton, Input } from "@facile/muse";
   import { editLine, removePart, saveLater, saveBom } from "../lib/bom.svelte";
   import type { BomLine } from "../lib/types";
 
@@ -7,7 +7,7 @@
 
   const price = (n: number | null | undefined) => (n == null ? "-" : n.toFixed(2));
   const safeUrl = (url?: string) => (/^https?:\/\//i.test(url || "") ? url : "");
-  const field = "h-9 w-full rounded-full bg-fc-surface px-3 text-fc-sm text-fc-fg placeholder:text-fc-fg-muted focus-visible:outline-2 focus-visible:outline-fc-ring";
+  const field = "h-9 w-full rounded-fc-pill px-3 text-fc-sm";
 
   function text(event: Event, name: string, rerender = false) {
     const control = event.currentTarget as HTMLInputElement;
@@ -34,18 +34,18 @@
 
 <div
   role="row"
-  class="grid grid-cols-[2rem_4.5rem_minmax(10rem,1fr)_9rem_12rem_7rem_5rem_2.75rem] items-center gap-2 rounded-2xl bg-fc-component px-3 py-2 text-fc-sm {line.picked
+  class="grid grid-cols-[2rem_4.5rem_minmax(10rem,1fr)_9rem_12rem_7rem_5rem_2.75rem] items-center gap-2 rounded-fc-lg bg-fc-surface px-3 py-2 text-fc-sm {line.picked
     ? ''
     : 'opacity-50'}"
   data-id={line.id}
 >
-  <div role="cell"><input type="checkbox" class="size-4 accent-fc-accent" checked={line.picked} aria-label="Pick" onchange={pick} /></div>
+  <div role="cell"><Checkbox dense checked={line.picked} aria-label="Pick" onchange={pick} /></div>
   <div role="cell">
-    <input class={field} type="number" min="0" step="1" value={line.quantity} aria-label="Quantity" onchange={(e) => num(e, "quantity")} />
+    <Input class={field} type="number" min="0" step="1" value={line.quantity} aria-label="Quantity" onchange={(e) => num(e, "quantity")} />
   </div>
   <div role="cell" class="min-w-0">
     {#if line.kind === "manual"}
-      <input class={field} value={line.description} aria-label="Part" onchange={(e) => text(e, "description")} />
+      <Input class={field} value={line.description} aria-label="Part" onchange={(e) => text(e, "description")} />
     {:else}
       <div class="truncate">{line.description}</div>
       <div class="truncate text-fc-xs text-fc-fg-muted">{[line.mpn, line.designators.join(" ")].filter(Boolean).join(" · ")}</div>
@@ -53,15 +53,15 @@
   </div>
   <div role="cell">
     {#if line.kind !== "print"}
-      <input class={field} value={line.supplier ?? ""} aria-label="Supplier" onchange={(e) => text(e, "supplier")} />
+      <Input class={field} value={line.supplier ?? ""} placeholder="Supplier" aria-label="Supplier" onchange={(e) => text(e, "supplier")} />
     {/if}
   </div>
   <div role="cell" class="flex items-center gap-1">
     {#if line.kind !== "print"}
-      <input class={field} value={line.url ?? ""} placeholder="https://" aria-label="Link" onchange={(e) => text(e, "url")} />
+      <Input class={field} value={line.url ?? ""} placeholder="https://" aria-label="Link" onchange={(e) => text(e, "url")} />
       {#if safeUrl(line.url)}
         <a
-          class="inline-flex size-9 shrink-0 items-center justify-center rounded-full hover:bg-fc-surface focus-visible:outline-2 focus-visible:outline-fc-ring"
+          class="inline-flex size-9 shrink-0 items-center justify-center rounded-fc-pill hover:bg-fc-field focus-visible:outline-2 focus-visible:outline-fc-ring"
           href={line.url}
           target="_blank"
           rel="noopener noreferrer"
@@ -75,7 +75,7 @@
   </div>
   <div role="cell" class="flex items-center gap-1">
     {#if line.kind === "print"}
-      <input
+      <Input
         class={field}
         type="number"
         min="0"
@@ -87,7 +87,7 @@
       />
       <span class="text-fc-fg-muted">g</span>
     {:else}
-      <input
+      <Input
         class={field}
         type="number"
         min="0"

@@ -6,7 +6,7 @@
 
 {#if tip}
   <div
-    class="pointer-events-none fixed z-50 max-w-72 rounded-2xl bg-fc-surface px-4 py-3 text-fc-xs shadow-lg"
+    class="pointer-events-none fixed z-50 max-w-72 rounded-fc-lg bg-fc-surface px-4 py-3 text-fc-xs shadow-lg"
     style:left="{Math.min(tip.x + 14, window.innerWidth - 300)}px"
     style:top="{tip.y + 14}px"
     role="tooltip"

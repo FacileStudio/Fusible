@@ -44,12 +44,12 @@
 <div class="grid h-dvh grid-rows-[56px_1fr] bg-fc-page text-fc-fg">
   <TopBar />
   <main class="flex min-h-0 gap-2 p-2 pt-0">
+    <ProjectDrawer />
     <Viewport />
     <Sidebar />
   </main>
 </div>
 
-<ProjectDrawer />
 <PairDialog />
 <HoverTooltip />
 <StatusToast />

@@ -1,6 +1,6 @@
 {
   "name": "fusible-studio",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,7 +10,7 @@
     "icons": "bun scripts/solar-icons.ts"
   },
   "dependencies": {
-    "@facile/muse": "github:FacileStudio/muse#v0.10.0",
+    "@facile/muse": "github:FacileStudio/muse#v0.16.1",
     "@tscircuit/3d-viewer": "0.0.627",
     "@tscircuit/checks": "0.0.257",
     "@tscircuit/circuit-json-util": "^0.0.123",
