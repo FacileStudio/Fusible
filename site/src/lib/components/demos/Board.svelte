@@ -7,7 +7,7 @@
     "M212 180 H238 V214 H296",
     "M150 196 V226 H110",
     "M120 150 H72",
-    "M180 104 V62 H262",
+    "M180 96 V62 H262",
   ];
   const PADS = [
     [300, 86], [300, 170], [296, 208], [262, 56], [100, 220], [64, 144], [330, 120], [330, 150],
@@ -17,12 +17,14 @@
 <svg viewBox="0 0 400 280" class="board" aria-hidden="true">
   <rect x="24" y="20" width="352" height="240" rx="14" class="plate" />
   {#each TRACES as d (d)}<path {d} class="trace" />{/each}
-  {#each PADS as [x, y] (`${x}-${y}`)}<rect {x} {y} width="14" height="10" rx="2" class="pad" />{/each}
-  <rect x="120" y="96" width="92" height="100" rx="6" class="chip" />
-  <rect x="24" y="118" width="40" height="44" rx="4" class="chip" />
   <path d="M64 134 H92 V116 H120" class="vbus" class:blown class:wide />
+  {#each PADS as [x, y] (`${x}-${y}`)}<rect {x} {y} width="14" height="10" rx="2" class="pad" />{/each}
   <circle cx="340" cy="44" r="6" class="pad" />
   <circle cx="60" cy="236" r="6" class="pad" />
+  <rect x="120" y="96" width="92" height="100" rx="6" class="chip-base" />
+  <rect x="120" y="96" width="92" height="100" rx="6" class="chip" />
+  <rect x="24" y="118" width="40" height="44" rx="4" class="chip-base" />
+  <rect x="24" y="118" width="40" height="44" rx="4" class="chip" />
 </svg>
 
 <style>
@@ -30,7 +32,8 @@
     width: 100%;
     height: 100%;
   }
-  .plate {
+  .plate,
+  .chip-base {
     fill: var(--color-fc-surface);
   }
   .trace {

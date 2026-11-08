@@ -104,10 +104,6 @@ export const frLanding: Landing = {
         summary: "Pistes, perçages, vias et taille de carte respectent les limites du fabricant.",
         standard: { label: "JLCPCB 2/4 couches", href: SOURCES.jlcpcb },
       },
-      { id: "trace_clearance", summary: "Le cuivre de réseaux différents garde un espacement minimal." },
-      { id: "shorted_nets", summary: "Aucune piste ne relie des réseaux de noms différents, comme GND et 3V3." },
-      { id: "unconnected_net", summary: "Chaque réseau relie au moins deux pastilles ou ports." },
-      { id: "pin_mux", summary: "Chaque broche gère la fonction de périphérique demandée sur la puce choisie." },
       {
         id: "decoupling_capacitor",
         summary:
@@ -115,15 +111,9 @@ export const frLanding: Landing = {
           "à 3 mm au plus quand le placement est connu.",
         standard: { label: "guide de placement", href: SOURCES.bypass },
       },
-      { id: "body_interference", summary: "Un corps ne chevauche ni la carte, ni un composant, ni un autre corps." },
       {
         id: "mech.wall_thickness",
         summary: "Les parois respectent le minimum du procédé d'impression ou de moulage.",
-        standard: { label: "DFAM Academy", href: SOURCES.dfam },
-      },
-      {
-        id: "mech.standoff_height",
-        summary: "Les entretoises dépassent d'au moins 0,5 mm la pièce la plus haute sous la carte.",
         standard: { label: "DFAM Academy", href: SOURCES.dfam },
       },
       {

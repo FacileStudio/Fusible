@@ -12,6 +12,7 @@
     height,
     phone = false,
     reverse = false,
+    icon,
   }: {
     id: string;
     data: ShotContent;
@@ -21,6 +22,7 @@
     height: number;
     phone?: boolean;
     reverse?: boolean;
+    icon?: string;
   } = $props();
 
   const href = $derived(data.cta?.href.startsWith("/") ? `${content.prefix}${data.cta.href}` : data.cta?.href);
@@ -36,7 +38,7 @@
     <h2 id="{id}-title" class="text-fc-xl font-semibold tracking-tight text-fc-fg sm:text-fc-2xl">{data.title}</h2>
     <p class="max-w-md text-fc-md text-fc-fg-muted">{data.text}</p>
     {#if data.cta && href}
-      <Button variant="primary" size="lg" {href}>{data.cta.label}</Button>
+      <Button variant="primary" size="lg" {href} {icon}>{data.cta.label}</Button>
     {/if}
   </div>
   <div data-reveal-item class="flex justify-center {reverse ? 'lg:order-1' : ''}">

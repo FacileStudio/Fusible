@@ -22,4 +22,5 @@ export const ICON_NAMES = [
   "solar:box-minimalistic-linear",
   "solar:qr-code-linear",
   "solar:arrow-right-linear",
+  "solar:arrow-up-linear",
 ] as const;

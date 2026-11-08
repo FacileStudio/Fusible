@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { icons } from "@facile/muse";
   import type { Content } from "$lib/content/types";
   import Seo from "./Seo.svelte";
   import SiteShell from "./SiteShell.svelte";
@@ -22,7 +23,7 @@
   <Rules {content} />
   <Agents {content} />
   <ShotSection id="bodies" data={content.bodies} {content} src="/screenshots/studio-bodies.png" width={1600} height={1000} />
-  <ShotSection id="mobile" data={content.mobile} {content} src="/screenshots/mobile.png" width={600} height={1300} phone />
-  <ShotSection id="desktop" data={content.desktop} {content} src="/screenshots/desktop.png" width={1600} height={1000} reverse />
+  <ShotSection id="mobile" data={content.mobile} {content} src="/screenshots/mobile.png" width={600} height={1300} phone icon={icons.android} />
+  <ShotSection id="desktop" data={content.desktop} {content} src="/screenshots/desktop.png" width={1600} height={1000} reverse icon={icons.monitor} />
   <Suite {content} />
 </SiteShell>

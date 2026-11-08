@@ -30,8 +30,17 @@
       </li>
     {/each}
   </ul>
-  <p class="flex items-center gap-2 text-fc-sm text-fc-fg-muted">
-    <Icon icon="solar:shield-check-linear" size={18} />
-    <span>{content.rules.disclaimer}</span>
-  </p>
+  <div class="flex flex-wrap items-center justify-between gap-4 text-fc-sm text-fc-fg-muted">
+    <p class="flex items-center gap-2">
+      <Icon icon="solar:shield-check-linear" size={18} />
+      <span>{content.rules.disclaimer}</span>
+    </p>
+    <a
+      href="{content.prefix}/docs#rules"
+      class="inline-flex items-center gap-1 font-medium text-fc-fg underline decoration-fc-fg-muted/40 hover:decoration-fc-fg"
+    >
+      <span>{content.locale === "fr" ? "Toutes les règles dans la doc" : "All rules in docs"}</span>
+      <Icon icon="solar:arrow-right-linear" size={14} />
+    </a>
+  </div>
 </section>

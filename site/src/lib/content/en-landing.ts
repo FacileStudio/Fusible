@@ -92,24 +92,14 @@ export const enLanding: Landing = {
         summary: "Traces, drills, vias and board size fit the fab house's limits.",
         standard: { label: "JLCPCB 2/4-layer", href: SOURCES.jlcpcb },
       },
-      { id: "trace_clearance", summary: "Copper of different nets keeps a minimum spacing." },
-      { id: "shorted_nets", summary: "No trace ties differently named nets together, such as GND and 3V3." },
-      { id: "unconnected_net", summary: "Every net connects at least two pads or ports." },
-      { id: "pin_mux", summary: "Each pin supports the peripheral function you gave it on the chosen chip." },
       {
         id: "decoupling_capacitor",
         summary: "Every IC power pin has a decoupling capacitor, within 3 mm when placement is known.",
         standard: { label: "layout guideline", href: SOURCES.bypass },
       },
-      { id: "body_interference", summary: "A body does not overlap the board, a component or another body." },
       {
         id: "mech.wall_thickness",
         summary: "Walls meet the minimum for the print or mould process.",
-        standard: { label: "DFAM Academy", href: SOURCES.dfam },
-      },
-      {
-        id: "mech.standoff_height",
-        summary: "Standoffs clear the tallest part under the board by at least 0.5 mm.",
         standard: { label: "DFAM Academy", href: SOURCES.dfam },
       },
       {

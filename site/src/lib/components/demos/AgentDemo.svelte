@@ -1,6 +1,7 @@
 <script lang="ts">
   import { fade } from "svelte/transition";
   import { Bar, Stage, Stream, Window, grow, type Act } from "@facile/mise-en-scene";
+  import { Icon } from "@facile/muse";
   import type { AgentDemoCopy } from "$lib/content/types";
 
   let { copy }: { copy: AgentDemoCopy } = $props();
@@ -83,8 +84,11 @@
         {/if}
       </div>
       <div class="ad-composer">
-        <span class:ad-placeholder={!draft}>{draft || copy.placeholder}</span>
-        <span class="ad-send" class:ad-idle={!draft}></span>
+        <Icon icon="solar:pen-new-square-linear" size={15} class="ad-lead-icon" />
+        <span class="ad-input" class:ad-placeholder={!draft}>{draft || copy.placeholder}</span>
+        <span class="ad-send" class:ad-idle={!draft}>
+          <Icon icon="solar:arrow-up-linear" size={16} />
+        </span>
       </div>
     </Window>
   {/snippet}
@@ -185,14 +189,19 @@
     align-items: center;
     gap: 8px;
     margin: 0 16px 16px;
-    padding: 6px 6px 6px 16px;
+    padding: 6px 6px 6px 14px;
     border-radius: 999px;
     background: var(--color-fc-field);
     font-size: 13px;
     color: var(--color-fc-fg);
   }
-  .ad-composer > span:first-child {
+  :global(.ad-lead-icon) {
+    flex: none;
+    color: var(--color-fc-fg-muted);
+  }
+  .ad-input {
     flex: 1;
+    min-width: 0;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -201,11 +210,16 @@
     color: var(--color-fc-fg-muted);
   }
   .ad-send {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     flex: none;
+    margin-left: auto;
     width: 32px;
     height: 32px;
     border-radius: 999px;
     background: var(--color-fc-accent);
+    color: var(--color-fc-accent-fg);
     transition: opacity 0.15s ease;
   }
   .ad-idle {
