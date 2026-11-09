@@ -28,8 +28,10 @@
     {#each rows as row (row.name)}
       <SettingsRow label={row.name} description={row.tool?.path ?? "Not found"}>
         <Badge tone={row.tool ? "success" : "danger"}>
-          <Icon icon={row.tool ? "solar:check-circle-linear" : "solar:close-circle-linear"} size={14} />
-          {row.tool?.version ?? "Missing"}
+          <span class="inline-flex items-center gap-1.5 whitespace-nowrap">
+            <Icon icon={row.tool ? "solar:check-circle-linear" : "solar:close-circle-linear"} size={14} />
+            <span>{row.tool?.version ?? "Missing"}</span>
+          </span>
         </Badge>
       </SettingsRow>
     {/each}

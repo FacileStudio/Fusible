@@ -7,6 +7,13 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 
 ## [Unreleased]
 
+## [1.1.2] - 2026-11-09
+
+### Fixed
+
+- Desktop: remove the version container under the sidebar.
+- UI: prevent badge content and icons from wrapping onto multiple lines.
+
 ## [1.1.1] - 2026-11-08
 
 ### Added
