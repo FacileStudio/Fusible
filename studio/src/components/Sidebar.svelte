@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { Drawer } from "@facile/muse";
+  import { Drawer, Spinner } from "@facile/muse";
   import PaneTabs from "./PaneTabs.svelte";
   import Inspector from "./panes/Inspector.svelte";
   import Components from "./panes/Components.svelte";
@@ -11,7 +11,8 @@
   import Runs from "./panes/Runs.svelte";
   import Pins from "./panes/Pins.svelte";
   import { catalog, loadBodies, loadRules } from "../lib/catalog.svelte";
-  import { studio } from "../lib/studio.svelte";
+  import { project } from "../lib/project.svelte";
+  import { getCircuit, studio } from "../lib/studio.svelte";
 
   const ALL = [
     { id: "inspector", label: "Inspect", icon: "solar:cursor-linear" },
@@ -43,7 +44,12 @@
     <PaneTabs {items} />
     <h2 class="px-2 pt-1 text-fc-sm font-medium">{title}</h2>
     <div id="pane-panel" class="min-h-0 flex-1 overflow-y-auto" role="tabpanel" aria-label={title}>
-      {#if studio.pane === "inspector"}<Inspector />
+      {#if project.compiling && !getCircuit()}
+        <div class="flex h-48 flex-col items-center justify-center gap-3 p-4 text-center text-fc-sm text-fc-fg-muted">
+          <Spinner size="md" class="text-fc-warning" />
+          <span>Compiling circuit...</span>
+        </div>
+      {:else if studio.pane === "inspector"}<Inspector />
       {:else if studio.pane === "components"}<Components />
       {:else if studio.pane === "nets"}<Nets />
       {:else if studio.pane === "checks"}<Checks />

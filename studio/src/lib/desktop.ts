@@ -1,5 +1,5 @@
 export const LABEL = "main";
-export const MAC_PILL = 78;
+export const MAC_PILL = 100;
 
 export interface WindowButton {
   name: "close" | "min" | "max";

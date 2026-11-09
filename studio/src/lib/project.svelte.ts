@@ -15,6 +15,7 @@ export const project = $state({
   board: null as string | null,
   health: {} as Record<string, Health>,
   item: null as string | null,
+  compiling: true,
 });
 
 let boardRequest = 0;
@@ -29,13 +30,24 @@ export function showBoard(name: string): void {
   project.board = name;
   resetSelection();
   const cached = boards.get(name);
-  if (cached) return applyPayload(cached);
+  if (cached) {
+    project.compiling = false;
+    return applyPayload(cached);
+  }
+  project.compiling = true;
   const mine = ++boardRequest;
   api
     .getCircuit(name)
-    .then((fresh) => mine === boardRequest && project.board === name && applyPayload(fresh))
+    .then((fresh) => {
+      if (mine !== boardRequest || project.board !== name) return;
+      if (fresh && (fresh.revision || fresh.board_name)) {
+        project.compiling = false;
+        applyPayload(fresh);
+      }
+    })
     .catch((err) => {
       if (mine !== boardRequest) return;
+      project.compiling = false;
       showStatus(`Board ${name} unavailable: ${String(err.message || err)}`);
     });
 }

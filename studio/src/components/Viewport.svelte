@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount, untrack } from "svelte";
+  import { Spinner } from "@facile/muse";
   import BomView from "./BomView.svelte";
   import ViewControls from "./ViewControls.svelte";
   import { Tscircuit } from "../tscircuit";
@@ -8,6 +9,7 @@
   import { initMechanical, syncOverlay } from "../lib/mechanical.svelte";
   import { resendRevision } from "../lib/payload.svelte";
   import { selectComponent } from "../lib/selection.svelte";
+  import { project } from "../lib/project.svelte";
   import { getCircuit, studio } from "../lib/studio.svelte";
   import { cameraPreset, parkViewers, refit, renderView, type Hosts } from "../lib/viewers";
 
@@ -65,6 +67,12 @@
 </script>
 
 <section class="relative min-w-0 flex-1 overflow-hidden rounded-fc-lg bg-fc-component" aria-label="Viewport">
+  {#if project.compiling && !getCircuit()}
+    <div class="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-fc-component/60 backdrop-blur-xs text-fc-sm text-fc-fg-muted">
+      <Spinner size="lg" class="text-fc-warning" />
+      <span>Compiling circuit...</span>
+    </div>
+  {/if}
   {#each HOSTS as [name, id] (name)}
     <div {id} class="view-host" class:hidden={studio.view !== name} bind:this={hosts[name]}></div>
   {/each}

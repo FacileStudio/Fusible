@@ -28,6 +28,7 @@ function afterAssemblyRun(data: Message): void {
 }
 
 function onPayload(data: DevPayload): void {
+  project.compiling = false;
   const board = data.board || "";
   boards.set(board, data);
   noteHealth(board, data);
@@ -39,7 +40,8 @@ function onPayload(data: DevPayload): void {
 /** Routes one server event: log lines, run status, KiCad sync, or a board payload. */
 export function handleMessage(data: Message): void {
   afterAssemblyRun(data);
-  if (data.event === "log") appendLog(data.run as number, data.line as string);
+  if (data.event === "compiling") project.compiling = true;
+  else if (data.event === "log") appendLog(data.run as number, data.line as string);
   else if (data.event === "run") onRun(applyRunEvent(data as { run: number; label?: string; status?: Run["status"] }));
   else if (data.event === "sync") applyKicad((data.boards as KicadBoard[]) || []);
   else onPayload(data as DevPayload);

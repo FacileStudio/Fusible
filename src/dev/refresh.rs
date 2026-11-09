@@ -36,6 +36,13 @@ Install a GitHub release binary, or run `bun install && bun run build` in studio
 /// reads the new payload and at worst receives it twice.
 pub(super) fn refresh(slot: &Slot, state: &State) {
     let start = std::time::Instant::now();
+    state.hub.broadcast(
+        &serde_json::json!({
+            "event": "compiling",
+            "board": &slot.name,
+        })
+        .to_string(),
+    );
     let (payload, source) = execute_pipeline(&slot.entry);
     let shared: Option<Arc<str>> = source.as_deref().map(Arc::from);
     let health = Health {
