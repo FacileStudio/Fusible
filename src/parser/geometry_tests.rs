@@ -72,7 +72,8 @@ fn resolves_nets_through_ports_when_the_trace_names_none() {
       {"type":"source_port","port_id":"p1","net_id":"n1"},
       {"type":"source_trace","trace_id":"t1","connected_port_ids":["p1"]},
       {"type":"pcb_trace","pcb_trace_id":"pt","source_trace_id":"t1","route":[
-        {"x":0,"y":0,"width":0.2,"layer":"top"},{"x":1,"y":0,"width":0.2,"layer":"top"}]}
+        {"route_type":"wire","x":0,"y":0,"width":0.2,"layer":"top"},
+        {"route_type":"wire","x":1,"y":0,"width":0.2,"layer":"top"}]}
     ]"#;
     assert_eq!(
         geometry(json).segments[0].net_names,

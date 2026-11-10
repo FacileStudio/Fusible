@@ -7,7 +7,6 @@
 //! rule family's tests live in a submodule under `tests/`, kept under
 //! filet's functions-per-file budget.
 
-mod autoroute;
 mod bypass;
 mod clearance;
 mod fab_profile;
@@ -18,6 +17,8 @@ mod qfn_footprint;
 mod references;
 mod schematic;
 mod trace_current;
+mod unrouted;
+mod upstream;
 mod voltage_clearance;
 
 use std::path::Path;
@@ -48,10 +49,7 @@ pub(super) fn rule_violations(
     rule: impl Rule + 'static,
     elements: Vec<CircuitElement>,
 ) -> Vec<Diagnostic> {
-    let circuit = Circuit {
-        elements,
-        raw_elements: Vec::new(),
-    };
+    let circuit = Circuit::from_elements(elements);
     Linter::new().with_rule(rule).run(&circuit)
 }
 

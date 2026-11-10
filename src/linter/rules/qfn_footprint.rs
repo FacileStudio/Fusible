@@ -1,7 +1,5 @@
 //! `qfn_footprint_span`: a bare qfn footprint string describes copper span, not body size.
 
-use serde_json::Value;
-
 use crate::linter::{Category, Diagnostic, LintContext, Rule, RuleMeta, Severity};
 
 const MIN_SAFE_SPAN_MM: f64 = 3.5;
@@ -28,7 +26,7 @@ impl Rule for QfnFootprintSpanRule {
 
     fn check(&self, ctx: &LintContext<'_>) -> Vec<Diagnostic> {
         let mut seen: Vec<&str> = Vec::new();
-        for footprint in ctx.circuit.raw_elements.iter().filter_map(footprint_of) {
+        for footprint in ctx.circuit.model().footprints.iter().map(String::as_str) {
             if is_risky(footprint) && !seen.contains(&footprint) {
                 seen.push(footprint);
             }
@@ -42,12 +40,6 @@ impl Rule for QfnFootprintSpanRule {
             })
             .collect()
     }
-}
-
-fn footprint_of(el: &Value) -> Option<&str> {
-    ["footprinter_string", "footprint"]
-        .iter()
-        .find_map(|key| el.get(key).and_then(Value::as_str))
 }
 
 fn is_risky(footprint: &str) -> bool {

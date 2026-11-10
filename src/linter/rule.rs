@@ -65,14 +65,11 @@ pub trait Rule {
         self.meta().summary
     }
 
-    /// The standard this rule's diagnostics cite, if it has a single one.
-    fn standard(&self) -> Option<&'static str> {
-        self.meta().standard
-    }
-
-    /// Where to read that standard.
-    fn source_url(&self) -> Option<&'static str> {
-        self.meta().source_url
+    /// Further ids this rule reports under, beyond [`Self::meta`]'s own.
+    /// A rule that maps upstream kinds to several ids lists them all here,
+    /// so the registry knows every id a diagnostic can carry.
+    fn emits(&self) -> &'static [&'static RuleMeta] {
+        &[]
     }
 
     /// Whether the manifest declares the data this rule needs. Rules that read

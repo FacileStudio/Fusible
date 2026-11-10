@@ -1,9 +1,8 @@
-//! The board, the placed parts and their source data.
+//! The board, the placed parts and the pins they join.
 
 use serde::Deserialize;
 
 use super::{Kind, Model, Point};
-use crate::parser::props::ComponentProps;
 
 /// A `pcb_board`. Units are millimetres.
 ///
@@ -11,7 +10,7 @@ use crate::parser::props::ComponentProps;
 /// any other shape. The `min_*` fields are the board's own DRC limits.
 #[derive(Debug, Clone, Default, PartialEq, Deserialize)]
 pub struct PcbBoard {
-    pub pcb_board_id: String,
+    pub pcb_board_id: Option<String>,
     pub source_board_id: Option<String>,
     pub center: Option<Point>,
     pub width: Option<f64>,
@@ -48,10 +47,13 @@ pub struct PcbComponent {
 }
 
 /// A `source_component_internal_connection`: pins a part joins inside itself.
+///
+/// Only the port list matters to the netlist, so the ids are optional.
 #[derive(Debug, Clone, Default, PartialEq, Deserialize)]
 pub struct InternalConnection {
-    pub source_component_internal_connection_id: String,
-    pub source_component_id: String,
+    pub source_component_internal_connection_id: Option<String>,
+    pub source_component_id: Option<String>,
+    #[serde(default)]
     pub source_port_ids: Vec<String>,
 }
 
@@ -73,12 +75,5 @@ impl Kind for InternalConnection {
     const TYPE: &'static str = "source_component_internal_connection";
     fn slot(model: &mut Model) -> &mut Vec<Self> {
         &mut model.internal_connections
-    }
-}
-
-impl Kind for ComponentProps {
-    const TYPE: &'static str = "source_component";
-    fn slot(model: &mut Model) -> &mut Vec<Self> {
-        &mut model.parts
     }
 }

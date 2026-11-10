@@ -1,18 +1,9 @@
 //! Copper of drilled parts: plated holes and vias, present on every layer.
 
-use serde_json::Value;
-
 use super::copper::{Copper, Shape};
 use crate::linter::LintContext;
 use crate::parser::geometry::Geometry;
-
-fn num(el: &Value, key: &str) -> Option<f64> {
-    el.get(key)?.as_f64()
-}
-
-fn text<'a>(el: &'a Value, key: &str) -> Option<&'a str> {
-    el.get(key)?.as_str()
-}
+use crate::parser::model::{PcbPlatedHole, PcbVia};
 
 fn layers(geometry: &Geometry) -> Vec<String> {
     let count = geometry.board.as_ref().map_or(2, |b| b.layers).max(2);
@@ -23,39 +14,35 @@ fn layers(geometry: &Geometry) -> Vec<String> {
         .collect()
 }
 
-fn plated_half(el: &Value) -> Option<(f64, f64)> {
-    if let Some(d) = num(el, "outer_diameter") {
+fn plated_half(el: &PcbPlatedHole) -> Option<(f64, f64)> {
+    if let Some(d) = el.outer_diameter {
         return Some((d / 2.0, d / 2.0));
     }
-    Some((
-        num(el, "outer_width")? / 2.0,
-        num(el, "outer_height")? / 2.0,
-    ))
+    Some((el.outer_width? / 2.0, el.outer_height? / 2.0))
 }
 
-fn port_net(ctx: &LintContext<'_>, el: &Value) -> Option<String> {
-    if let Some(id) = text(el, "net_id").or_else(|| text(el, "source_net_id")) {
-        let idx = ctx.netlist.by_id.get(id)?;
-        return Some(ctx.netlist.nets.get(*idx)?.display_name().to_string());
+fn net_name(ctx: &LintContext<'_>, net: Option<usize>) -> Option<String> {
+    Some(ctx.netlist.nets.get(net?)?.display_name().to_string())
+}
+
+fn port_net(ctx: &LintContext<'_>, net: Option<&str>, pcb_port: Option<&str>) -> Option<String> {
+    if let Some(id) = net {
+        return net_name(ctx, ctx.netlist.by_id.get(id).copied());
     }
-    let pcb_port = text(el, "pcb_port_id")?;
+    let pcb_port = pcb_port?;
     let source_port = ctx
         .circuit
-        .raw_elements
-        .iter()
-        .filter(|e| text(e, "type") == Some("pcb_port"))
-        .find(|e| text(e, "pcb_port_id") == Some(pcb_port))
-        .and_then(|e| text(e, "source_port_id"))?;
-    let idx = ctx.netlist.port_to_net.get(source_port)?;
-    Some(ctx.netlist.nets.get(*idx)?.display_name().to_string())
+        .pcb_ports()
+        .find(|p| p.pcb_port_id.as_deref() == Some(pcb_port))
+        .and_then(|p| p.source_port_id.as_deref())?;
+    net_name(ctx, ctx.netlist.port_to_net.get(source_port).copied())
 }
 
-fn via_net(ctx: &LintContext<'_>, geometry: &Geometry, el: &Value) -> Option<String> {
-    if let Some(net) = port_net(ctx, el) {
+fn via_net(ctx: &LintContext<'_>, geometry: &Geometry, el: &PcbVia) -> Option<String> {
+    if let Some(net) = port_net(ctx, el.source_net_id.as_deref(), None) {
         return Some(net);
     }
-    let (x, y) = (num(el, "x")?, num(el, "y")?);
-    let near = |p: (f64, f64)| (p.0 - x).abs() < 1e-6 && (p.1 - y).abs() < 1e-6;
+    let near = |p: (f64, f64)| (p.0 - el.x).abs() < 1e-6 && (p.1 - el.y).abs() < 1e-6;
     let touching = geometry.segments.iter().find(|s| near(s.a) || near(s.b))?;
     touching.net_names.first().cloned()
 }
@@ -77,31 +64,21 @@ fn on_every_layer(
 /// Plated holes and vias as copper on every layer. A part whose net cannot
 /// be resolved is left out, as for unnamed traces.
 pub(super) fn drilled(ctx: &LintContext<'_>, geometry: &Geometry) -> Vec<Copper> {
-    let mut out = Vec::new();
-    for el in &ctx.circuit.raw_elements {
-        let kind = text(el, "type");
-        let (Some(x), Some(y)) = (num(el, "x"), num(el, "y")) else {
-            continue;
-        };
-        let (half, net, id) = match kind {
-            Some("pcb_plated_hole") => (
-                plated_half(el),
-                port_net(ctx, el),
-                text(el, "pcb_plated_hole_id"),
-            ),
-            Some("pcb_via") => (
-                num(el, "outer_diameter").map(|d| (d / 2.0, d / 2.0)),
-                via_net(ctx, geometry, el),
-                text(el, "pcb_via_id"),
-            ),
-            _ => continue,
-        };
-        let (Some((hw, hh)), Some(net)) = (half, net) else {
-            continue;
-        };
-        let id = id.unwrap_or("drill").to_string();
-        let shape = Shape::Rect { c: (x, y), hw, hh };
-        out.extend(on_every_layer(geometry, id, net, shape));
-    }
-    out
+    let model = ctx.circuit.model();
+    let holes = model.plated_holes.iter().filter_map(|el| {
+        let net = port_net(ctx, el.source_net_id.as_deref(), el.pcb_port_id.as_deref());
+        let (hw, hh) = plated_half(el)?;
+        Some((el.pcb_plated_hole_id.clone(), net?, (el.x, el.y), (hw, hh)))
+    });
+    let vias = model.vias.iter().filter_map(|el| {
+        let half = el.outer_diameter / 2.0;
+        let net = via_net(ctx, geometry, el)?;
+        Some((el.pcb_via_id.clone(), net, (el.x, el.y), (half, half)))
+    });
+    holes
+        .chain(vias)
+        .flat_map(|(id, net, c, (hw, hh))| {
+            on_every_layer(geometry, id, net, Shape::Rect { c, hw, hh })
+        })
+        .collect()
 }

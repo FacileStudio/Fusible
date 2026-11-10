@@ -30,6 +30,7 @@ fn chip_to_remote(
             component_id: Some("U1".to_string()),
             name: Some(chip.to_string()),
             kind: Some("chip".to_string()),
+            ..Default::default()
         }),
         wired(format!("U1.{pin}"), "U1", pin),
         net(Some(net_id), net_name),

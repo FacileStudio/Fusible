@@ -6,9 +6,11 @@ use serde_json::Value;
 ///
 /// tscircuit adds new kinds often, so this keeps the type name as data
 /// instead of one struct per kind. `element_ids` lists every id the element
-/// points at (`*_id` strings and `*_ids` lists), except its own id and its
-/// `subcircuit_id`, sorted and deduplicated. The own id is the `*_id` whose value starts with the type
-/// name, because some kinds (`pcb_autorouting_error`) store it as `pcb_error_id`.
+/// points at (`*_id` strings and `*_ids` lists), except its own id, its
+/// `subcircuit_id`, `source_group_id` and `pcb_error_id` (a second label of
+/// the error itself), sorted and deduplicated. The own id is the `*_id` whose
+/// value starts with the type name, because some kinds
+/// (`pcb_autorouting_error`) store it as `pcb_error_id`.
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct UpstreamIssue {
     /// The element type, e.g. `pcb_trace_error`.
@@ -21,7 +23,7 @@ pub struct UpstreamIssue {
     pub is_error: bool,
 }
 
-const SKIPPED: [&str; 2] = ["subcircuit_id", "source_group_id"];
+const SKIPPED: [&str; 3] = ["subcircuit_id", "source_group_id", "pcb_error_id"];
 
 fn referenced(own: &str, object: &serde_json::Map<String, Value>) -> Vec<String> {
     let refs = object

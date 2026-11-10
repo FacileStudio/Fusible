@@ -5,7 +5,7 @@ mod element;
 use std::collections::HashSet;
 
 use crate::linter::{Category, Diagnostic, LintContext, Rule, RuleMeta, Severity};
-use element::{detect_multiple_sheets, extract_coord, resolve_refdes};
+use element::{detect_multiple_sheets, resolve_refdes};
 
 const MAX_CENTER_COORD_MM: f64 = 150.0;
 const MAX_SPAN_MM: f64 = 300.0;
@@ -115,16 +115,15 @@ impl Bounds {
 
 /// Every `schematic_component` with both coordinates.
 fn collect_placements(ctx: &LintContext<'_>) -> Vec<Placement> {
-    ctx.circuit
-        .raw_elements
+    let schematic = &ctx.circuit.model().schematic_components;
+    schematic
         .iter()
-        .filter(|elem| elem.get("type").and_then(|v| v.as_str()) == Some("schematic_component"))
-        .filter_map(|elem| {
-            let (x, y) = (extract_coord(elem, "x")?, extract_coord(elem, "y")?);
+        .filter_map(|component| {
+            let (x, y) = component.position();
             Some(Placement {
-                refdes: resolve_refdes(elem, ctx),
-                x,
-                y,
+                refdes: resolve_refdes(component, ctx),
+                x: x?,
+                y: y?,
             })
         })
         .collect()

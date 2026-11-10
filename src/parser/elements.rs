@@ -3,6 +3,7 @@
 use serde::Deserialize;
 
 use super::pin::PinAttributes;
+use super::props::ComponentProps;
 
 /// A component.
 #[derive(Debug, Clone, Deserialize, Default)]
@@ -16,6 +17,10 @@ pub struct Component {
     /// Human-readable designator, e.g. `U1` or `ESP32`.
     #[serde(default)]
     pub name: Option<String>,
+    /// Part numbers and typed values (`resistance`, `capacitance`, ...),
+    /// boxed to keep every `CircuitElement` small.
+    #[serde(flatten, deserialize_with = "super::lenient::lenient")]
+    pub props: Box<ComponentProps>,
 }
 
 /// A net: the logical connection between pins.
@@ -51,7 +56,7 @@ pub struct Port {
     #[serde(default, alias = "port_hints", alias = "portHints")]
     pub port_hints: Option<Vec<String>>,
     /// Declared electrical intent (`requires_power`, `do_not_connect`, ...).
-    #[serde(flatten, deserialize_with = "super::pin::lenient")]
+    #[serde(flatten, deserialize_with = "super::lenient::lenient")]
     pub attributes: PinAttributes,
 }
 

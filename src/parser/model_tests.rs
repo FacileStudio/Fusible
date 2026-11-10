@@ -9,6 +9,12 @@ fn model(source: &str) -> Model {
     parse(source, Path::new("circuit.json"))
         .expect("fixture parses")
         .model()
+        .clone()
+}
+
+fn parts(source: &str) -> Vec<ComponentProps> {
+    let circuit = parse(source, Path::new("circuit.json")).expect("fixture parses");
+    circuit.components().map(|c| (*c.props).clone()).collect()
 }
 
 #[test]
@@ -72,22 +78,23 @@ fn reads_fieldcam_silkscreen_courtyards_and_parts() {
     assert_eq!(m.courtyard_outlines[0].outline.len(), 4);
     let joined = &m.internal_connections[0].source_port_ids;
     assert_eq!(joined, &["source_port_182", "source_port_183"]);
-    let resistor = &m.parts[0];
+    let parts = parts(include_str!("fixtures/fieldcam_pcb.json"));
+    let resistor = &parts[0];
     assert_eq!(resistor.resistance, Some(10_000.0));
     assert_eq!(
         resistor.manufacturer_part_number.as_deref(),
         Some("RC0603FR-0710KL")
     );
     assert_eq!(resistor.supplier_part_numbers["jlcpcb"].len(), 3);
-    assert_eq!(m.parts[1].capacitance, Some(0.000001));
-    assert_eq!(m.parts[1].display_capacitance.as_deref(), Some("1uF"));
+    assert_eq!(parts[1].capacitance, Some(0.000001));
+    assert_eq!(parts[1].display_capacitance.as_deref(), Some("1uF"));
 }
 
 #[test]
 fn part_values_sent_as_strings_read_as_numbers() {
     let json = r#"[{"type": "source_component", "source_component_id": "c1", "ftype": "simple_capacitor",
         "name": "C1", "capacitance": "100nF", "max_voltage_rating": "16V", "display_value": "100n"}]"#;
-    let part = &model(json).parts[0];
+    let part = &parts(json)[0];
     assert!((part.capacitance.expect("capacitance") - 1e-7).abs() < 1e-18);
     assert_eq!(part.max_voltage_rating, Some(16.0));
     assert_eq!(part.display_value.as_deref(), Some("100n"));
@@ -106,7 +113,8 @@ fn malformed_typed_elements_are_listed_not_dropped() {
     assert!(m.unreadable[0].starts_with("pcb_via_9: pcb_via:"));
     assert!(m.unreadable[1].starts_with("t1: pcb_trace:"));
     assert!(m.unreadable[2].starts_with("r1: source_component:"));
-    assert!(m.vias.is_empty() && m.traces.is_empty() && m.parts.is_empty());
+    assert!(m.vias.is_empty() && m.traces.is_empty());
+    assert!(parts(json)[0].unreadable.is_some());
 }
 
 #[test]

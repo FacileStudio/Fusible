@@ -17,10 +17,10 @@ fn enabled(list: &[Value], id: &str) -> bool {
 #[test]
 fn every_registered_rule_is_listed_with_a_summary() {
     let list = rules(None);
-    assert_eq!(list.len(), 14);
+    assert_eq!(list.len(), 30);
     for rule in &list {
         assert!(!rule["summary"].as_str().unwrap().is_empty(), "{rule}");
-        assert!(["error", "warning"].contains(&rule["severity"].as_str().unwrap()));
+        assert!(["error", "warning", "info"].contains(&rule["severity"].as_str().unwrap()));
     }
     let current = list.iter().find(|r| r["id"] == "trace_current").unwrap();
     assert_eq!(current["standard"], "IPC-2152");

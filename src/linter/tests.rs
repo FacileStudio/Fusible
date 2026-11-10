@@ -12,21 +12,18 @@ use crate::parser::{Circuit, CircuitElement, Net, Port};
 
 /// One net wired to a single port: `unconnected_net` must fire on it.
 fn floating_net() -> Circuit {
-    Circuit {
-        elements: vec![
-            CircuitElement::Net(Net {
-                net_id: Some("n1".to_string()),
-                name: Some("GND".to_string()),
-            }),
-            CircuitElement::Port(Port {
-                port_id: Some("U1.1".to_string()),
-                name: None,
-                net_id: Some("n1".to_string()),
-                ..Default::default()
-            }),
-        ],
-        raw_elements: Vec::new(),
-    }
+    Circuit::from_elements(vec![
+        CircuitElement::Net(Net {
+            net_id: Some("n1".to_string()),
+            name: Some("GND".to_string()),
+        }),
+        CircuitElement::Port(Port {
+            port_id: Some("U1.1".to_string()),
+            name: None,
+            net_id: Some("n1".to_string()),
+            ..Default::default()
+        }),
+    ])
 }
 
 /// `new()` is the isolation hatch: nothing runs unless it was added.
@@ -62,31 +59,28 @@ fn with_rule_appends_to_an_empty_linter() {
 /// ghost (port pointing at an undefined net).
 #[test]
 fn rules_run_in_registration_order() {
-    let circuit = Circuit {
-        elements: vec![
-            CircuitElement::Net(Net {
-                net_id: Some("n1".to_string()),
-                name: Some("GND".to_string()),
-            }),
-            CircuitElement::Port(Port {
-                port_id: Some("U1.1".to_string()),
-                name: None,
-                net_id: Some("n1".to_string()),
-                ..Default::default()
-            }),
-            CircuitElement::Net(Net {
-                net_id: None,
-                name: Some("nameless".to_string()),
-            }),
-            CircuitElement::Port(Port {
-                port_id: Some("U1.2".to_string()),
-                name: None,
-                net_id: Some("undefined".to_string()),
-                ..Default::default()
-            }),
-        ],
-        raw_elements: Vec::new(),
-    };
+    let circuit = Circuit::from_elements(vec![
+        CircuitElement::Net(Net {
+            net_id: Some("n1".to_string()),
+            name: Some("GND".to_string()),
+        }),
+        CircuitElement::Port(Port {
+            port_id: Some("U1.1".to_string()),
+            name: None,
+            net_id: Some("n1".to_string()),
+            ..Default::default()
+        }),
+        CircuitElement::Net(Net {
+            net_id: None,
+            name: Some("nameless".to_string()),
+        }),
+        CircuitElement::Port(Port {
+            port_id: Some("U1.2".to_string()),
+            name: None,
+            net_id: Some("undefined".to_string()),
+            ..Default::default()
+        }),
+    ]);
 
     let violations = Linter::default().run(&circuit);
     let rules: Vec<&str> = violations.iter().map(|v| v.rule.as_str()).collect();

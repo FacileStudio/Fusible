@@ -10,6 +10,7 @@ pub fn chip(component_id: &str, name: &str) -> CircuitElement {
         component_id: Some(component_id.to_string()),
         kind: Some("chip".to_string()),
         name: Some(name.to_string()),
+        ..Default::default()
     })
 }
 
@@ -34,10 +35,7 @@ pub fn port(port_id: &str, name: &str, net_id: &str, component: &str, pin: u32) 
 }
 
 fn circuit(elements: Vec<CircuitElement>) -> Circuit {
-    Circuit {
-        elements,
-        raw_elements: Vec::new(),
-    }
+    Circuit::from_elements(elements)
 }
 
 /// An ESP32-S3 wired to a camera data line and a modem TX line.

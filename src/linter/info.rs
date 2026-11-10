@@ -2,7 +2,7 @@
 
 use serde::Serialize;
 
-use super::{Category, Linter, Rule, Severity};
+use super::{Category, Linter, Rule, RuleMeta, Severity};
 use crate::config::DesignRules;
 
 /// What a rule checks, which standard backs it, and whether the manifest feeds it.
@@ -18,22 +18,30 @@ pub struct RuleInfo {
 }
 
 impl Linter {
-    /// Describes every registered rule, in registration order. `design` decides
-    /// which rules have the declarations they need.
+    /// Describes every id the registered rules report under, in
+    /// registration order: each rule's own id, then the ids it
+    /// [`Rule::emits`]. `design` decides which rules have the declarations
+    /// they need.
     pub fn describe(&self, design: Option<&DesignRules>) -> Vec<RuleInfo> {
-        let info = |rule: &dyn Rule| RuleInfo {
-            id: rule.name(),
-            category: rule.meta().category,
-            standard: rule.standard(),
-            source_url: rule.source_url(),
-            severity: match rule.severity() {
+        let info = |rule: &dyn Rule, meta: &'static RuleMeta| RuleInfo {
+            id: meta.id,
+            category: meta.category,
+            standard: meta.standard,
+            source_url: meta.source_url,
+            severity: match meta.default_severity {
                 Severity::Error => "error",
                 Severity::Warning => "warning",
                 Severity::Info => "info",
             },
             enabled: rule.enabled(design),
-            summary: rule.summary(),
+            summary: meta.summary,
         };
-        self.rules.iter().map(|rule| info(rule.as_ref())).collect()
+        let rules = self.rules.iter().map(|rule| rule.as_ref());
+        rules
+            .flat_map(|rule| {
+                let metas = std::iter::once(rule.meta()).chain(rule.emits().iter().copied());
+                metas.map(move |meta| info(rule, meta))
+            })
+            .collect()
     }
 }

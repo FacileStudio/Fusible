@@ -1,24 +1,28 @@
 //! Typed model of the Circuit JSON elements the netlist AST does not cover.
 //!
-//! [`Model::build`] reads the board, placement, copper, drill, silkscreen
-//! and courtyard elements, the part data of every `source_component`, and
-//! every upstream `*_error` / `*_warning`. An element of a modelled type that
+//! [`Model::build`] reads the board, placement, copper, drill, silkscreen,
+//! courtyard and schematic elements, and every upstream `*_error` /
+//! `*_warning`. Part data lives on [`super::Component::props`]. An element of a modelled type that
 //! does not deserialize is never dropped: it is listed in
 //! [`Model::unreadable`], which a rule reports to keep the fuse fail-closed.
 
 mod board;
+mod census;
 mod issues;
 mod pcb;
+mod schematic;
 mod silk;
 
 pub use super::elements::PadPoint as Point;
-pub use super::props::ComponentProps;
 pub use board::{InternalConnection, PcbBoard, PcbComponent};
 pub use issues::UpstreamIssue;
 pub use pcb::{
     BrepShape, PcbCopperPour, PcbHole, PcbPlatedHole, PcbTrace, PcbVia, Ring, RoutePoint,
 };
+pub use schematic::{LoosePoint, SchematicComponent};
 pub use silk::{CourtyardOutline, CourtyardRect, SilkscreenPath, SilkscreenText};
+
+use std::collections::{BTreeMap, BTreeSet};
 
 use serde::de::DeserializeOwned;
 use serde_json::Value;
@@ -30,8 +34,6 @@ use super::Circuit;
 pub struct Model {
     pub boards: Vec<PcbBoard>,
     pub components: Vec<PcbComponent>,
-    /// Part data of each `source_component`.
-    pub parts: Vec<ComponentProps>,
     pub internal_connections: Vec<InternalConnection>,
     pub traces: Vec<PcbTrace>,
     pub vias: Vec<PcbVia>,
@@ -42,7 +44,14 @@ pub struct Model {
     pub silkscreen_paths: Vec<SilkscreenPath>,
     pub courtyard_rects: Vec<CourtyardRect>,
     pub courtyard_outlines: Vec<CourtyardOutline>,
+    pub schematic_components: Vec<SchematicComponent>,
     pub issues: Vec<UpstreamIssue>,
+    /// How many elements of each `type` the file holds, readable or not.
+    pub type_counts: BTreeMap<String, usize>,
+    /// The `footprinter_string` or `footprint` of each element that has one.
+    pub footprints: Vec<String>,
+    /// Every distinct `schematic_sheet_id` any element points at.
+    pub schematic_sheet_ids: BTreeSet<String>,
     /// `<id>: <type>: <why>` for each element that could not be read.
     pub unreadable: Vec<String>,
 }
@@ -63,7 +72,6 @@ fn read<T: Kind>(model: &mut Model, element: &Value) -> Result<(), String> {
 const READERS: [(&str, Reader); 13] = [
     (PcbBoard::TYPE, read::<PcbBoard>),
     (PcbComponent::TYPE, read::<PcbComponent>),
-    (ComponentProps::TYPE, read::<ComponentProps>),
     (InternalConnection::TYPE, read::<InternalConnection>),
     (PcbTrace::TYPE, read::<PcbTrace>),
     (PcbVia::TYPE, read::<PcbVia>),
@@ -74,16 +82,19 @@ const READERS: [(&str, Reader); 13] = [
     (SilkscreenPath::TYPE, read::<SilkscreenPath>),
     (CourtyardRect::TYPE, read::<CourtyardRect>),
     (CourtyardOutline::TYPE, read::<CourtyardOutline>),
+    (SchematicComponent::TYPE, read::<SchematicComponent>),
 ];
 
 impl Model {
-    /// Reads every element of `circuit` once.
+    /// Reads every element of `raw` once; `circuit` holds the same
+    /// elements, already typed.
     ///
-    /// Ports whose pin attributes failed to read are listed in `unreadable`
-    /// too, under their `source_port_id`.
-    pub fn build(circuit: &Circuit) -> Self {
+    /// Ports whose pin attributes and components whose part data failed to
+    /// read are listed in `unreadable` too, under their source id.
+    pub(in crate::parser) fn build(raw: &[Value], circuit: &Circuit) -> Self {
         let mut model = Self::default();
-        for element in &circuit.raw_elements {
+        for element in raw {
+            census::count(&mut model, element);
             model.add(element);
         }
         let ports = circuit.ports().filter_map(|port| {
@@ -91,7 +102,12 @@ impl Model {
             let id = port.port_id.as_deref().unwrap_or("source_port");
             Some(format!("{id}: source_port: pin attributes: {why}"))
         });
-        model.unreadable.extend(ports);
+        let parts = circuit.components().filter_map(|part| {
+            let why = part.props.unreadable.as_ref()?;
+            let id = part.component_id.as_deref().unwrap_or("source_component");
+            Some(format!("{id}: source_component: {why}"))
+        });
+        model.unreadable.extend(ports.chain(parts));
         model
     }
 

@@ -66,6 +66,7 @@ mod elements;
 pub mod geometry;
 #[cfg(test)]
 mod geometry_tests;
+mod lenient;
 pub mod model;
 #[cfg(test)]
 mod model_tests;
@@ -76,6 +77,7 @@ mod props;
 #[cfg(test)]
 mod tests;
 pub mod units;
+mod views;
 
 pub use diagnostic::JsonDiagnostic;
 pub use elements::{Component, Net, Pad, PadPoint, PcbPort, Port, Trace};
@@ -116,65 +118,48 @@ pub enum CircuitElement {
     Unknown,
 }
 
-/// The circuit AST: the raw element array plus typed accessors.
+/// The circuit AST: the typed elements plus the typed model built from
+/// the same file at construction.
 ///
 /// Instead of `match`ing over `elements` everywhere, the per-type *views*
-/// live here. The linter — and later the `mcu::` module — consume these
-/// iterators without knowing anything about the JSON shape.
+/// live in the `views` submodule. The linter — and later the `mcu::` module —
+/// consume these iterators without knowing anything about the JSON shape.
 #[derive(Debug, Clone, Default)]
 pub struct Circuit {
     pub elements: Vec<CircuitElement>,
-    pub raw_elements: Vec<serde_json::Value>,
+    model: Model,
 }
 
 impl Circuit {
-    pub fn components(&self) -> impl Iterator<Item = &Component> {
-        self.elements.iter().filter_map(|e| match e {
-            CircuitElement::Component(c) => Some(c),
-            _ => None,
-        })
+    /// A circuit holding only `elements`. Its model has no board, copper
+    /// or upstream issue: no raw element backs it.
+    pub fn from_elements(elements: Vec<CircuitElement>) -> Self {
+        Self::assemble(&[], elements)
     }
 
-    pub fn nets(&self) -> impl Iterator<Item = &Net> {
-        self.elements.iter().filter_map(|e| match e {
-            CircuitElement::Net(n) => Some(n),
-            _ => None,
-        })
+    /// Reads every element of `values`, as [`parse`] does without the
+    /// source position of an error.
+    pub fn from_values(values: Vec<serde_json::Value>) -> Result<Self, serde_json::Error> {
+        let elements = values
+            .iter()
+            .map(CircuitElement::deserialize)
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(Self::assemble(&values, elements))
     }
 
-    pub fn ports(&self) -> impl Iterator<Item = &Port> {
-        self.elements.iter().filter_map(|e| match e {
-            CircuitElement::Port(p) => Some(p),
-            _ => None,
-        })
+    fn assemble(raw: &[serde_json::Value], elements: Vec<CircuitElement>) -> Self {
+        let mut circuit = Self {
+            elements,
+            model: Model::default(),
+        };
+        circuit.model = Model::build(raw, &circuit);
+        circuit
     }
 
-    pub fn pads(&self) -> impl Iterator<Item = &Pad> {
-        self.elements.iter().filter_map(|e| match e {
-            CircuitElement::Pad(p) => Some(p),
-            _ => None,
-        })
-    }
-
-    pub fn pcb_ports(&self) -> impl Iterator<Item = &PcbPort> {
-        self.elements.iter().filter_map(|e| match e {
-            CircuitElement::PcbPort(p) => Some(p),
-            _ => None,
-        })
-    }
-
-    pub fn traces(&self) -> impl Iterator<Item = &Trace> {
-        self.elements.iter().filter_map(|e| match e {
-            CircuitElement::Trace(t) => Some(t),
-            _ => None,
-        })
-    }
-
-    /// The typed board, placement, copper, silkscreen, part and upstream
-    /// issue model. It reads every raw element, so build it once per check
-    /// and pass it down rather than calling this per rule.
-    pub fn model(&self) -> Model {
-        Model::build(self)
+    /// The typed board, placement, copper, silkscreen, schematic and
+    /// upstream issue model, built once when the circuit was read.
+    pub fn model(&self) -> &Model {
+        &self.model
     }
 }
 
@@ -192,8 +177,5 @@ pub fn parse(source: &str, path: &Path) -> Result<Circuit, JsonDiagnostic> {
                 .map_err(|err| JsonDiagnostic::element(index, err, source, path))
         })
         .collect::<Result<Vec<_>, _>>()?;
-    Ok(Circuit {
-        elements,
-        raw_elements,
-    })
+    Ok(Circuit::assemble(&raw_elements, elements))
 }

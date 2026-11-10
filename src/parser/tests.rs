@@ -138,3 +138,28 @@ fn span_mapping_handles_multiline_crlf_and_multibyte() {
     // A line beyond the file lands at EOF instead of panicking.
     assert_eq!(byte_offset_at(lf, 99, 1), lf.len());
 }
+
+#[test]
+fn census_and_schematic_placements_cover_every_element() {
+    let circuit = Circuit::from_values(vec![
+        serde_json::json!({"type": "cad_component", "footprinter_string": "qfn32_w6_h6_p0.5"}),
+        serde_json::json!({"type": "schematic_component", "center": {"x": "NaN", "y": 2},
+            "x": 4, "refdes": 7, "schematic_sheet_id": "s1"}),
+        serde_json::json!({"type": "schematic_text", "schematic_sheet_id": "s2"}),
+    ])
+    .expect("fixture reads");
+    let m = circuit.model();
+
+    assert_eq!(m.footprints, ["qfn32_w6_h6_p0.5"]);
+    assert_eq!(
+        (m.count("schematic_component"), m.count("pcb_trace")),
+        (1, 0)
+    );
+    assert_eq!(m.schematic_sheet_ids.len(), 2);
+    let placed = &m.schematic_components[0];
+    assert!(placed.position().0.is_some_and(f64::is_nan));
+    assert_eq!(
+        (placed.position().1, placed.refdes.as_deref()),
+        (Some(2.0), None)
+    );
+}

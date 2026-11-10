@@ -11,20 +11,15 @@ use serde::Deserialize;
 
 use super::units::quantity;
 
-/// Everything a `source_component` says about the part it places.
+/// Everything a `source_component` says about the part it places, beyond
+/// the identity fields [`super::Component`] keeps.
 ///
-/// [`super::Component`] keeps the identity fields; this struct carries the
-/// rest and links back through `source_component_id`.
+/// When a value has the wrong type, every field stays empty and
+/// [`ComponentProps::unreadable`] holds the serde error, so a rule can
+/// report the part instead of trusting missing data.
 #[derive(Debug, Clone, Default, PartialEq, Deserialize)]
 #[serde(default)]
 pub struct ComponentProps {
-    #[serde(alias = "component_id", alias = "sourceComponentId")]
-    pub source_component_id: Option<String>,
-    /// Component kind, e.g. `simple_resistor`.
-    #[serde(alias = "kind")]
-    pub ftype: Option<String>,
-    /// Reference designator, e.g. `R1`.
-    pub name: Option<String>,
     pub manufacturer_part_number: Option<String>,
     /// Supplier name (`jlcpcb`, `digikey`, ...) to its part numbers.
     pub supplier_part_numbers: BTreeMap<String, Vec<String>>,
@@ -80,4 +75,16 @@ pub struct ComponentProps {
     /// LED colour, e.g. `red`.
     pub color: Option<String>,
     pub wavelength: Option<String>,
+    /// Why the part data could not be read, when a value had the wrong type.
+    #[serde(skip)]
+    pub unreadable: Option<String>,
+}
+
+impl super::lenient::Lenient for Box<ComponentProps> {
+    fn failed(why: String) -> Self {
+        Box::new(ComponentProps {
+            unreadable: Some(why),
+            ..ComponentProps::default()
+        })
+    }
 }
