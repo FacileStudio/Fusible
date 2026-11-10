@@ -11,7 +11,7 @@ mod report;
 pub mod sexpr;
 pub mod sync;
 mod tsx;
-mod tsx_tag;
+pub(crate) mod tsx_tag;
 
 #[cfg(test)]
 mod backup_tests;

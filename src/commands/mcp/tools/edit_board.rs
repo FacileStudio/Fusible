@@ -7,6 +7,7 @@ use super::outcome::Outcome;
 use crate::commands::mcp::edit;
 use crate::commands::mcp::report;
 use crate::commands::mcp::session::Session;
+use crate::commands::target::BoardTarget;
 
 pub const DESCRIPTION: &str =
     "Edit the source file of a board with a unified diff (patch) or full new content, \
@@ -34,26 +35,39 @@ pub fn schema() -> Value {
     )
 }
 
-fn prepare(session: &mut Session, args: &Value) -> Result<Outcome, Outcome> {
-    let board = required_str(args, "board")?;
+/// Applies `change` to the board file of `target` and checks that board.
+pub(super) fn edit_target(
+    session: &mut Session,
+    target: &BoardTarget,
+    change: &edit::Change,
+    dry: bool,
+) -> Outcome {
     let project = session.project();
-    let target = report::select(&project, Some(board))
-        .map_err(Outcome::fail)?
-        .remove(0);
-    let change = edit::change_from(args).map_err(Outcome::fail)?;
     let check = || {
-        let lint = report::lint_board(&project, &target);
+        let lint = report::lint_board(&project, target);
         (
             json!(report::fuse(std::slice::from_ref(&lint))),
             report::diagnostics_json(&lint),
         )
     };
-    Ok(edit::edit(
+    edit::edit(session, &target.entry, change, dry, &check)
+}
+
+/// The one board `args.board` names.
+pub(super) fn target(session: &Session, args: &Value) -> Result<BoardTarget, Outcome> {
+    let board = required_str(args, "board")?;
+    let mut found = report::select(&session.project(), Some(board)).map_err(Outcome::fail)?;
+    Ok(found.remove(0))
+}
+
+fn prepare(session: &mut Session, args: &Value) -> Result<Outcome, Outcome> {
+    let target = target(session, args)?;
+    let change = edit::change_from(args).map_err(Outcome::fail)?;
+    Ok(edit_target(
         session,
-        &target.entry,
+        &target,
         &change,
         flag(args, "dry_run", true),
-        &check,
     ))
 }
 
