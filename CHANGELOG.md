@@ -98,10 +98,20 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 ### Fixed
 
 - Studio: info diagnostics no longer show in the error colour.
+- `unrouted` is judged per net by copper connectivity, not by trace id. tscircuit routes a net as
+  one tree, so a net with more than two pins was reported as unrouted.
+- A `<trace name="...">` no longer fails parsing with "duplicate field `name`".
+- A gap equal to the minimum no longer fails `trace_clearance` or `voltage_clearance`.
+- Port-to-port traces and their vias are checked by the clearance and drill rules. Copper whose
+  net cannot be resolved is its own net, never skipped.
+- Round vias, plated holes and pads are measured as circles, not as their bounding squares.
+- `voltage_domain` uses a signal pin's own `provides_voltage` or `requires_voltage` before its
+  part's supply voltage.
+- RP2040: GPIO22 to GPIO25 are listed.
 
 ### Removed
 
-- `HANDOFF.md` and the hand-written `src/silicon/database/stm32/` tables.
+- `HANDOFF.md`, `PLAN.md` and the hand-written `src/silicon/database/stm32/` tables.
 
 ## [1.1.2] - 2026-11-09
 

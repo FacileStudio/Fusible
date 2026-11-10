@@ -36,10 +36,22 @@ impl Project {
         self.temp.path.join("ws")
     }
 
+    /// Builds once. Linux answers "text file busy" while another test thread
+    /// forks with the fresh script still open for writing, so that error is
+    /// tried again; the script did not run.
     fn build(&self) -> PathBuf {
-        self.runner
-            .build(&self.ws().join("board.tsx"), None)
-            .unwrap()
+        let entry = self.ws().join("board.tsx");
+        let busy =
+            |e: &crate::tscircuit::RunnerError| format!("{e:?}").contains("ExecutableFileBusy");
+        let mut tries = (0..200).map(|_| self.runner.build(&entry, None));
+        let done = tries.find(|r| {
+            let retry = r.as_ref().is_err_and(busy);
+            if retry {
+                std::thread::sleep(std::time::Duration::from_millis(5));
+            }
+            !retry
+        });
+        done.expect("the fake tsci stayed busy").unwrap()
     }
 
     fn runs(&self) -> usize {
