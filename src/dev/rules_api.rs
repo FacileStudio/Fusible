@@ -4,12 +4,12 @@ use tiny_http::Request;
 
 use super::api::respond_json;
 use crate::config::DesignRules;
-use crate::linter::Linter;
+use crate::linter::catalog;
 use crate::project::Project;
 
 /// The JSON list of every registered rule for the manifest nearest to the working directory.
 pub(super) fn rules_json(design: Option<&DesignRules>) -> String {
-    let rules = Linter::default().describe(design);
+    let rules = catalog(design);
     serde_json::to_string(&rules).unwrap_or_else(|_| "[]".to_string())
 }
 

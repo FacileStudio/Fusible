@@ -1,7 +1,44 @@
 //! Where a pad sits, how big it is, and which net it is on.
 
+use super::copper::Shape;
 use crate::linter::LintContext;
+use crate::parser::model::PcbPlatedHole;
 use crate::parser::{Pad, PadPoint};
+
+/// The copper outline of a pad: a circle for a `radius` pad, else its box.
+pub(super) fn pad_shape(pad: &Pad) -> Option<Shape> {
+    if let (Some(x), Some(y), None, None, Some(r)) =
+        (pad.x, pad.y, pad.width, pad.height, pad.radius)
+    {
+        return Some(Shape::disc((x, y), r));
+    }
+    let (x, y, hw, hh) = pad_box(pad)?;
+    Some(Shape::Rect { c: (x, y), hw, hh })
+}
+
+/// The copper around a plated hole: a circle for a round ring, a box for a
+/// pill ring or a rectangular pad (turned by quarter turns), and the barrel
+/// alone when no pad size is written.
+pub(super) fn hole_shape(hole: &PcbPlatedHole) -> Option<Shape> {
+    let c = (hole.x, hole.y);
+    if let Some(d) = hole.outer_diameter {
+        return Some(Shape::disc(c, d / 2.0));
+    }
+    let pill = hole.outer_width.zip(hole.outer_height);
+    let Some((w, h)) = pill.or_else(|| hole.rect_pad_width.zip(hole.rect_pad_height)) else {
+        return Some(Shape::disc(c, hole.hole_diameter? / 2.0));
+    };
+    let quarter = |r: f64| (r / 90.0).round() as i64 % 2 != 0;
+    let (w, h) = match hole.rect_ccw_rotation.is_some_and(quarter) {
+        true => (h, w),
+        false => (w, h),
+    };
+    Some(Shape::Rect {
+        c,
+        hw: w / 2.0,
+        hh: h / 2.0,
+    })
+}
 
 /// Half extents of a pad: `width`/`height`, or `radius` for circle pads.
 fn half_extents(pad: &Pad) -> (f64, f64) {

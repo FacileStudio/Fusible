@@ -24,7 +24,7 @@ mod tests;
 pub use context::LintContext;
 pub use cross::{cross_world_ids, CROSS_WORLD};
 pub use diagnostics::{Diagnostic, Fix, FuseBlown, Location, Severity, SourceRef};
-pub use info::RuleInfo;
+pub use info::{catalog, RuleInfo};
 pub use rule::{Category, Rule, RuleMeta};
 pub use rules::roles;
 pub use rules::{

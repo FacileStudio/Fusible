@@ -4,6 +4,7 @@ use std::collections::BTreeMap;
 
 use crate::config::{ClearanceClass, DesignRules};
 use crate::linter::rules::copper::{neighbours, Copper};
+use crate::linter::rules::geom2d::TOLERANCE;
 use crate::linter::rules::ipc2221b::spacing;
 use crate::linter::rules::physics::is_external;
 
@@ -39,7 +40,7 @@ fn candidate(design: &DesignRules, a: &Copper, b: &Copper) -> Option<Worst> {
     let class = class_for(design, &a.layer);
     let required = spacing(class, (va - vb).abs());
     let gap = a.shape.gap(&b.shape);
-    if va == vb || gap >= required {
+    if va == vb || gap >= required - TOLERANCE {
         return None;
     }
     let ((high, hi), (low, lo)) = match va >= vb {

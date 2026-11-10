@@ -66,6 +66,18 @@ fn trace_clearance_measures_diagonal_gaps_corner_to_corner() {
 }
 
 #[test]
+fn trace_clearance_accepts_a_gap_equal_to_the_minimum() {
+    let a = r#""pcb_port_id": "pp_a", "shape": "rect", "x": 1, "y": 0, "width": 0.3, "height": 1"#;
+    let b =
+        r#""pcb_port_id": "pp_b", "shape": "rect", "x": 1.45, "y": 0, "width": 0.3, "height": 1"#;
+    let v = lint(TraceClearanceRule, &two_pads(a, b));
+    assert!(v.is_empty(), "{v:?}");
+
+    let closer = b.replace("1.45", "1.449");
+    assert_eq!(lint(TraceClearanceRule, &two_pads(a, &closer)).len(), 1);
+}
+
+#[test]
 fn trace_clearance_checks_polygon_pads() {
     let a = r#""pcb_port_id": "pp_a", "shape": "polygon",
         "points": [{"x": -1, "y": -1}, {"x": 1, "y": -1}, {"x": 1, "y": 1}, {"x": -1, "y": 1}]"#;

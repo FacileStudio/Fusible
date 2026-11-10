@@ -5,8 +5,8 @@ mod pairs;
 use super::copper::{collect, Copper};
 use super::physics::{unreadable, PRECHECK};
 use crate::config::DesignRules;
+use crate::linter::rules::trace_net::geometry;
 use crate::linter::{Category, Diagnostic, LintContext, Rule, RuleMeta, Severity};
-use crate::parser::geometry::read;
 use pairs::{voltage, worst_pairs, Worst};
 
 const STANDARD: &str = "IPC-2221B";
@@ -72,7 +72,7 @@ impl Rule for VoltageClearanceRule {
         let Some(design) = ctx.design.filter(|d| self.enabled(Some(d))) else {
             return Vec::new();
         };
-        let geometry = read(ctx.circuit);
+        let geometry = geometry(ctx);
         let items: Vec<Copper> = collect(ctx, &geometry)
             .into_iter()
             .filter(|item| voltage(design, &item.net).is_some())

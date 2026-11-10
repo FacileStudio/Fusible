@@ -4,9 +4,10 @@ mod report;
 
 use super::ipc2152::rise;
 use super::physics::{is_external, unreadable};
+use super::trace_net::geometry;
 use crate::config::DesignRules;
 use crate::linter::{Category, Diagnostic, LintContext, Rule, RuleMeta, Severity};
-use crate::parser::geometry::{read, Segment};
+use crate::parser::geometry::Segment;
 use report::{diagnostic, violation};
 
 const DEFAULT_MAX_RISE: f64 = 10.0;
@@ -104,7 +105,7 @@ impl Rule for TraceCurrentRule {
         if loads.is_empty() {
             return Vec::new();
         }
-        let geometry = read(ctx.circuit);
+        let geometry = geometry(ctx);
         let declared = loads
             .iter()
             .filter(|l| ctx.circuit.nets().any(|n| n.name.as_deref() == Some(l.net)));

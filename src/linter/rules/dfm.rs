@@ -30,6 +30,7 @@ pub use silk_over_pad::SilkOverPadRule;
 pub use silk_text_size::SilkTextSizeRule;
 pub use via_aspect_ratio::ViaAspectRatioRule;
 
+pub(super) use index::Index;
 pub(super) use limit::{at, declared, violation, Gate};
 pub(super) use outline::{outline, Outline};
 pub(super) use owners::Owners;

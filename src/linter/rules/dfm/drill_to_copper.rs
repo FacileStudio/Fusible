@@ -1,8 +1,8 @@
 //! `drill_to_copper`: the drill bit keeps away from copper of other nets.
 //!
 //! A plated drill's own net is exempt; a non-plated drill has none, so every
-//! piece of copper counts. A plated drill whose net cannot be resolved is
-//! skipped, as `copper_drill` leaves it out of the copper set.
+//! piece of copper counts. A plated drill whose net cannot be resolved is a
+//! net of its own in `copper_drill`, so every other piece of copper counts.
 
 use std::collections::HashMap;
 
@@ -12,8 +12,8 @@ use super::limit::{at, declared, violation, Gate};
 use crate::config::{DesignRules, FabProfile};
 use crate::linter::rules::copper::{collect, Copper};
 use crate::linter::rules::physics::mm;
+use crate::linter::rules::trace_net::geometry;
 use crate::linter::{Category, Diagnostic, LintContext, Rule, RuleMeta, Severity};
-use crate::parser::geometry::read;
 
 /// Checks the drill edge to foreign copper distance of every hole.
 pub struct DrillToCopperRule;
@@ -71,7 +71,7 @@ fn report(fab: &FabProfile, drill: &Drill, copper: &Copper, gap: f64, min: f64) 
 }
 
 fn scan(ctx: &LintContext<'_>, fab: &FabProfile, min: f64) -> Vec<Diagnostic> {
-    let items = collect(ctx, &read(ctx.circuit));
+    let items = collect(ctx, &geometry(ctx));
     let nets: HashMap<&str, &str> = items
         .iter()
         .map(|c| (c.id.as_str(), c.net.as_str()))

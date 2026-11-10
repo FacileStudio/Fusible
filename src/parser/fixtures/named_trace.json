@@ -1,0 +1,24 @@
+[
+  {"type": "source_port", "source_port_id": "source_port_0", "name": "pin1", "source_component_id": "source_component_0"},
+  {"type": "source_port", "source_port_id": "source_port_1", "name": "pin2", "source_component_id": "source_component_1"},
+  {"type": "source_port", "source_port_id": "source_port_2", "name": "pin1", "source_component_id": "source_component_2"},
+  {"type": "source_port", "source_port_id": "source_port_3", "name": "pin2", "source_component_id": "source_component_3"},
+  {
+    "type": "source_trace",
+    "source_trace_id": "source_trace_0",
+    "connected_source_port_ids": ["source_port_0", "source_port_1"],
+    "connected_source_net_ids": [],
+    "subcircuit_id": "subcircuit_source_group_0",
+    "name": "RESET_LINE",
+    "display_name": ".R1 > .pin1 to .U1 > .pin2",
+    "subcircuit_connectivity_map_key": "unnamedsubcircuitsubcircuit_source_group_0_connectivity_net0"
+  },
+  {
+    "type": "source_trace",
+    "source_trace_id": "source_trace_1",
+    "connected_source_port_ids": ["source_port_2", "source_port_3"],
+    "connected_source_net_ids": [],
+    "display_name": ".R2 > .pin1 to .U1 > .pin3",
+    "subcircuit_connectivity_map_key": "unnamedsubcircuitsubcircuit_source_group_0_connectivity_net1"
+  }
+]

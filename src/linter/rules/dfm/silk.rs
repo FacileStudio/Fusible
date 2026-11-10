@@ -5,9 +5,9 @@
 
 use super::owners::Owners;
 use crate::linter::rules::copper::Shape;
-use crate::linter::rules::pad_geometry::pad_box;
+use crate::linter::rules::pad_geometry::{hole_shape, pad_shape};
 use crate::linter::LintContext;
-use crate::parser::model::{Model, PcbPlatedHole, SilkscreenText};
+use crate::parser::model::{Model, SilkscreenText};
 
 const GLYPH_WIDTH: f64 = 4.0;
 const GLYPH_HEIGHT: f64 = 6.0;
@@ -92,39 +92,19 @@ pub(super) fn silk(model: &Model) -> Vec<Item> {
     strokes.chain(texts).collect()
 }
 
-fn ring_box(el: &PcbPlatedHole) -> Option<Shape> {
-    let size = el.outer_diameter.map(|d| (d, d));
-    let size = size.or_else(|| el.outer_width.zip(el.outer_height));
-    let (w, h) = size.or_else(|| el.rect_pad_width.zip(el.rect_pad_height))?;
-    let turned = el
-        .rect_ccw_rotation
-        .is_some_and(|r| (r / 90.0).round() as i64 % 2 != 0);
-    let (w, h) = if turned { (h, w) } else { (w, h) };
-    Some(Shape::Rect {
-        c: (el.x, el.y),
-        hw: w / 2.0,
-        hh: h / 2.0,
-    })
-}
-
 /// Every pad's copper on its side; plated-hole pads sit on both sides.
 pub(super) fn pads(ctx: &LintContext<'_>) -> Vec<Item> {
     let owners = Owners::new(ctx);
     let smt = ctx.circuit.pads().enumerate().filter_map(|(i, pad)| {
-        let (x, y, hw, hh) = pad_box(pad)?;
         Some(Item {
+            shape: pad_shape(pad)?,
             id: pad.pad_id.clone().unwrap_or_else(|| format!("#{i}")),
-            layer: pad
-                .layer
-                .clone()
-                .unwrap_or_else(|| "top".into())
-                .to_ascii_lowercase(),
-            shape: Shape::Rect { c: (x, y), hw, hh },
+            layer: pad.layer.as_deref().unwrap_or("top").to_ascii_lowercase(),
             owner: owners.of_pad(pad).map(str::to_string),
         })
     });
     let plated = ctx.circuit.model().plated_holes.iter().filter_map(|el| {
-        let shape = ring_box(el)?;
+        let shape = hole_shape(el)?;
         let owner = el
             .pcb_component_id
             .as_deref()

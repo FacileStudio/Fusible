@@ -34,6 +34,11 @@ pub(in crate::linter::rules) fn outline(model: &Model) -> Option<Outline> {
 }
 
 impl Outline {
+    /// A closed polygon through `points`, in order.
+    pub fn through(points: Vec<Point>) -> Self {
+        Self { points }
+    }
+
     fn edges(&self) -> impl Iterator<Item = (Point, Point)> + '_ {
         let n = self.points.len();
         (0..n).map(move |i| (self.points[i], self.points[(i + 1) % n]))

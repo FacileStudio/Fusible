@@ -1,6 +1,6 @@
-//! Reads the routed and unrouted connections for the `unrouted` rule.
+//! Tells a board that was never routed from one that needs no trace.
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use crate::linter::LintContext;
 
@@ -31,18 +31,4 @@ pub(super) fn is_unrouted(ctx: &LintContext<'_>) -> bool {
         && model.has_type(|t| t == "source_net" || t == "source_trace")
         && model.count("pcb_trace") == 0
         && !pads_only_connect(ctx)
-}
-
-/// The `source_trace` ids that have no `pcb_trace`, on a board that routed some traces.
-pub(super) fn unrouted_traces<'a>(ctx: &LintContext<'a>) -> Vec<&'a str> {
-    let model = ctx.circuit.model();
-    if model.count("pcb_trace") == 0 {
-        return Vec::new();
-    }
-    let traces = model.traces.iter();
-    let routed: HashSet<&str> = traces
-        .filter_map(|t| t.source_trace_id.as_deref())
-        .collect();
-    let sources = ctx.circuit.traces().filter_map(|t| t.trace_id.as_deref());
-    sources.filter(|id| !routed.contains(id)).collect()
 }

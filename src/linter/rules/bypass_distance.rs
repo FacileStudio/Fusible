@@ -6,18 +6,14 @@ use std::collections::HashMap;
 use super::copper::Shape;
 use super::erc::parts::PartKind;
 use super::erc::{Board, Pin};
-use super::pad_geometry::pad_box;
+use super::geom2d::TOLERANCE;
+use super::pad_geometry::pad_shape;
 use crate::linter::{Diagnostic, LintContext};
 use crate::parser::{Pad, Port};
 
 const MAX_DISTANCE_MM: f64 = 3.0;
 const SOURCE: &str =
     "https://www.protoexpress.com/blog/decoupling-capacitor-placement-guidelines-pcb-design/";
-
-fn shape(pad: &Pad) -> Option<Shape> {
-    let (x, y, hw, hh) = pad_box(pad)?;
-    Some(Shape::Rect { c: (x, y), hw, hh })
-}
 
 fn pads_by_port<'a>(ctx: &'a LintContext<'_>) -> HashMap<&'a str, &'a Pad> {
     let pcb_ports: HashMap<&str, &str> = ctx
@@ -50,7 +46,7 @@ fn nearest_cap<'a>(
 ) -> Option<(&'a str, &'a str, f64)> {
     let caps = board.on_net(net).filter(|p| p.kind == PartKind::Capacitor);
     let gaps = caps.filter_map(|cap| {
-        let pad = shape(pads.get(cap.id)?)?;
+        let pad = pad_shape(pads.get(cap.id)?)?;
         Some((cap.refdes(), cap.part_id, at.gap(&pad)))
     });
     gaps.min_by(|a, b| a.2.total_cmp(&b.2))
@@ -61,12 +57,12 @@ pub(super) fn too_far(board: &Board<'_>, pins: &[&Pin<'_>]) -> Vec<Diagnostic> {
     let pads = pads_by_port(board.ctx);
     let mut found = Vec::new();
     for pin in pins {
-        let at = pads.get(pin.id).and_then(|pad| shape(pad));
+        let at = pads.get(pin.id).and_then(|pad| pad_shape(pad));
         let (Some(at), Some(net)) = (at, pin.net) else {
             continue;
         };
         if let Some((cap, cap_id, gap)) = nearest_cap(board, &pads, net, &at) {
-            if gap > MAX_DISTANCE_MM {
+            if gap > MAX_DISTANCE_MM + TOLERANCE {
                 found.push(warning(pin, cap, cap_id, gap));
             }
         }

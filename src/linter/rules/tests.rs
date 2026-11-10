@@ -16,9 +16,12 @@ mod physical;
 mod pin_mux;
 mod qfn_footprint;
 mod references;
+mod round_copper;
 mod schematic;
 mod trace_current;
+mod trace_nets;
 mod unrouted;
+mod unrouted_nets;
 mod upstream;
 mod voltage_clearance;
 

@@ -37,6 +37,7 @@ macro_rules! gpio_pin {
 pub mod esp32c3;
 pub mod esp32s3;
 pub mod rp2040;
+mod rp2040_high;
 pub mod rp2350;
 
 use super::model::SiliconTarget;

@@ -4,13 +4,14 @@
 use rstar::primitives::{GeomWithData, Rectangle};
 use rstar::{RTree, AABB};
 
-use super::pad_geometry::{pad_box, pad_net};
+use super::pad_geometry::{pad_net, pad_shape};
 use crate::linter::LintContext;
 use crate::parser::geometry::Geometry;
 
 use super::geom2d::{seg_rect, seg_seg, Point};
 
 /// A copper outline: a trace segment with half its width, or a pad box.
+/// Round copper is a segment of no length, see [`Shape::disc`].
 #[derive(Debug, Clone)]
 pub(super) enum Shape {
     Seg { a: Point, b: Point, half: f64 },
@@ -27,6 +28,20 @@ pub(super) struct Copper {
 }
 
 impl Shape {
+    /// A circle of radius `r` around `c`: a via, a round pad, a round ring.
+    pub fn disc(c: Point, r: f64) -> Self {
+        Self::Seg {
+            a: c,
+            b: c,
+            half: r,
+        }
+    }
+
+    /// Whether this is round copper and not a stretch of trace.
+    pub fn is_disc(&self) -> bool {
+        matches!(self, Self::Seg { a, b, .. } if a == b)
+    }
+
     fn reach(&self) -> f64 {
         match self {
             Self::Seg { half, .. } => *half,
@@ -63,32 +78,29 @@ impl Shape {
 
 /// Every trace segment, positioned pad, plated hole and via as copper.
 ///
-/// Segments whose trace names no net are left out: their net is unknown, so
-/// no pair involving them can be called a violation.
+/// `geometry` comes from `trace_net::geometry`, which puts a net on every
+/// segment. A segment read without one is a net of its own, never left out.
 pub(super) fn collect(ctx: &LintContext<'_>, geometry: &Geometry) -> Vec<Copper> {
-    let segments = geometry.segments.iter().filter_map(|s| {
-        Some(Copper {
+    let segments = geometry.segments.iter().map(|s| {
+        let named = s.net_names.first().cloned();
+        Copper {
             id: s.trace_id.clone(),
-            net: s.net_names.first()?.clone(),
+            net: named.unwrap_or_else(|| format!("<unresolved trace {}>", s.trace_id)),
             layer: s.layer.clone(),
             shape: Shape::Seg {
                 a: s.a,
                 b: s.b,
                 half: s.width / 2.0,
             },
-        })
+        }
     });
     let pads = ctx.circuit.pads().enumerate().filter_map(|(index, pad)| {
-        let (x, y, hw, hh) = pad_box(pad)?;
+        let shape = pad_shape(pad)?;
         let id = pad.pad_id.clone().unwrap_or_else(|| format!("#{index}"));
         Some(Copper {
             net: pad_net(ctx, pad, &id).1,
-            layer: pad
-                .layer
-                .clone()
-                .unwrap_or_else(|| "top".into())
-                .to_ascii_lowercase(),
-            shape: Shape::Rect { c: (x, y), hw, hh },
+            layer: pad.layer.as_deref().unwrap_or("top").to_ascii_lowercase(),
+            shape,
             id,
         })
     });

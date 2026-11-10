@@ -1,5 +1,7 @@
 //! Raspberry Pi RP2040 Function Select (F1-F9) and ADC silicon tables.
+//! GPIO16 to GPIO29 live in `rp2040_high.rs`.
 
+use super::rp2040_high::*;
 use crate::silicon::model::{
     MuxFunction, PeripheralSignal, PinCapabilities, PinSpec, SiliconTarget,
 };
@@ -130,72 +132,6 @@ static GP15_FUNCS: &[MuxFunction] = &[
     mux!(PeripheralSignal::Pwm(7, 'B'), 4, "F4"),
 ];
 
-static GP16_FUNCS: &[MuxFunction] = &[
-    mux!(PeripheralSignal::SpiMiso(0), 1, "F1"),
-    mux!(PeripheralSignal::UartTx(0), 2, "F2"),
-    mux!(PeripheralSignal::I2cSda(0), 3, "F3"),
-    mux!(PeripheralSignal::Pwm(0, 'A'), 4, "F4"),
-];
-
-static GP17_FUNCS: &[MuxFunction] = &[
-    mux!(PeripheralSignal::SpiCs(0, 0), 1, "F1"),
-    mux!(PeripheralSignal::UartRx(0), 2, "F2"),
-    mux!(PeripheralSignal::I2cScl(0), 3, "F3"),
-    mux!(PeripheralSignal::Pwm(0, 'B'), 4, "F4"),
-];
-
-static GP18_FUNCS: &[MuxFunction] = &[
-    mux!(PeripheralSignal::SpiSck(0), 1, "F1"),
-    mux!(PeripheralSignal::UartCts(0), 2, "F2"),
-    mux!(PeripheralSignal::I2cSda(1), 3, "F3"),
-    mux!(PeripheralSignal::Pwm(1, 'A'), 4, "F4"),
-];
-
-static GP19_FUNCS: &[MuxFunction] = &[
-    mux!(PeripheralSignal::SpiMosi(0), 1, "F1"),
-    mux!(PeripheralSignal::UartRts(0), 2, "F2"),
-    mux!(PeripheralSignal::I2cScl(1), 3, "F3"),
-    mux!(PeripheralSignal::Pwm(1, 'B'), 4, "F4"),
-];
-
-static GP20_FUNCS: &[MuxFunction] = &[
-    mux!(PeripheralSignal::SpiMiso(0), 1, "F1"),
-    mux!(PeripheralSignal::UartTx(1), 2, "F2"),
-    mux!(PeripheralSignal::I2cSda(0), 3, "F3"),
-    mux!(PeripheralSignal::Pwm(2, 'A'), 4, "F4"),
-];
-
-static GP21_FUNCS: &[MuxFunction] = &[
-    mux!(PeripheralSignal::SpiCs(0, 0), 1, "F1"),
-    mux!(PeripheralSignal::UartRx(1), 2, "F2"),
-    mux!(PeripheralSignal::I2cScl(0), 3, "F3"),
-    mux!(PeripheralSignal::Pwm(2, 'B'), 4, "F4"),
-];
-
-static GP26_FUNCS: &[MuxFunction] = &[
-    mux!(PeripheralSignal::Adc(0), 0, "ADC"),
-    mux!(PeripheralSignal::I2cSda(1), 3, "F3"),
-    mux!(PeripheralSignal::Pwm(5, 'A'), 4, "F4"),
-];
-
-static GP27_FUNCS: &[MuxFunction] = &[
-    mux!(PeripheralSignal::Adc(1), 0, "ADC"),
-    mux!(PeripheralSignal::I2cScl(1), 3, "F3"),
-    mux!(PeripheralSignal::Pwm(5, 'B'), 4, "F4"),
-];
-
-static GP28_FUNCS: &[MuxFunction] = &[
-    mux!(PeripheralSignal::Adc(2), 0, "ADC"),
-    mux!(PeripheralSignal::UartTx(0), 2, "F2"),
-    mux!(PeripheralSignal::Pwm(6, 'A'), 4, "F4"),
-];
-
-static GP29_FUNCS: &[MuxFunction] = &[
-    mux!(PeripheralSignal::Adc(3), 0, "ADC"),
-    mux!(PeripheralSignal::UartRx(0), 2, "F2"),
-    mux!(PeripheralSignal::Pwm(6, 'B'), 4, "F4"),
-];
-
 pub static RP2040_PINS: &[PinSpec] = &[
     gpio_pin!(0, "GPIO0", RP_GPIO_CAP, GP0_FUNCS),
     gpio_pin!(1, "GPIO1", RP_GPIO_CAP, GP1_FUNCS),
@@ -219,6 +155,10 @@ pub static RP2040_PINS: &[PinSpec] = &[
     gpio_pin!(19, "GPIO19", RP_GPIO_CAP, GP19_FUNCS),
     gpio_pin!(20, "GPIO20", RP_GPIO_CAP, GP20_FUNCS),
     gpio_pin!(21, "GPIO21", RP_GPIO_CAP, GP21_FUNCS),
+    gpio_pin!(22, "GPIO22", RP_GPIO_CAP, GP22_FUNCS),
+    gpio_pin!(23, "GPIO23", RP_GPIO_CAP, GP23_FUNCS),
+    gpio_pin!(24, "GPIO24", RP_GPIO_CAP, GP24_FUNCS),
+    gpio_pin!(25, "GPIO25", RP_GPIO_CAP, GP25_FUNCS),
     gpio_pin!(26, "GPIO26", RP_ADC_CAP, GP26_FUNCS),
     gpio_pin!(27, "GPIO27", RP_ADC_CAP, GP27_FUNCS),
     gpio_pin!(28, "GPIO28", RP_ADC_CAP, GP28_FUNCS),

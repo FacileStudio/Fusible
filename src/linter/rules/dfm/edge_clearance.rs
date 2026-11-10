@@ -10,8 +10,8 @@ use super::outline::outline;
 use crate::config::{DesignRules, FabProfile};
 use crate::linter::rules::copper::{collect, Copper, Shape};
 use crate::linter::rules::physics::mm;
+use crate::linter::rules::trace_net::geometry;
 use crate::linter::{Category, Diagnostic, LintContext, Rule, RuleMeta, Severity};
-use crate::parser::geometry::read;
 
 /// Checks the distance from every piece of copper to the board outline.
 pub struct EdgeClearanceRule;
@@ -36,7 +36,7 @@ fn scan(ctx: &LintContext<'_>, fab: &FabProfile, min: f64) -> Vec<Diagnostic> {
     let Some(board) = outline(ctx.circuit.model()) else {
         return Vec::new();
     };
-    let items = collect(ctx, &read(ctx.circuit));
+    let items = collect(ctx, &geometry(ctx));
     let mut worst: BTreeMap<&str, (f64, &Copper)> = BTreeMap::new();
     for copper in &items {
         let gap = board.gap(&copper.shape);
