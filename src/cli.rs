@@ -18,7 +18,7 @@ pub use args::{
     ReleaseArgs, RouteArgs, SyncArgs,
 };
 pub use args_body::{EjectArgs, KitArgs, NewArgs};
-pub use args_new::ExplainArgs;
+pub use args_new::{ExplainArgs, ProjectArgs, Template};
 pub use args_studio::StudioArgs;
 pub use mcp_args::{McpArgs, McpClient, NuageArgs, OpusArgs, ShareArgs, ShareTarget};
 
@@ -110,6 +110,9 @@ pub enum Commands {
 
     /// Initialize a new Fusible project and tscircuit hardware workspace
     Init(InitArgs),
+
+    /// Create a project from a template: board, firmware crate, enclosure and manifest
+    New(ProjectArgs),
 
     /// Describe one rule: what it checks, its standard, its level here
     Explain(ExplainArgs),

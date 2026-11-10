@@ -18,6 +18,7 @@ pub mod install;
 pub mod links;
 pub mod mcp;
 pub mod migrate;
+pub mod new;
 pub mod opus;
 pub mod release;
 pub mod route;

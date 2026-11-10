@@ -1,6 +1,7 @@
 //! Subcommand: `fusible init` — scaffold a complete Fusible & tscircuit project.
 
 mod currency;
+pub(crate) mod starter;
 mod templates;
 
 use std::path::{Path, PathBuf};
@@ -11,6 +12,9 @@ use thiserror::Error;
 
 use crate::tscircuit::bun_path;
 use crate::tscircuit::detect::resolve_program;
+
+/// The `hardware/tsconfig.json` every new workspace gets.
+pub(crate) const TSCONFIG: &str = templates::TSCONFIG_JSON;
 
 /// Error raised when initialization cannot be completed.
 #[derive(Debug, Error, Diagnostic)]
@@ -133,7 +137,7 @@ fn write_new(path: &Path, content: &str) -> Result<(), InitError> {
 }
 
 /// Runs `install` with the first available package manager in `hw_dir`.
-fn install_hardware_deps(hw_dir: &Path) {
+pub(crate) fn install_hardware_deps(hw_dir: &Path) {
     println!("📦 Installing hardware dependencies...");
     let bun = bun_path().unwrap_or_else(|| resolve_program("bun"));
     for runner in [bun, resolve_program("npm")] {
