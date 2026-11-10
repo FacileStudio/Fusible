@@ -14,7 +14,7 @@ type Rule = {
 
 const root = resolve(import.meta.dir, "..");
 const outDir = join(root, "docs/rules");
-const binary = process.env.FUSIBLE_BIN ?? join(root, "target/debug/fusible");
+const binary = resolve(root, process.env.FUSIBLE_BIN ?? "target/debug/fusible");
 const check = process.argv.includes("--check");
 
 function loadRules(): Rule[] {
