@@ -204,7 +204,9 @@ off until you declare them in `fusible.yml`.
 | `fab_profile` | Trace width and spacing, drill, via pad, annular ring, via to via, board size for `jlcpcb-2l`, `jlcpcb-4l` or your own limits. | https://jlcpcb.com/capabilities/pcb-capabilities |
 | `trace_clearance` | Copper clearance between different nets, 0.15 mm unless a fab profile is set. | |
 | `decoupling_capacitor` | Every IC supply pin has a bypass capacitor, within 3 mm (warning). | https://www.protoexpress.com/blog/decoupling-capacitor-placement-guidelines-pcb-design/ |
-| `autoroute` | tscircuit placement or routing errors, and nets with no routed trace. | |
+| `unrouted` | A board with nets but no routed trace, or a `source_trace` with no `pcb_trace`. | |
+| `footprint_overlap`, `courtyard_overlap`, `placement`, `off_board`, `trace_error`, `trace_missing`, `port_not_connected`, `via_clearance`, `pad_trace_clearance`, `via_trace_clearance`, `pad_pad_clearance`, `autorouting`, `connector_accessibility` | Errors tscircuit recorded in the Circuit JSON, one id per kind. Any other `*_error` blows the fuse as `upstream_error`. | tscircuit |
+| `upstream_warning`, `unnamed_trace` | Warnings tscircuit recorded, one line per kind. `unnamed_trace` is info level. | tscircuit |
 | `unconnected_net`, `ghost_net`, `shorted_nets`, `malformed_element`, `dangling_reference` | Netlist integrity. | |
 | `pin_mux` | Pin muxing against the silicon of the target MCU. | |
 | `qfn_footprint_span` | A qfn footprint that gives only a copper span (warning). | |
