@@ -11,7 +11,7 @@ use serde::Deserialize;
 pub struct FirmwareConfig {
     #[serde(default)]
     pub path: Option<PathBuf>,
-    /// `embassy`, `cortex-m`, `esp-idf`, `esp-idf-c` or `zephyr`.
+    /// `embassy`, `cortex-m`, `esp-hal`, `esp-idf`, `esp-idf-c` or `zephyr`.
     #[serde(default)]
     pub framework: Option<String>,
     #[serde(default, alias = "pins-rs")]
@@ -33,7 +33,7 @@ pub struct FirmwareConfig {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum OutputKind {
-    /// `pins.rs`, plus `board.rs` beside it for Embassy.
+    /// `pins.rs`, plus `board.rs` beside it for Embassy and esp-hal.
     Rust,
     /// `pins.h`.
     C,
@@ -54,6 +54,7 @@ pub enum Outputs {
 pub enum Framework {
     Embassy,
     CortexM,
+    EspHal,
     EspIdf,
     EspIdfC,
     Zephyr,
@@ -65,7 +66,8 @@ impl Framework {
         match name.trim().to_ascii_lowercase().as_str() {
             "embassy" | "embassy-stm32" | "embassy-rp" => Some(Self::Embassy),
             "cortex-m" | "rtic" => Some(Self::CortexM),
-            "esp-idf" | "esp-idf-rs" | "esp-hal" => Some(Self::EspIdf),
+            "esp-hal" => Some(Self::EspHal),
+            "esp-idf" | "esp-idf-rs" => Some(Self::EspIdf),
             "esp-idf-c" => Some(Self::EspIdfC),
             "zephyr" => Some(Self::Zephyr),
             _ => None,
@@ -95,13 +97,18 @@ impl FirmwareConfig {
         }
     }
 
-    /// True for an Embassy firmware whose `outputs:` names `rust`: it also gets `board.rs`.
+    /// True for an Embassy or esp-hal firmware whose `outputs:` names `rust`: it also gets
+    /// `board.rs`.
     pub fn wants_board_rs(&self) -> bool {
         let rust = self
             .output_paths()
             .iter()
             .any(|(k, _)| *k == OutputKind::Rust);
-        self.outputs.is_some() && rust && self.framework_kind() == Some(Framework::Embassy)
+        let typed = matches!(
+            self.framework_kind(),
+            Some(Framework::Embassy | Framework::EspHal)
+        );
+        self.outputs.is_some() && rust && typed
     }
 
     fn default_path(&self, kind: OutputKind) -> PathBuf {

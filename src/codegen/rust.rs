@@ -1,35 +1,33 @@
-//! `board.rs`: Embassy init that hands each bus its peripherals.
+//! `board.rs`: the typed peripherals of every bus and free pin of the board.
 //!
-//! Targets `embassy-stm32` and `embassy-rp` with `Peri<'static, T>` handles
-//! (0.4 and later). Other families get no `board.rs`.
+//! Targets `embassy-stm32` and `embassy-rp` with `Peri<'static, T>` handles (0.4 and
+//! later), and `esp-hal` 1.x with `GPIOn<'static>` singletons. Other families get no
+//! `board.rs`. `take!(p)` moves the board's fields out of the HAL `Peripherals` the caller
+//! owns, so timers, DMA, ADCs and the other buses stay with the caller; `init(config)` is
+//! `take!` over a fresh HAL init for firmware that needs nothing else.
 
 use std::fmt::Write;
 
 use super::groups::field_ident;
-use super::model::{BoardBindings, BusPin};
+use super::hal::Hal;
+use super::model::BoardBindings;
 use super::render::comment_text;
 use super::view::{buses, Bus, Family};
 
-/// The `board.rs` text, or `None` when the family has no Embassy HAL mapping.
+/// The `board.rs` text, or `None` when the family has no HAL mapping.
 pub fn board_rs(b: &BoardBindings) -> Option<String> {
-    let family = Family::of(&b.mcu.chip);
-    let hal = match family {
-        Family::Stm32 => "embassy_stm32",
-        Family::Rp => "embassy_rp",
-        _ => return None,
-    };
-    let pin = |p: &BusPin| pin_name(family, p);
-    let mut out = header(b, hal);
+    let hal = Hal::of(Family::of(&b.mcu.chip))?;
+    let mut out = header(b, &hal);
     let buses = buses(b);
     for bus in &buses {
-        bus_struct(&mut out, bus, &pin);
+        bus_struct(&mut out, bus, &hal);
     }
-    board_struct(&mut out, b, &buses, &pin);
-    init_fn(&mut out, b, &buses, hal, &pin);
+    board_struct(&mut out, b, &buses, &hal);
+    take_macro(&mut out, b, &buses, &hal);
     Some(out)
 }
 
-fn header(b: &BoardBindings, hal: &str) -> String {
+fn header(b: &BoardBindings, hal: &Hal) -> String {
     let mut out = String::new();
     let _ = writeln!(
         out,
@@ -39,17 +37,17 @@ fn header(b: &BoardBindings, hal: &str) -> String {
     );
     out.push_str("//! DO NOT EDIT MANUALLY. Changes will be overwritten on next build.\n");
     out.push_str(
-        "//!\n//! `init` runs the HAL init and hands each bus of the board its peripherals.\n\n",
+        "//!\n//! `take!(p)` moves the board's buses and pins out of the HAL `Peripherals`;\n",
+    );
+    out.push_str(
+        "//! the caller keeps every other peripheral. `init` does the HAL init first.\n\n",
     );
     out.push_str("#![allow(dead_code)]\n\n");
-    let _ = writeln!(out, "use {hal}::{{peripherals as hal, Peri}};\n");
+    let _ = writeln!(out, "{}\n", hal.imports());
     for input in b.adc.iter().filter(|a| a.divider.is_some()) {
         let ratio = input.divider.unwrap_or(1.0);
-        let _ = writeln!(
-            out,
-            "/// Volts at the divider input per volt at `{}`.",
-            input.pin.label
-        );
+        let label = &input.pin.label;
+        let _ = writeln!(out, "/// Volts at the divider input per volt at `{label}`.");
         let _ = writeln!(
             out,
             "pub const {}_DIVIDER: f32 = {ratio:.4};\n",
@@ -57,13 +55,6 @@ fn header(b: &BoardBindings, hal: &str) -> String {
         );
     }
     out
-}
-
-fn pin_name(family: Family, pin: &BusPin) -> String {
-    match family {
-        Family::Rp => format!("PIN_{}", pin.number),
-        _ => pin.label.clone(),
-    }
 }
 
 fn struct_name(bus: &Bus) -> String {
@@ -76,7 +67,7 @@ fn struct_name(bus: &Bus) -> String {
         .collect()
 }
 
-fn bus_struct(out: &mut String, bus: &Bus, pin: &dyn Fn(&BusPin) -> String) {
+fn bus_struct(out: &mut String, bus: &Bus, hal: &Hal) {
     let lines: Vec<String> = bus
         .lines
         .iter()
@@ -84,97 +75,89 @@ fn bus_struct(out: &mut String, bus: &Bus, pin: &dyn Fn(&BusPin) -> String) {
         .collect();
     let _ = writeln!(out, "/// {}: {}.", bus.name, lines.join(", "));
     if !bus.devices.is_empty() {
-        let _ = writeln!(
-            out,
-            "/// Devices: {}.",
-            comment_text(&bus.devices.join(", "))
-        );
+        let devices = comment_text(&bus.devices.join(", "));
+        let _ = writeln!(out, "/// Devices: {devices}.");
     }
     let _ = writeln!(out, "pub struct {} {{", struct_name(bus));
     if bus.instance.is_some() {
-        let _ = writeln!(out, "    pub peri: Peri<'static, hal::{}>,", bus.name);
+        let _ = writeln!(out, "    pub peri: {},", hal.ty(&bus.name));
     }
     for (role, p) in &bus.lines {
-        let _ = writeln!(out, "    pub {role}: Peri<'static, hal::{}>,", pin(p));
+        let _ = writeln!(out, "    pub {role}: {},", hal.ty(&hal.pin(p)));
     }
     for (p, _) in &bus.chip_selects {
         let _ = writeln!(
             out,
-            "    pub {}: Peri<'static, hal::{}>,",
+            "    pub {}: {},",
             field_ident(&p.signal),
-            pin(p)
+            hal.ty(&hal.pin(p))
         );
     }
     out.push_str("}\n\n");
 }
 
-fn board_struct(
-    out: &mut String,
-    b: &BoardBindings,
-    buses: &[Bus],
-    pin: &dyn Fn(&BusPin) -> String,
-) {
+fn board_struct(out: &mut String, b: &BoardBindings, buses: &[Bus], hal: &Hal) {
     out.push_str("/// Every bus and free pin of the board.\npub struct Board {\n");
     for bus in buses {
+        let name = bus.name.to_ascii_lowercase();
+        let _ = writeln!(out, "    pub {name}: {},", struct_name(bus));
+    }
+    for p in b.adc.iter().map(|a| &a.pin).chain(&b.gpio) {
         let _ = writeln!(
             out,
             "    pub {}: {},",
-            bus.name.to_ascii_lowercase(),
-            struct_name(bus)
-        );
-    }
-    for p in b.adc.iter().map(|a| &a.pin).chain(&b.gpio) {
-        let _ = writeln!(
-            out,
-            "    pub {}: Peri<'static, hal::{}>,",
             field_ident(&p.signal),
-            pin(p)
+            hal.ty(&hal.pin(p))
         );
     }
     out.push_str("}\n\n");
 }
 
-fn init_fn(
-    out: &mut String,
-    b: &BoardBindings,
-    buses: &[Bus],
-    hal: &str,
-    pin: &dyn Fn(&BusPin) -> String,
-) {
-    let _ = writeln!(
-        out,
-        "/// Initialises the HAL and splits its peripherals into [`Board`]."
+fn take_macro(out: &mut String, b: &BoardBindings, buses: &[Bus], hal: &Hal) {
+    out.push_str(
+        "/// Moves every bus and free pin of the board out of `p`, the HAL `Peripherals`, into a\n",
     );
-    let config = if hal == "embassy_rp" {
-        "embassy_rp::config::Config"
-    } else {
-        "embassy_stm32::Config"
-    };
-    let _ = writeln!(out, "pub fn init(config: {config}) -> Board {{");
-    let _ = writeln!(out, "    let p = {hal}::init(config);\n    Board {{");
+    out.push_str("/// [`Board`]. The caller keeps the other fields of `p`, so in `main`:\n");
+    out.push_str("/// `let board = board::take!(p);` then `p.DMA1_CH1`, `p.TIM2`, ... as usual.\n");
+    out.push_str("/// Expects this file to be the crate's `board` module.\n");
+    out.push_str("macro_rules! take {\n    ($p:ident) => {\n        $crate::board::Board {\n");
     for bus in buses {
-        out.push_str(&bus_init(bus, pin));
+        out.push_str(&bus_init(bus, hal));
     }
     for p in b.adc.iter().map(|a| &a.pin).chain(&b.gpio) {
-        let _ = writeln!(out, "        {}: p.{},", field_ident(&p.signal), pin(p));
+        let _ = writeln!(
+            out,
+            "            {}: $p.{},",
+            field_ident(&p.signal),
+            hal.pin(p)
+        );
     }
-    out.push_str("    }\n}\n");
+    out.push_str("        }\n    };\n}\n\n#[allow(unused_imports)]\npub(crate) use take;\n\n");
+    out.push_str(
+        "/// Initialises the HAL and moves every bus and pin of the board into [`Board`].\n",
+    );
+    let _ = writeln!(out, "pub fn init(config: {}) -> Board {{", hal.config);
+    let _ = writeln!(
+        out,
+        "    let p = {}::init(config);\n    take!(p)\n}}",
+        hal.krate
+    );
 }
 
-fn bus_init(bus: &Bus, pin: &dyn Fn(&BusPin) -> String) -> String {
-    let peri = bus.instance.map(|_| format!("peri: p.{}", bus.name));
+fn bus_init(bus: &Bus, hal: &Hal) -> String {
+    let peri = bus.instance.map(|_| format!("peri: $p.{}", bus.name));
     let lines = bus
         .lines
         .iter()
-        .map(|(role, p)| format!("{role}: p.{}", pin(p)));
+        .map(|(role, p)| format!("{role}: $p.{}", hal.pin(p)));
     let cs = bus
         .chip_selects
         .iter()
-        .map(|(p, _)| format!("{}: p.{}", field_ident(&p.signal), pin(p)));
+        .map(|(p, _)| format!("{}: $p.{}", field_ident(&p.signal), hal.pin(p)));
     let fields: Vec<String> = peri.into_iter().chain(lines).chain(cs).collect();
     let name = bus.name.to_ascii_lowercase();
     format!(
-        "        {name}: {} {{ {} }},\n",
+        "            {name}: $crate::board::{} {{ {} }},\n",
         struct_name(bus),
         fields.join(", ")
     )
