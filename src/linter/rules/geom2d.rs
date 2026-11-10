@@ -2,6 +2,10 @@
 
 pub(super) type Point = (f64, f64);
 
+/// Slack, in millimetres, for comparing a measured distance with a limit:
+/// a gap that equals the limit must not fail on floating-point rounding.
+pub(super) const TOLERANCE: f64 = 1e-6;
+
 pub(super) fn dist(p: Point, q: Point) -> f64 {
     (p.0 - q.0).hypot(p.1 - q.1)
 }

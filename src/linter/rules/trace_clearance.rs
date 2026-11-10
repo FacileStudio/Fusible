@@ -1,5 +1,6 @@
 //! `trace_clearance`: physical copper clearance design rule check (DRC).
 
+use super::geom2d::TOLERANCE;
 use super::pad_geometry::{pad_box, pad_net};
 use crate::linter::{Category, Diagnostic, LintContext, Rule, RuleMeta, Severity};
 
@@ -74,7 +75,7 @@ fn clearance_violation(f1: &CopperFeature, f2: &CopperFeature, min: f64) -> Opti
     let reach_x = f1.half_w + f2.half_w;
     let reach_y = f1.half_h + f2.half_h;
     let clearance_gap = ((dx - reach_x).max(0.0)).hypot((dy - reach_y).max(0.0));
-    (clearance_gap < min).then(|| {
+    (clearance_gap < min - TOLERANCE).then(|| {
         if dx < reach_x && dy < reach_y {
             format!(
                 "direct copper short-circuit on {}: net \"{}\" and net \"{}\" overlap at \

@@ -6,6 +6,7 @@ use std::collections::HashMap;
 use super::copper::Shape;
 use super::erc::parts::PartKind;
 use super::erc::{Board, Pin};
+use super::geom2d::TOLERANCE;
 use super::pad_geometry::pad_box;
 use crate::linter::{Diagnostic, LintContext};
 use crate::parser::{Pad, Port};
@@ -66,7 +67,7 @@ pub(super) fn too_far(board: &Board<'_>, pins: &[&Pin<'_>]) -> Vec<Diagnostic> {
             continue;
         };
         if let Some((cap, cap_id, gap)) = nearest_cap(board, &pads, net, &at) {
-            if gap > MAX_DISTANCE_MM {
+            if gap > MAX_DISTANCE_MM + TOLERANCE {
                 found.push(warning(pin, cap, cap_id, gap));
             }
         }
