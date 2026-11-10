@@ -66,6 +66,7 @@ mod elements;
 pub mod geometry;
 #[cfg(test)]
 mod geometry_tests;
+mod lenient;
 pub mod model;
 #[cfg(test)]
 mod model_tests;

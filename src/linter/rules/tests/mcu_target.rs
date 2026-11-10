@@ -11,6 +11,7 @@ fn esp_circuit(pin: &str) -> Circuit {
             component_id: Some("U1".to_string()),
             kind: Some("chip".to_string()),
             name: Some("ESP32-S3".to_string()),
+            ..Default::default()
         }),
         CircuitElement::Port(Port {
             port_id: Some(format!("U1.{pin}")),

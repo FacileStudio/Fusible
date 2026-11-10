@@ -6,8 +6,7 @@
 //! Every field is optional: `None` means the design declares nothing, never
 //! "false".
 
-use serde::{Deserialize, Deserializer};
-use serde_json::{Map, Value};
+use serde::Deserialize;
 
 use super::units::quantity;
 
@@ -82,19 +81,11 @@ pub struct PinAttributes {
     pub unreadable: Option<String>,
 }
 
-/// Reads the attributes from the keys a `source_port` leaves over.
-///
-/// A malformed attribute never rejects the port, so `parse` accepts what it
-/// accepted before attributes were modelled; the error lands in
-/// [`PinAttributes::unreadable`] instead.
-pub(super) fn lenient<'de, D: Deserializer<'de>>(
-    deserializer: D,
-) -> Result<PinAttributes, D::Error> {
-    let rest = Map::<String, Value>::deserialize(deserializer)?;
-    Ok(
-        PinAttributes::deserialize(Value::Object(rest)).unwrap_or_else(|err| PinAttributes {
-            unreadable: Some(err.to_string()),
-            ..PinAttributes::default()
-        }),
-    )
+impl super::lenient::Lenient for PinAttributes {
+    fn failed(why: String) -> Self {
+        Self {
+            unreadable: Some(why),
+            ..Self::default()
+        }
+    }
 }

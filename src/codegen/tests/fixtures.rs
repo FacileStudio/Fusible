@@ -10,6 +10,7 @@ pub fn chip(component_id: &str, name: &str) -> CircuitElement {
         component_id: Some(component_id.to_string()),
         kind: Some("chip".to_string()),
         name: Some(name.to_string()),
+        ..Default::default()
     })
 }
 

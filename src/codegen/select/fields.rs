@@ -17,12 +17,12 @@ pub(super) fn descriptors(circuit: &Circuit, component: &Component) -> Vec<Strin
     fields
 }
 
-pub(super) fn manufacturer_part_number(circuit: &Circuit, component: &Component) -> Option<String> {
-    let id = component.component_id.as_deref()?;
-    let parts = circuit.model().parts.iter();
-    parts
-        .filter(|part| part.source_component_id.as_deref() == Some(id))
-        .find_map(|part| part.manufacturer_part_number.clone())
+/// The part number tscircuit recorded on `component`, if any.
+pub(super) fn manufacturer_part_number(
+    _circuit: &Circuit,
+    component: &Component,
+) -> Option<String> {
+    component.props.manufacturer_part_number.clone()
 }
 
 fn normalize(text: &str) -> String {

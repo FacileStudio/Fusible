@@ -1,9 +1,8 @@
-//! The board, the placed parts and their source data.
+//! The board, the placed parts and the pins they join.
 
 use serde::Deserialize;
 
 use super::{Kind, Model, Point};
-use crate::parser::props::ComponentProps;
 
 /// A `pcb_board`. Units are millimetres.
 ///
@@ -76,12 +75,5 @@ impl Kind for InternalConnection {
     const TYPE: &'static str = "source_component_internal_connection";
     fn slot(model: &mut Model) -> &mut Vec<Self> {
         &mut model.internal_connections
-    }
-}
-
-impl Kind for ComponentProps {
-    const TYPE: &'static str = "source_component";
-    fn slot(model: &mut Model) -> &mut Vec<Self> {
-        &mut model.parts
     }
 }
