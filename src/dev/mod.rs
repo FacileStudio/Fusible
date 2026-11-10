@@ -11,6 +11,7 @@ mod bom;
 mod bom_read;
 mod desktop;
 mod firmware;
+mod fix_api;
 mod git_api;
 mod git_error;
 mod git_log;

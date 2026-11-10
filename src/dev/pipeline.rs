@@ -6,7 +6,7 @@ use std::path::Path;
 
 use serde::Serialize;
 
-use crate::check::{check_source, CheckError};
+use crate::check::{check_source, CheckError, WaivedDiagnostic};
 use crate::commands::check::load_circuit_source;
 use crate::commands::target::board_for_entry;
 use crate::linter::Diagnostic;
@@ -25,6 +25,7 @@ pub struct DevPayload {
     pub board: Option<String>,
     pub fuse_blown: bool,
     pub diagnostics: Vec<Diagnostic>,
+    pub waived: Vec<WaivedDiagnostic>,
     pub circuit_json: Option<serde_json::Value>,
     pub revision: String,
 }
@@ -72,6 +73,7 @@ fn source_failure(board_name: String, message: String) -> DevPayload {
             message,
             "Ensure your circuit file compiles and is valid JSON/TSX",
         )],
+        waived: Vec::new(),
         circuit_json: None,
         revision: String::new(),
     }
@@ -102,6 +104,7 @@ fn analyze(
         board: None,
         fuse_blown: true,
         diagnostics: Vec::new(),
+        waived: Vec::new(),
         circuit_json: serde_json::from_str(source).ok(),
         revision: revision(source),
     };
@@ -109,6 +112,7 @@ fn analyze(
         Ok(checked) => {
             payload.fuse_blown = checked.blown();
             payload.diagnostics = checked.diagnostics;
+            payload.waived = checked.waived;
         }
         Err(err) => payload.diagnostics.push(failure(err)),
     }

@@ -11,7 +11,7 @@ mod rpc;
 mod session;
 mod stdio;
 mod tools;
-mod tsx_prop;
+pub(crate) mod tsx_prop;
 mod waiver_text;
 
 pub(crate) use stdio::protocol_out;
