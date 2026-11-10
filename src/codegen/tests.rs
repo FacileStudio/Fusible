@@ -3,6 +3,7 @@
 mod fixtures;
 mod select;
 mod select_hint;
+mod snapshots;
 
 use super::*;
 use crate::netlist::Netlist;

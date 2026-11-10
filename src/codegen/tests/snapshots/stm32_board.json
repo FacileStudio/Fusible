@@ -1,0 +1,397 @@
+[
+ {
+  "type": "source_net",
+  "source_net_id": "net_scl",
+  "name": "SCL"
+ },
+ {
+  "type": "source_net",
+  "source_net_id": "net_sda",
+  "name": "SDA"
+ },
+ {
+  "type": "source_net",
+  "source_net_id": "net_spi_sck",
+  "name": "SPI_SCK"
+ },
+ {
+  "type": "source_net",
+  "source_net_id": "net_spi_mosi",
+  "name": "SPI_MOSI"
+ },
+ {
+  "type": "source_net",
+  "source_net_id": "net_spi_miso",
+  "name": "SPI_MISO"
+ },
+ {
+  "type": "source_net",
+  "source_net_id": "net_flash_cs",
+  "name": "FLASH_CS"
+ },
+ {
+  "type": "source_net",
+  "source_net_id": "net_gps_tx",
+  "name": "GPS_TX"
+ },
+ {
+  "type": "source_net",
+  "source_net_id": "net_gps_rx",
+  "name": "GPS_RX"
+ },
+ {
+  "type": "source_net",
+  "source_net_id": "net_vbat",
+  "name": "VBAT"
+ },
+ {
+  "type": "source_net",
+  "source_net_id": "net_vbat_sense",
+  "name": "VBAT_SENSE"
+ },
+ {
+  "type": "source_net",
+  "source_net_id": "net_gnd",
+  "name": "GND"
+ },
+ {
+  "type": "source_net",
+  "source_net_id": "net_led",
+  "name": "LED"
+ },
+ {
+  "type": "source_net",
+  "source_net_id": "net_v3v3",
+  "name": "V3V3"
+ },
+ {
+  "type": "source_component",
+  "source_component_id": "U1",
+  "ftype": "simple_chip",
+  "name": "U1",
+  "manufacturer_part_number": "STM32G431CBU6"
+ },
+ {
+  "type": "source_component",
+  "source_component_id": "U2",
+  "ftype": "simple_chip",
+  "name": "U2",
+  "manufacturer_part_number": "BME280"
+ },
+ {
+  "type": "source_component",
+  "source_component_id": "U3",
+  "ftype": "simple_chip",
+  "name": "U3",
+  "manufacturer_part_number": "W25Q32JVSS"
+ },
+ {
+  "type": "source_component",
+  "source_component_id": "U4",
+  "ftype": "simple_chip",
+  "name": "U4",
+  "manufacturer_part_number": "MAX-M10S"
+ },
+ {
+  "type": "source_component",
+  "source_component_id": "R3",
+  "ftype": "simple_resistor",
+  "name": "R3",
+  "manufacturer_part_number": "RC0603-100K",
+  "resistance": 100000
+ },
+ {
+  "type": "source_component",
+  "source_component_id": "R4",
+  "ftype": "simple_resistor",
+  "name": "R4",
+  "manufacturer_part_number": "RC0603-47K",
+  "resistance": 47000
+ },
+ {
+  "type": "source_component",
+  "source_component_id": "D1",
+  "ftype": "simple_led",
+  "name": "D1",
+  "manufacturer_part_number": "LTST-C190"
+ },
+ {
+  "type": "source_component",
+  "source_component_id": "J1",
+  "ftype": "simple_connector",
+  "name": "J1",
+  "manufacturer_part_number": "S2B-PH"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "U1_PB8",
+  "name": "PB8",
+  "pin_number": 1,
+  "source_component_id": "U1",
+  "source_net_id": "net_scl"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "U1_PB9",
+  "name": "PB9",
+  "pin_number": 2,
+  "source_component_id": "U1",
+  "source_net_id": "net_sda"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "U1_PA5",
+  "name": "PA5",
+  "pin_number": 3,
+  "source_component_id": "U1",
+  "source_net_id": "net_spi_sck"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "U1_PA6",
+  "name": "PA6",
+  "pin_number": 4,
+  "source_component_id": "U1",
+  "source_net_id": "net_spi_miso"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "U1_PA7",
+  "name": "PA7",
+  "pin_number": 5,
+  "source_component_id": "U1",
+  "source_net_id": "net_spi_mosi"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "U1_PA4",
+  "name": "PA4",
+  "pin_number": 6,
+  "source_component_id": "U1",
+  "source_net_id": "net_flash_cs"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "U1_PA9",
+  "name": "PA9",
+  "pin_number": 7,
+  "source_component_id": "U1",
+  "source_net_id": "net_gps_tx"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "U1_PA10",
+  "name": "PA10",
+  "pin_number": 8,
+  "source_component_id": "U1",
+  "source_net_id": "net_gps_rx"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "U1_PA0",
+  "name": "PA0",
+  "pin_number": 9,
+  "source_component_id": "U1",
+  "source_net_id": "net_vbat_sense"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "U1_PB0",
+  "name": "PB0",
+  "pin_number": 10,
+  "source_component_id": "U1",
+  "source_net_id": "net_led"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "U1_VDD",
+  "name": "VDD",
+  "pin_number": 11,
+  "source_component_id": "U1",
+  "source_net_id": "net_v3v3"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "U1_VSS",
+  "name": "VSS",
+  "pin_number": 12,
+  "source_component_id": "U1",
+  "source_net_id": "net_gnd"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "U2_SCL",
+  "name": "SCL",
+  "pin_number": 1,
+  "source_component_id": "U2",
+  "source_net_id": "net_scl"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "U2_SDA",
+  "name": "SDA",
+  "pin_number": 2,
+  "source_component_id": "U2",
+  "source_net_id": "net_sda"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "U2_VDD",
+  "name": "VDD",
+  "pin_number": 3,
+  "source_component_id": "U2",
+  "source_net_id": "net_v3v3"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "U2_GND",
+  "name": "GND",
+  "pin_number": 4,
+  "source_component_id": "U2",
+  "source_net_id": "net_gnd"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "U3_CLK",
+  "name": "CLK",
+  "pin_number": 1,
+  "source_component_id": "U3",
+  "source_net_id": "net_spi_sck"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "U3_DI",
+  "name": "DI",
+  "pin_number": 2,
+  "source_component_id": "U3",
+  "source_net_id": "net_spi_mosi"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "U3_DO",
+  "name": "DO",
+  "pin_number": 3,
+  "source_component_id": "U3",
+  "source_net_id": "net_spi_miso"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "U3_CS",
+  "name": "CS",
+  "pin_number": 4,
+  "source_component_id": "U3",
+  "source_net_id": "net_flash_cs"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "U3_VCC",
+  "name": "VCC",
+  "pin_number": 5,
+  "source_component_id": "U3",
+  "source_net_id": "net_v3v3"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "U3_GND",
+  "name": "GND",
+  "pin_number": 6,
+  "source_component_id": "U3",
+  "source_net_id": "net_gnd"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "U4_RX",
+  "name": "RX",
+  "pin_number": 1,
+  "source_component_id": "U4",
+  "source_net_id": "net_gps_tx"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "U4_TX",
+  "name": "TX",
+  "pin_number": 2,
+  "source_component_id": "U4",
+  "source_net_id": "net_gps_rx"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "U4_VCC",
+  "name": "VCC",
+  "pin_number": 3,
+  "source_component_id": "U4",
+  "source_net_id": "net_v3v3"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "U4_GND",
+  "name": "GND",
+  "pin_number": 4,
+  "source_component_id": "U4",
+  "source_net_id": "net_gnd"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "R3_pin1",
+  "name": "pin1",
+  "pin_number": 1,
+  "source_component_id": "R3",
+  "source_net_id": "net_vbat"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "R3_pin2",
+  "name": "pin2",
+  "pin_number": 2,
+  "source_component_id": "R3",
+  "source_net_id": "net_vbat_sense"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "R4_pin1",
+  "name": "pin1",
+  "pin_number": 1,
+  "source_component_id": "R4",
+  "source_net_id": "net_vbat_sense"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "R4_pin2",
+  "name": "pin2",
+  "pin_number": 2,
+  "source_component_id": "R4",
+  "source_net_id": "net_gnd"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "D1_anode",
+  "name": "anode",
+  "pin_number": 1,
+  "source_component_id": "D1",
+  "source_net_id": "net_led"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "D1_cathode",
+  "name": "cathode",
+  "pin_number": 2,
+  "source_component_id": "D1",
+  "source_net_id": "net_gnd"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "J1_pin1",
+  "name": "pin1",
+  "pin_number": 1,
+  "source_component_id": "J1",
+  "source_net_id": "net_vbat"
+ },
+ {
+  "type": "source_port",
+  "source_port_id": "J1_pin2",
+  "name": "pin2",
+  "pin_number": 2,
+  "source_component_id": "J1",
+  "source_net_id": "net_gnd"
+ }
+]

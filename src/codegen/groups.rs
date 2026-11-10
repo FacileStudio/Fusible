@@ -65,6 +65,11 @@ fn to_field_name(signal_name: &str, group_name: &str) -> String {
     }
 }
 
+/// Lowercase field identifier of a signal, with a `_` suffix on Rust keywords.
+pub(crate) fn field_ident(signal: &str) -> String {
+    to_field_name(signal, "")
+}
+
 fn is_rust_keyword(s: &str) -> bool {
     const KEYWORDS: &[&str] = &[
         "abstract", "as", "async", "await", "become", "box", "break", "const", "continue", "crate",
