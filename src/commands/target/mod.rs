@@ -41,8 +41,6 @@ pub struct BoardTarget {
     pub mcu: Option<String>,
     /// Names of the firmware bound to this board.
     pub firmware: Vec<String>,
-    /// Pin binding files of every firmware bound to this board.
-    pub pins_rs: Vec<PathBuf>,
     pub port: Option<u16>,
     /// The KiCad board file named by the manifest, if any.
     pub kicad: Option<PathBuf>,
@@ -135,7 +133,6 @@ fn named_board(
         title: cfg.board_title(name),
         mcu: board.mcu.clone(),
         firmware: firmware_for(cfg, Some(name)),
-        pins_rs: pins_for(cfg, Some(name)),
         port: board.port,
         kicad: board.kicad.clone(),
         out_dir: match cfg.boards.len() {
@@ -146,16 +143,15 @@ fn named_board(
 }
 
 fn bare_board(cfg: &FusibleConfig, entry: PathBuf) -> BoardTarget {
-    let (firmware, pins_rs) = match cfg.boards.is_empty() {
-        true => (firmware_for(cfg, None), pins_for(cfg, None)),
-        false => (Vec::new(), Vec::new()),
+    let firmware = match cfg.boards.is_empty() {
+        true => firmware_for(cfg, None),
+        false => Vec::new(),
     };
     BoardTarget {
         name: None,
         entry,
         title: cfg.name.clone().unwrap_or_else(|| "Hardware Board".into()),
         firmware,
-        pins_rs,
         out_dir: PathBuf::from("dist"),
         ..Default::default()
     }
@@ -164,11 +160,5 @@ fn bare_board(cfg: &FusibleConfig, entry: PathBuf) -> BoardTarget {
 fn firmware_for(cfg: &FusibleConfig, board: Option<&str>) -> Vec<String> {
     cfg.firmware_for(board)
         .map(|(name, _)| name.clone())
-        .collect()
-}
-
-fn pins_for(cfg: &FusibleConfig, board: Option<&str>) -> Vec<PathBuf> {
-    cfg.firmware_for(board)
-        .filter_map(|(_, fw)| fw.pins_rs.clone())
         .collect()
 }

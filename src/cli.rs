@@ -60,6 +60,24 @@ pub enum Commands {
         file: Option<PathBuf>,
     },
 
+    /// Check the board, then flash its firmware (flash_cmd, probe-rs or espflash)
+    Flash {
+        /// Firmware name from fusible.yml; optional with a single firmware
+        #[arg(value_name = "FIRMWARE")]
+        firmware: Option<String>,
+    },
+
+    /// Write the bench bring-up sheet: rails in power order, strap pins, debug pinout
+    Bringup {
+        /// Board name or circuit file
+        #[arg(value_name = "BOARD")]
+        board: Option<PathBuf>,
+
+        /// Destination file (default: <out_dir>/bringup.md)
+        #[arg(short, long, value_name = "PATH")]
+        output: Option<PathBuf>,
+    },
+
     /// Export tscircuit code to various formats (gerbers, svg, glb, etc.)
     Export(ExportArgs),
 

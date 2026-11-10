@@ -42,13 +42,14 @@ fn matches_datasheet_alternate_functions() {
 }
 
 #[test]
-fn omits_signals_the_datasheet_does_not_list() {
+fn omits_unlisted_signals_and_keeps_usb() {
     let chip = find_target("stm32g431vb").unwrap();
     let pc13 = chip.find_pin("PC13").unwrap();
     assert!(pc13.functions.iter().all(|f| f.af_number != 7));
     assert_eq!(af("PB6", PeripheralSignal::I2cScl(1)), None);
     assert_eq!(af("PA0", PeripheralSignal::UartTx(2)), None);
-    assert_eq!(af("PA11", PeripheralSignal::UsbDm), None);
+    assert!(af("PA11", PeripheralSignal::UsbDm).is_some());
+    assert!(af("PA12", PeripheralSignal::UsbDp).is_some());
 }
 
 #[test]

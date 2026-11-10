@@ -10,7 +10,7 @@ use super::pins::{McuInfo, PinMapping};
 
 /// Renders text for a `//` or `///` comment: control characters (newlines,
 /// carriage returns, tabs) are escaped so the text stays on one line.
-fn comment_text(s: &str) -> String {
+pub(super) fn comment_text(s: &str) -> String {
     s.chars()
         .map(|c| {
             if c.is_control() {

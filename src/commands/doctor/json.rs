@@ -8,7 +8,8 @@ use serde_json::{json, Value};
 use crate::tscircuit::detect::find_binary_in_path;
 use crate::tscircuit::{bun_path, Runner, RunnerKind};
 
-/// Builds `{"bun", "node", "tsci", "path_installs"}`: tools are `{path, version}` or null when missing;
+/// Builds `{"bun", "node", "tsci", "probe_rs", "espflash", "path_installs"}`: tools are
+/// `{path, version}` or null when missing;
 /// `path_installs` lists every `fusible` on `PATH` as `{path, version, active}`.
 pub fn report() -> Value {
     let path_var = std::env::var_os("PATH");
@@ -21,12 +22,16 @@ pub fn report() -> Value {
         .as_deref()
         .map(super::installs::find)
         .unwrap_or_default();
-    json!({
+    let mut report = json!({
         "bun": tool(bun_path()),
         "node": tool(on_path("node")),
         "tsci": tool(tsci_path()),
         "path_installs": super::installs::to_json(&installs),
-    })
+    });
+    for (key, entry) in super::flash::entries() {
+        report[key] = entry;
+    }
+    report
 }
 
 fn tsci_path() -> Option<PathBuf> {

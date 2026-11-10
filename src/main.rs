@@ -88,6 +88,8 @@ fn run_command(command: Commands, project: &Project) -> ExitCode {
         Commands::Studio(args) => dispatch::dev(project, args),
         Commands::Check(args) => dispatch::check(project, args),
         Commands::Build { file } => dispatch::build(project, file),
+        Commands::Flash { firmware } => dispatch::flash(project, firmware),
+        Commands::Bringup { board, output } => dispatch::bringup(project, board, output),
         Commands::Export(args) => dispatch::export(project, args),
         Commands::Release(args) => dispatch::release(project, args),
         Commands::Body(args) => dispatch::body(project, args),

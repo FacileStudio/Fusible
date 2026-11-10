@@ -50,7 +50,7 @@ pub fn run(
     let boards = with_mcu(resolve_boards(project, file)?, mcu);
     run_boards(project, &boards)?;
     if bindings.write || bindings.path.is_some() {
-        bindings::write(&boards, bindings.path)?;
+        bindings::write(project, &boards, bindings.path)?;
     }
     Ok(())
 }

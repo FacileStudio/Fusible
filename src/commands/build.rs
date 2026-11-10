@@ -41,7 +41,7 @@ pub enum BuildError {
 pub fn run(project: &Project, target: Option<PathBuf>) -> Result<(), BuildError> {
     let (boards, firmware) = select(project, target)?;
     check::run_boards(project, &boards)?;
-    bindings::write(&boards, None)?;
+    bindings::write(project, &boards, None)?;
     for (name, fw) in firmware {
         build_firmware(name, fw)?;
     }

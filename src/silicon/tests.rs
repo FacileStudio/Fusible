@@ -55,7 +55,7 @@ fn find_target_matches_exact_chip_ids_only() {
     }
     for unknown in [
         "esp32",
-        "esp32-c3",
+        "esp32-c6",
         "stm32f103",
         "stm32g431xyz",
         "pico",
