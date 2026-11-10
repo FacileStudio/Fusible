@@ -108,6 +108,7 @@
   },
   {
     "type": "pcb_hole",
+    "pcb_hole_id": "pcb_hole_0",
     "x": -22,
     "y": -14,
     "hole_diameter": 3.2,
@@ -115,6 +116,7 @@
   },
   {
     "type": "pcb_hole",
+    "pcb_hole_id": "pcb_hole_1",
     "x": 22,
     "y": -14,
     "hole_diameter": 3.2,
@@ -122,6 +124,7 @@
   },
   {
     "type": "pcb_hole",
+    "pcb_hole_id": "pcb_hole_2",
     "x": -22,
     "y": 14,
     "hole_diameter": 3.2,
@@ -129,6 +132,7 @@
   },
   {
     "type": "pcb_hole",
+    "pcb_hole_id": "pcb_hole_3",
     "x": 22,
     "y": 14,
     "hole_diameter": 3.2,

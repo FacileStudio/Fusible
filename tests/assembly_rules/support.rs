@@ -12,7 +12,7 @@ pub const BOARD: &str = r#"[
 
 pub const HOLE_BOARD: &str = r#"[
   {"type":"pcb_board","width":40,"height":30,"center":{"x":0,"y":0},"thickness":1.6},
-  {"type":"pcb_hole","x":0,"y":0,"hole_diameter":3.2}
+  {"type":"pcb_hole","pcb_hole_id":"pcb_hole_0","x":0,"y":0,"hole_diameter":3.2}
 ]"#;
 
 pub fn bun_available() -> bool {

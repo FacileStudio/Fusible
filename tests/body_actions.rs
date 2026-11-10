@@ -16,7 +16,7 @@ bodies:
 
 const BOARD: &str = r#"[
   {"type":"pcb_board","width":40,"height":30,"center":{"x":0,"y":0},"thickness":1.4},
-  {"type":"pcb_hole","x":-15,"y":10,"hole_diameter":3.2},
+  {"type":"pcb_hole","pcb_hole_id":"pcb_hole_0","x":-15,"y":10,"hole_diameter":3.2},
   {"type":"source_component","source_component_id":"sc1","name":"J1","ftype":"simple_pin_header"},
   {"type":"pcb_component","pcb_component_id":"pc1","source_component_id":"sc1",
    "center":{"x":18,"y":0},"width":6,"height":8,"layer":"top"}
