@@ -63,31 +63,28 @@ impl Shape {
 
 /// Every trace segment, positioned pad, plated hole and via as copper.
 ///
-/// Segments whose trace names no net are left out: their net is unknown, so
-/// no pair involving them can be called a violation.
+/// `geometry` comes from `trace_net::geometry`, which puts a net on every
+/// segment. A segment read without one is a net of its own, never left out.
 pub(super) fn collect(ctx: &LintContext<'_>, geometry: &Geometry) -> Vec<Copper> {
-    let segments = geometry.segments.iter().filter_map(|s| {
-        Some(Copper {
+    let segments = geometry.segments.iter().map(|s| {
+        let named = s.net_names.first().cloned();
+        Copper {
             id: s.trace_id.clone(),
-            net: s.net_names.first()?.clone(),
+            net: named.unwrap_or_else(|| format!("<unresolved trace {}>", s.trace_id)),
             layer: s.layer.clone(),
             shape: Shape::Seg {
                 a: s.a,
                 b: s.b,
                 half: s.width / 2.0,
             },
-        })
+        }
     });
     let pads = ctx.circuit.pads().enumerate().filter_map(|(index, pad)| {
         let (x, y, hw, hh) = pad_box(pad)?;
         let id = pad.pad_id.clone().unwrap_or_else(|| format!("#{index}"));
         Some(Copper {
             net: pad_net(ctx, pad, &id).1,
-            layer: pad
-                .layer
-                .clone()
-                .unwrap_or_else(|| "top".into())
-                .to_ascii_lowercase(),
+            layer: pad.layer.as_deref().unwrap_or("top").to_ascii_lowercase(),
             shape: Shape::Rect { c: (x, y), hw, hh },
             id,
         })

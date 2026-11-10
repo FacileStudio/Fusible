@@ -8,6 +8,7 @@ use std::collections::HashMap;
 
 use crate::linter::LintContext;
 use crate::netlist::Netlist;
+use crate::parser::geometry::{read, Geometry};
 use crate::parser::model::{PcbTrace, RoutePoint};
 use crate::parser::Trace;
 
@@ -29,6 +30,33 @@ pub(super) fn named_ports(trace: &PcbTrace) -> impl Iterator<Item = &str> {
         RoutePoint::Via { .. } => [None, None],
     });
     ends.flatten()
+}
+
+/// The board geometry with a net on every segment.
+///
+/// A trace the netlist resolves takes that net's name. One it cannot keeps the
+/// names its `source_trace` gave it, or becomes a net of its own: unknown
+/// copper is checked against everything, never skipped.
+pub(super) fn geometry(ctx: &LintContext<'_>) -> Geometry {
+    let nets = TraceNets::new(ctx);
+    let traces = ctx.circuit.model().traces.iter();
+    let resolved: HashMap<&str, &str> = traces
+        .filter_map(|trace| {
+            let node = ctx.netlist.nets.get(nets.of(trace)?)?;
+            Some((trace.pcb_trace_id.as_str(), node.display_name()))
+        })
+        .collect();
+    let mut geometry = read(ctx.circuit);
+    for segment in &mut geometry.segments {
+        match resolved.get(segment.trace_id.as_str()) {
+            Some(net) => segment.net_names = vec![net.to_string()],
+            None if segment.net_names.is_empty() => {
+                segment.net_names = vec![format!("<unresolved trace {}>", segment.trace_id)];
+            }
+            None => {}
+        }
+    }
+    geometry
 }
 
 impl<'a> TraceNets<'a> {

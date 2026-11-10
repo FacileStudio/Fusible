@@ -7,9 +7,10 @@ mod spacing;
 use std::collections::BTreeMap;
 
 use super::physics::{mm, unreadable, PRECHECK};
+use super::trace_net::geometry;
 use crate::config::{DesignRules, FabProfile};
 use crate::linter::{Category, Diagnostic, LintContext, Rule, RuleMeta, Severity};
-use crate::parser::geometry::{read, Geometry};
+use crate::parser::geometry::Geometry;
 
 const EPSILON: f64 = 1e-9;
 
@@ -81,7 +82,7 @@ impl Rule for FabProfileRule {
         let Some(profile) = ctx.design.and_then(|d| d.fab.as_ref()) else {
             return Vec::new();
         };
-        let geometry = read(ctx.circuit);
+        let geometry = geometry(ctx);
         let found = narrow_traces(profile, &geometry)
             .into_iter()
             .chain(spacing::tight_spacing(ctx, profile, &geometry))

@@ -38,13 +38,16 @@ fn port_net(ctx: &LintContext<'_>, net: Option<&str>, pcb_port: Option<&str>) ->
     net_name(ctx, ctx.netlist.port_to_net.get(source_port).copied())
 }
 
-fn via_net(ctx: &LintContext<'_>, geometry: &Geometry, el: &PcbVia) -> Option<String> {
-    if let Some(net) = port_net(ctx, el.source_net_id.as_deref(), None) {
-        return Some(net);
-    }
+/// The net of a via: its own `source_net_id`, else the net of the trace it
+/// belongs to or that ends on it, else a net of its own.
+fn via_net(ctx: &LintContext<'_>, geometry: &Geometry, el: &PcbVia) -> String {
     let near = |p: (f64, f64)| (p.0 - el.x).abs() < 1e-6 && (p.1 - el.y).abs() < 1e-6;
-    let touching = geometry.segments.iter().find(|s| near(s.a) || near(s.b))?;
-    touching.net_names.first().cloned()
+    let trace = el.pcb_trace_id.as_deref();
+    let mut segments = geometry.segments.iter();
+    let owner = segments.find(|s| trace == Some(s.trace_id.as_str()) || near(s.a) || near(s.b));
+    port_net(ctx, el.source_net_id.as_deref(), None)
+        .or_else(|| owner?.net_names.first().cloned())
+        .unwrap_or_else(|| format!("<unresolved via {}>", el.pcb_via_id))
 }
 
 fn on_every_layer(
@@ -62,18 +65,20 @@ fn on_every_layer(
 }
 
 /// Plated holes and vias as copper on every layer. A part whose net cannot
-/// be resolved is left out, as for unnamed traces.
+/// be resolved is a net of its own, so it is checked against everything.
 pub(super) fn drilled(ctx: &LintContext<'_>, geometry: &Geometry) -> Vec<Copper> {
     let model = ctx.circuit.model();
     let holes = model.plated_holes.iter().filter_map(|el| {
         let net = port_net(ctx, el.source_net_id.as_deref(), el.pcb_port_id.as_deref());
         let (hw, hh) = plated_half(el)?;
-        Some((el.pcb_plated_hole_id.clone(), net?, (el.x, el.y), (hw, hh)))
+        let id = el.pcb_plated_hole_id.clone();
+        let net = net.unwrap_or_else(|| format!("<unresolved hole {id}>"));
+        Some((id, net, (el.x, el.y), (hw, hh)))
     });
-    let vias = model.vias.iter().filter_map(|el| {
+    let vias = model.vias.iter().map(|el| {
         let half = el.outer_diameter / 2.0;
-        let net = via_net(ctx, geometry, el)?;
-        Some((el.pcb_via_id.clone(), net, (el.x, el.y), (half, half)))
+        let net = via_net(ctx, geometry, el);
+        (el.pcb_via_id.clone(), net, (el.x, el.y), (half, half))
     });
     holes
         .chain(vias)

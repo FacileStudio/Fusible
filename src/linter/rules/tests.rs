@@ -18,6 +18,7 @@ mod qfn_footprint;
 mod references;
 mod schematic;
 mod trace_current;
+mod trace_nets;
 mod unrouted;
 mod unrouted_nets;
 mod upstream;
