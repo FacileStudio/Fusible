@@ -3,9 +3,9 @@
 use std::sync::{Arc, Mutex};
 
 use super::hub::ClientHub;
-use super::kicad_status::KicadStates;
+use super::kicad::status::KicadStates;
 use super::pair::PairState;
-use super::runs::Runs;
+use super::run::runs::Runs;
 use super::state::Slot;
 use crate::commands::target::BoardTarget;
 
