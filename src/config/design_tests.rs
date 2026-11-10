@@ -48,3 +48,15 @@ fn unknown_fab_and_bad_numbers_are_rejected() {
         .unwrap_err()
         .contains("greater than 0"));
 }
+
+#[test]
+fn a_builtin_profile_can_turn_on_the_assembly_service() {
+    let yaml = "fab: { profile: jlcpcb-2l, assembly_service: true }\n";
+    let fab = DesignRules::from_config(&load(yaml).unwrap()).fab.unwrap();
+    assert_eq!(fab.name, "jlcpcb-2l");
+    assert!(fab.assembly_service);
+    assert_eq!(fab.min_edge_clearance, Some(0.2));
+    assert!(load("fab: { profile: pcbway, assembly_service: true }\n")
+        .unwrap_err()
+        .contains("not a built-in profile"));
+}

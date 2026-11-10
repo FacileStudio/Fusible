@@ -1,7 +1,7 @@
 //! Checks of the design-rule keys: `nets`, `fab`, `clearance_class` and `copper`.
 
 use super::design::{ClearanceClass, FabProfile, FabSpec};
-use super::fab::builtin_fab_names;
+use super::fab::{builtin_fab_names, optional_limits};
 use super::FusibleConfig;
 
 /// Fails on an unsupported class, an unknown fab or a non-positive quantity.
@@ -11,6 +11,7 @@ pub(super) fn validate_design(cfg: &FusibleConfig) -> Result<(), String> {
     }
     match &cfg.fab {
         Some(FabSpec::Named(name)) => named_fab(name)?,
+        Some(FabSpec::Builtin { profile, .. }) => named_fab(profile)?,
         Some(FabSpec::Custom(profile)) => custom_fab(profile)?,
         None => {}
     }
@@ -55,6 +56,9 @@ fn custom_fab(profile: &FabProfile) -> Result<(), String> {
     ];
     for (key, value) in limits {
         positive(&format!("fab.{key}"), Some(value))?;
+    }
+    for (key, value) in optional_limits(profile) {
+        positive(&format!("fab.{key}"), value)?;
     }
     for value in profile.board_min.iter().chain(&profile.board_max) {
         positive("fab.board_min/board_max", Some(*value))?;
