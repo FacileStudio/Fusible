@@ -10,6 +10,7 @@ use crate::config::FusibleConfig;
 use crate::tscircuit::detect::{find_binary_in_path, resolve_program};
 use crate::tscircuit::{bun_path, Runner};
 
+pub mod flash;
 pub mod installs;
 pub mod json;
 
@@ -158,13 +159,14 @@ pub fn run(install: bool, as_json: bool) -> Result<(), DoctorError> {
     println!("🩺 Fusible Toolchain Doctor\n");
     let (has_bun, has_npm) = report_prerequisites();
     report_installs();
+    flash::print();
     report_manifest();
     report_runner(install, has_bun, has_npm)?;
     println!();
     Ok(())
 }
 
-fn print_status(name: &str, path: Option<&Path>) {
+pub(super) fn print_status(name: &str, path: Option<&Path>) {
     match path {
         Some(p) => println!("  ✅ {name:<14} -> {}", p.display()),
         None => println!("  ⚪ {name:<14} -> not found"),
