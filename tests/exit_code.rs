@@ -86,10 +86,7 @@ fn schematic_scale_alone_warns_and_exits_zero() {
 
     assert_eq!(out.status.code(), Some(0));
     let stderr = String::from_utf8_lossy(&out.stderr);
-    assert!(
-        stderr.contains("E_SCHEMATIC_SCALE_EXCESSIVE"),
-        "got: {stderr}"
-    );
+    assert!(stderr.contains("schematic_scale"), "got: {stderr}");
     assert!(!stderr.contains("the fuse blew"), "got: {stderr}");
 }
 
@@ -111,8 +108,5 @@ fn schematic_scale_next_to_a_real_violation_still_blows_the_fuse() {
     assert_eq!(out.status.code(), Some(1));
     let stderr = String::from_utf8_lossy(&out.stderr);
     assert!(stderr.contains("unconnected_net"), "got: {stderr}");
-    assert!(
-        stderr.contains("E_SCHEMATIC_SCALE_EXCESSIVE"),
-        "got: {stderr}"
-    );
+    assert!(stderr.contains("schematic_scale"), "got: {stderr}");
 }

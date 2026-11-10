@@ -62,7 +62,7 @@ pub fn verify_mech(cfg: &FusibleConfig, root: &Path) -> Result<(), CheckError> {
         };
         let (warnings, blown): (Vec<_>, Vec<_>) = findings(name, body, &report)
             .into_iter()
-            .partition(|d| d.severity == Severity::Warning);
+            .partition(|d| d.severity != Severity::Error);
         warnings
             .into_iter()
             .for_each(|d| eprintln!("{:?}", miette::Report::new(d)));

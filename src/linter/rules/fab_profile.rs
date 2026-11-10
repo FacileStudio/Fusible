@@ -8,7 +8,7 @@ use std::collections::BTreeMap;
 
 use super::physics::{mm, unreadable, PRECHECK};
 use crate::config::{DesignRules, FabProfile};
-use crate::linter::{Diagnostic, LintContext, Rule};
+use crate::linter::{Category, Diagnostic, LintContext, Rule, RuleMeta, Severity};
 use crate::parser::geometry::{read, Geometry};
 
 const EPSILON: f64 = 1e-9;
@@ -58,13 +58,19 @@ fn narrow_traces(profile: &FabProfile, geometry: &Geometry) -> Vec<Diagnostic> {
         .collect()
 }
 
-impl Rule for FabProfileRule {
-    fn name(&self) -> &'static str {
-        "fab_profile"
-    }
+const META: RuleMeta = RuleMeta {
+    id: "fab_profile",
+    category: Category::Dfm,
+    summary:
+        "Trace width, spacing, drills, vias and board size stay within the declared fab limits.",
+    standard: Some("fab capability profile"),
+    source_url: None,
+    default_severity: Severity::Error,
+};
 
-    fn standard(&self) -> Option<&'static str> {
-        Some("fab capability profile")
+impl Rule for FabProfileRule {
+    fn meta(&self) -> &'static RuleMeta {
+        &META
     }
 
     fn enabled(&self, design: Option<&DesignRules>) -> bool {

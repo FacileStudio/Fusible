@@ -117,6 +117,47 @@ fn diagnostic_exposes_code_severity_and_help() {
         ..Default::default()
     };
     assert!(silent.help().is_none());
+
+    let info = Diagnostic {
+        severity: Severity::Info,
+        ..Default::default()
+    };
+    assert_eq!(info.severity(), Some(miette::Severity::Advice));
+    assert_eq!(Severity::Error.max(Severity::Info), Severity::Info);
+    assert_eq!(Severity::Warning.max(Severity::Error), Severity::Warning);
+}
+
+/// Ids are the public contract of waivers and `fusible explain`.
+#[test]
+fn registry_ids_are_snake_case_unique_and_summarised() {
+    let rules = Linter::default().describe(None);
+    let mut ids = std::collections::HashSet::new();
+    for rule in &rules {
+        let snake = rule
+            .id
+            .chars()
+            .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '_');
+        assert!(
+            snake && !rule.id.starts_with('_'),
+            "{} is not snake_case",
+            rule.id
+        );
+        assert!(ids.insert(rule.id), "{} is registered twice", rule.id);
+        assert!(!rule.summary.is_empty(), "{} has no summary", rule.id);
+    }
+    let netlist: Vec<&str> = rules
+        .iter()
+        .filter(|r| r.category == Category::Netlist)
+        .map(|r| r.id)
+        .collect();
+    let expected = [
+        "unconnected_net",
+        "malformed_element",
+        "ghost_net",
+        "dangling_reference",
+        "shorted_nets",
+    ];
+    assert_eq!(netlist, expected);
 }
 
 #[test]

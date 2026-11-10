@@ -1,6 +1,6 @@
 //! `unconnected_net`: a net must not be left floating.
 
-use crate::linter::{Diagnostic, LintContext, Rule};
+use crate::linter::{Category, Diagnostic, LintContext, Rule, RuleMeta, Severity};
 
 /// Minimum number of endpoints for a net to count as connected.
 const MIN_CONNECTIONS: usize = 2;
@@ -10,9 +10,18 @@ const MIN_CONNECTIONS: usize = 2;
 /// reach the firmware.
 pub struct UnconnectedNetRule;
 
+const META: RuleMeta = RuleMeta {
+    id: "unconnected_net",
+    category: Category::Netlist,
+    summary: "A net with fewer than two endpoints is floating.",
+    standard: None,
+    source_url: None,
+    default_severity: Severity::Error,
+};
+
 impl Rule for UnconnectedNetRule {
-    fn name(&self) -> &'static str {
-        "unconnected_net"
+    fn meta(&self) -> &'static RuleMeta {
+        &META
     }
 
     fn check(&self, ctx: &LintContext<'_>) -> Vec<Diagnostic> {

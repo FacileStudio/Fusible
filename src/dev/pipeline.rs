@@ -36,6 +36,7 @@ impl From<Diagnostic> for DevDiagnostic {
             severity: match d.severity {
                 Severity::Error => "error",
                 Severity::Warning => "warning",
+                Severity::Info => "info",
             },
             standard: d.standard,
             source_url: d.source_url,

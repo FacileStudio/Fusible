@@ -5,7 +5,7 @@ mod report;
 use super::ipc2152::rise;
 use super::physics::{is_external, unreadable};
 use crate::config::DesignRules;
-use crate::linter::{Diagnostic, LintContext, Rule, Severity};
+use crate::linter::{Category, Diagnostic, LintContext, Rule, RuleMeta, Severity};
 use crate::parser::geometry::{read, Segment};
 use report::{diagnostic, violation};
 
@@ -77,17 +77,19 @@ impl TraceCurrentRule {
     }
 }
 
+const META: RuleMeta = RuleMeta {
+    id: "trace_current",
+    category: Category::Drc,
+    summary:
+        "A net that declares a current must not heat its narrowest trace past its allowed rise.",
+    standard: Some(STANDARD),
+    source_url: Some(SOURCE),
+    default_severity: Severity::Error,
+};
+
 impl Rule for TraceCurrentRule {
-    fn name(&self) -> &'static str {
-        "trace_current"
-    }
-
-    fn standard(&self) -> Option<&'static str> {
-        Some(STANDARD)
-    }
-
-    fn source_url(&self) -> Option<&'static str> {
-        Some(SOURCE)
+    fn meta(&self) -> &'static RuleMeta {
+        &META
     }
 
     fn enabled(&self, design: Option<&DesignRules>) -> bool {

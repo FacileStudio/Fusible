@@ -17,11 +17,11 @@
 
 mod autoroute;
 mod autoroute_scan;
-mod bypass_cap;
 pub(super) mod bypass_distance;
 mod copper;
 mod copper_drill;
 mod dangling_reference;
+mod decoupling_capacitor;
 mod fab_profile;
 mod geom2d;
 mod ghost_net;
@@ -42,8 +42,8 @@ mod unconnected_net;
 mod voltage_clearance;
 
 pub use autoroute::AutorouteRule;
-pub use bypass_cap::BypassCapRule;
 pub use dangling_reference::DanglingReferenceRule;
+pub use decoupling_capacitor::DecouplingCapacitorRule;
 pub use fab_profile::FabProfileRule;
 pub use ghost_net::GhostNetRule;
 pub use malformed_element::MalformedElementRule;

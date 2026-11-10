@@ -10,6 +10,7 @@ pub fn diagnostic_json(d: &Diagnostic) -> Value {
     let severity = match d.severity {
         Severity::Error => "error",
         Severity::Warning => "warning",
+        Severity::Info => "info",
     };
     let mut value =
         json!({"rule": d.rule, "message": d.message, "help": d.help, "severity": severity});

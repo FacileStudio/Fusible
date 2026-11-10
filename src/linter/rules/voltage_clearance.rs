@@ -5,7 +5,7 @@ mod pairs;
 use super::copper::{collect, Copper};
 use super::physics::{unreadable, PRECHECK};
 use crate::config::DesignRules;
-use crate::linter::{Diagnostic, LintContext, Rule};
+use crate::linter::{Category, Diagnostic, LintContext, Rule, RuleMeta, Severity};
 use crate::parser::geometry::read;
 use pairs::{voltage, worst_pairs, Worst};
 
@@ -50,17 +50,18 @@ fn violation(design: &DesignRules, w: Worst) -> Diagnostic {
     }
 }
 
+const META: RuleMeta = RuleMeta {
+    id: "voltage_clearance",
+    category: Category::Drc,
+    summary: "Copper at different declared voltages keeps the IPC-2221B Table 6-1 spacing.",
+    standard: Some(STANDARD),
+    source_url: Some(SOURCE),
+    default_severity: Severity::Error,
+};
+
 impl Rule for VoltageClearanceRule {
-    fn name(&self) -> &'static str {
-        "voltage_clearance"
-    }
-
-    fn standard(&self) -> Option<&'static str> {
-        Some(STANDARD)
-    }
-
-    fn source_url(&self) -> Option<&'static str> {
-        Some(SOURCE)
+    fn meta(&self) -> &'static RuleMeta {
+        &META
     }
 
     fn enabled(&self, design: Option<&DesignRules>) -> bool {

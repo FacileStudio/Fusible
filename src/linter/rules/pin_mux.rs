@@ -3,7 +3,7 @@
 mod assignments;
 mod target;
 
-use crate::linter::{Diagnostic, LintContext, Rule};
+use crate::linter::{Category, Diagnostic, LintContext, Rule, RuleMeta, Severity};
 use crate::silicon::{
     validate_pin_assignments, PeripheralSignal, PinConflict, PinSpec, StrappingRequirement,
 };
@@ -20,9 +20,18 @@ const RESERVED_HELP: &str = "relocate connection away from internal memory bus p
 /// microcontroller's Alternate Function (AF) matrix, strapping pins, and memory bus limits.
 pub struct PinMuxRule;
 
+const META: RuleMeta = RuleMeta {
+    id: "pin_mux",
+    category: Category::Firmware,
+    summary: "Pin assignments respect the alternate functions of the target MCU.",
+    standard: None,
+    source_url: None,
+    default_severity: Severity::Error,
+};
+
 impl Rule for PinMuxRule {
-    fn name(&self) -> &'static str {
-        "pin_mux"
+    fn meta(&self) -> &'static RuleMeta {
+        &META
     }
 
     fn check(&self, ctx: &LintContext<'_>) -> Vec<Diagnostic> {

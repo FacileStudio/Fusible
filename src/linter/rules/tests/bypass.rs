@@ -1,7 +1,7 @@
 //! `decoupling_capacitor` rule tests.
 
 use super::lint;
-use crate::linter::rules::BypassCapRule;
+use crate::linter::rules::DecouplingCapacitorRule;
 
 /// A chip whose VDD pin reaches rail `V3_3` only through a `source_trace`,
 /// next to a second component of the given name and `ftype` on that rail.
@@ -26,7 +26,7 @@ fn rail_with(name: &str, ftype: &str) -> String {
 
 #[test]
 fn bypass_cap_flags_a_traced_rail_without_capacitor() {
-    let v = lint(BypassCapRule, &rail_with("C9", "simple_resistor"));
+    let v = lint(DecouplingCapacitorRule, &rail_with("C9", "simple_resistor"));
     assert_eq!(v.len(), 1);
     assert_eq!(v[0].rule, "decoupling_capacitor");
     assert!(v[0].message.contains("MCU"));
@@ -35,7 +35,11 @@ fn bypass_cap_flags_a_traced_rail_without_capacitor() {
 
 #[test]
 fn bypass_cap_accepts_a_capacitor_named_unlike_c() {
-    assert!(lint(BypassCapRule, &rail_with("BYP", "simple_capacitor")).is_empty());
+    assert!(lint(
+        DecouplingCapacitorRule,
+        &rail_with("BYP", "simple_capacitor")
+    )
+    .is_empty());
 }
 
 fn placed(cap_x: f64) -> String {
@@ -56,7 +60,7 @@ fn placed(cap_x: f64) -> String {
 
 #[test]
 fn bypass_cap_far_from_its_pin_warns_with_the_distance() {
-    let v = lint(BypassCapRule, &placed(7.2));
+    let v = lint(DecouplingCapacitorRule, &placed(7.2));
     assert_eq!(v.len(), 1, "{v:?}");
     assert_eq!(v[0].severity, crate::linter::Severity::Warning);
     assert!(
@@ -72,8 +76,12 @@ fn bypass_cap_far_from_its_pin_warns_with_the_distance() {
 
 #[test]
 fn bypass_cap_within_three_millimetres_or_unplaced_is_silent() {
-    assert!(lint(BypassCapRule, &placed(3.9)).is_empty());
-    assert!(lint(BypassCapRule, &rail_with("C3", "simple_capacitor")).is_empty());
+    assert!(lint(DecouplingCapacitorRule, &placed(3.9)).is_empty());
+    assert!(lint(
+        DecouplingCapacitorRule,
+        &rail_with("C3", "simple_capacitor")
+    )
+    .is_empty());
 }
 
 #[test]

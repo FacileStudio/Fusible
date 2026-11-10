@@ -1,13 +1,22 @@
 //! `ghost_net`: every referenced net must be defined.
 
-use crate::linter::{Diagnostic, LintContext, Rule};
+use crate::linter::{Category, Diagnostic, LintContext, Rule, RuleMeta, Severity};
 
 /// A `net_id` referenced by ports, pads, or traces but defined by no `source_net`.
 pub struct GhostNetRule;
 
+const META: RuleMeta = RuleMeta {
+    id: "ghost_net",
+    category: Category::Netlist,
+    summary: "A port or pad refers to a net that no source net defines.",
+    standard: None,
+    source_url: None,
+    default_severity: Severity::Error,
+};
+
 impl Rule for GhostNetRule {
-    fn name(&self) -> &'static str {
-        "ghost_net"
+    fn meta(&self) -> &'static RuleMeta {
+        &META
     }
 
     fn check(&self, ctx: &LintContext<'_>) -> Vec<Diagnostic> {

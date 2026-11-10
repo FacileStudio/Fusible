@@ -1,6 +1,6 @@
 //! `malformed_element`: a recognized element must carry its identifier.
 
-use crate::linter::{Diagnostic, LintContext, Rule};
+use crate::linter::{Category, Diagnostic, LintContext, Rule, RuleMeta, Severity};
 use crate::parser::CircuitElement;
 
 /// A recognized element without an identifier, or a trace that connects
@@ -75,9 +75,18 @@ fn defects(index: usize, element: &CircuitElement) -> Vec<Diagnostic> {
     found
 }
 
+const META: RuleMeta = RuleMeta {
+    id: "malformed_element",
+    category: Category::Netlist,
+    summary: "A recognized element without its identifier cannot be verified.",
+    standard: None,
+    source_url: None,
+    default_severity: Severity::Error,
+};
+
 impl Rule for MalformedElementRule {
-    fn name(&self) -> &'static str {
-        "malformed_element"
+    fn meta(&self) -> &'static RuleMeta {
+        &META
     }
 
     fn check(&self, ctx: &LintContext<'_>) -> Vec<Diagnostic> {

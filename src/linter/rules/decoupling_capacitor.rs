@@ -3,7 +3,7 @@
 use std::collections::{HashMap, HashSet};
 
 use super::bypass_distance::too_far;
-use crate::linter::{Diagnostic, LintContext, Rule};
+use crate::linter::{Category, Diagnostic, LintContext, Rule, RuleMeta, Severity};
 use crate::netlist::NetNode;
 use crate::parser::{Component, Port};
 
@@ -17,7 +17,7 @@ const CHIP_KINDS: &[&str] = &["simple_chip", "chip"];
 
 /// Verifies that integrated circuits (ICs) have decoupling/bypass capacitors
 /// connected to their power supply rails to ensure power integrity.
-pub struct BypassCapRule;
+pub struct DecouplingCapacitorRule;
 
 /// Classifies a component by its `ftype`. Only a component without one falls
 /// back to the designator prefix (`C1`, `U1`) of its name or id.
@@ -44,9 +44,19 @@ pub(super) struct PowerPin<'a> {
     pub net: &'a NetNode,
 }
 
-impl Rule for BypassCapRule {
-    fn name(&self) -> &'static str {
-        "decoupling_capacitor"
+const META: RuleMeta = RuleMeta {
+    id: "decoupling_capacitor",
+    category: Category::Erc,
+    summary:
+        "Each IC power pin needs a bypass capacitor on its rail, placed within 3 mm of the pin.",
+    standard: None,
+    source_url: None,
+    default_severity: Severity::Error,
+};
+
+impl Rule for DecouplingCapacitorRule {
+    fn meta(&self) -> &'static RuleMeta {
+        &META
     }
 
     fn check(&self, ctx: &LintContext<'_>) -> Vec<Diagnostic> {
@@ -70,7 +80,7 @@ impl Rule for BypassCapRule {
     }
 }
 
-impl BypassCapRule {
+impl DecouplingCapacitorRule {
     fn missing_cap(&self, pin: &PowerPin<'_>) -> Diagnostic {
         let PowerPin {
             comp_name,

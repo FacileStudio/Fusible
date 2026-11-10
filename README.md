@@ -208,7 +208,7 @@ off until you declare them in `fusible.yml`.
 | `unconnected_net`, `ghost_net`, `shorted_nets`, `malformed_element`, `dangling_reference` | Netlist integrity. | |
 | `pin_mux` | Pin muxing against the silicon of the target MCU. | |
 | `qfn_footprint_span` | A qfn footprint that gives only a copper span (warning). | |
-| `E_SCHEMATIC_SCALE_EXCESSIVE` | A schematic too large for one sheet. | |
+| `schematic_scale` | A schematic too large for one sheet. | |
 | `harness_mismatch` | Cabled connectors that do not match. | |
 | `body_interference`, `hole_misaligned`, `connector_blocked` | Boards against bodies in an assembly. | |
 | `mech.*` | Wall thickness, bosses, port and component clearance, vents, standoff height and draft, by process. | see [Mechanical parts](docs/usage.md#mechanical-parts) |

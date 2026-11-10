@@ -66,7 +66,7 @@ pub fn lint_source(
     let (json_path, source, diagnostics) = lint_board(entry, target_mcu.as_deref())?;
     let (warnings, violations): (Vec<_>, Vec<_>) = diagnostics
         .into_iter()
-        .partition(|d| d.severity == Severity::Warning);
+        .partition(|d| d.severity != Severity::Error);
 
     for warning in warnings {
         eprintln!("{:?}", miette::Report::new(warning));

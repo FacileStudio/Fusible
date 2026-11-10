@@ -2,7 +2,7 @@
 
 use serde_json::Value;
 
-use crate::linter::{Diagnostic, LintContext, Rule, Severity};
+use crate::linter::{Category, Diagnostic, LintContext, Rule, RuleMeta, Severity};
 
 const MIN_SAFE_SPAN_MM: f64 = 3.5;
 const MESSAGE: &str = "qfn w/h is the copper span, not the body; corner pads may short";
@@ -11,21 +11,19 @@ const HELP: &str = "set explicit pad size, e.g. qfn16_w3.8_h3.8_p0.5_pw0.25_pl0.
 /// Warns on `qfn<N>_w<W>_h<H>_p<P>` footprints with no `_pw`/`_pl` pad size and a small span.
 pub struct QfnFootprintSpanRule;
 
+const META: RuleMeta = RuleMeta {
+    id: "qfn_footprint_span",
+    category: Category::Dfm,
+    summary:
+        "Warns when a qfn footprint gives only a copper span, which can short the corner pads.",
+    standard: Some("tscircuit footprinter"),
+    source_url: None,
+    default_severity: Severity::Warning,
+};
+
 impl Rule for QfnFootprintSpanRule {
-    fn name(&self) -> &'static str {
-        "qfn_footprint_span"
-    }
-
-    fn summary(&self) -> &'static str {
-        "Warns when a qfn footprint gives only a copper span, which can short the corner pads."
-    }
-
-    fn standard(&self) -> Option<&'static str> {
-        Some("tscircuit footprinter")
-    }
-
-    fn severity(&self) -> Severity {
-        Severity::Warning
+    fn meta(&self) -> &'static RuleMeta {
+        &META
     }
 
     fn check(&self, ctx: &LintContext<'_>) -> Vec<Diagnostic> {

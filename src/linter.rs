@@ -17,23 +17,18 @@ mod diagnostics;
 mod info;
 mod rule;
 mod rules;
-mod summaries;
 #[cfg(test)]
 mod tests;
 
 pub use context::LintContext;
-pub use diagnostics::{Diagnostic, FuseBlown, Severity};
+pub use diagnostics::{Diagnostic, Fix, FuseBlown, Location, Severity, SourceRef};
 pub use info::RuleInfo;
-pub use rule::Rule;
+pub use rule::{Category, Rule, RuleMeta};
 pub use rules::{
-    AutorouteRule, BypassCapRule, DanglingReferenceRule, FabProfileRule, GhostNetRule,
+    AutorouteRule, DanglingReferenceRule, DecouplingCapacitorRule, FabProfileRule, GhostNetRule,
     MalformedElementRule, PinMuxRule, QfnFootprintSpanRule, SchematicScaleRule, ShortedNetsRule,
     TraceClearanceRule, TraceCurrentRule, UnconnectedNetRule, VoltageClearanceRule,
 };
-
-// ---------------------------------------------------------------------------
-// Rule trait + Linter
-// ---------------------------------------------------------------------------
 
 /// The fuse: runs every pass and aggregates their violations.
 pub struct Linter {
@@ -71,10 +66,7 @@ impl Linter {
             .flat_map(|rule| {
                 let severity = rule.severity();
                 rule.check(ctx).into_iter().map(move |d| Diagnostic {
-                    severity: match d.severity {
-                        Severity::Warning => Severity::Warning,
-                        Severity::Error => severity,
-                    },
+                    severity: d.severity.max(severity),
                     ..d
                 })
             })
@@ -91,7 +83,7 @@ impl Default for Linter {
             .with_rule(DanglingReferenceRule)
             .with_rule(ShortedNetsRule)
             .with_rule(PinMuxRule)
-            .with_rule(BypassCapRule)
+            .with_rule(DecouplingCapacitorRule)
             .with_rule(TraceClearanceRule)
             .with_rule(SchematicScaleRule)
             .with_rule(AutorouteRule)

@@ -3,8 +3,8 @@
 
 use std::collections::HashMap;
 
-use super::bypass_cap::{chip_power_pin, is_kind, ComponentIndex, CAPACITOR_KINDS};
 use super::copper::Shape;
+use super::decoupling_capacitor::{chip_power_pin, is_kind, ComponentIndex, CAPACITOR_KINDS};
 use super::pad_geometry::pad_box;
 use crate::linter::{Diagnostic, LintContext};
 use crate::parser::{Pad, Port};

@@ -1,6 +1,6 @@
 //! `autoroute`: tscircuit placement and routing failures must blow the fuse.
 
-use crate::linter::{Diagnostic, LintContext, Rule};
+use crate::linter::{Category, Diagnostic, LintContext, Rule, RuleMeta, Severity};
 
 use super::autoroute_scan::{
     error_help, error_message, is_unrouted, type_of, unrouted_traces, HELP, UNROUTED,
@@ -10,17 +10,18 @@ use super::autoroute_scan::{
 /// Without this rule the fuse stays intact on a board whose copper was never routed.
 pub struct AutorouteRule;
 
+const META: RuleMeta = RuleMeta {
+    id: "autoroute",
+    category: Category::Upstream,
+    summary: "Blows the fuse when tscircuit reports a placement or routing error, or leaves nets with no routed trace.",
+    standard: Some("tscircuit"),
+    source_url: None,
+    default_severity: Severity::Error,
+};
+
 impl Rule for AutorouteRule {
-    fn name(&self) -> &'static str {
-        "autoroute"
-    }
-
-    fn summary(&self) -> &'static str {
-        "Blows the fuse when tscircuit reports a placement or routing error, or leaves nets with no routed trace."
-    }
-
-    fn standard(&self) -> Option<&'static str> {
-        Some("tscircuit")
+    fn meta(&self) -> &'static RuleMeta {
+        &META
     }
 
     fn check(&self, ctx: &LintContext<'_>) -> Vec<Diagnostic> {

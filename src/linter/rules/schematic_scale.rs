@@ -4,7 +4,7 @@ mod element;
 
 use std::collections::HashSet;
 
-use crate::linter::{Diagnostic, LintContext, Rule, Severity};
+use crate::linter::{Category, Diagnostic, LintContext, Rule, RuleMeta, Severity};
 use element::{detect_multiple_sheets, extract_coord, resolve_refdes};
 
 const MAX_CENTER_COORD_MM: f64 = 150.0;
@@ -34,13 +34,18 @@ struct Bounds {
     span_exceeded: bool,
 }
 
-impl Rule for SchematicScaleRule {
-    fn name(&self) -> &'static str {
-        "E_SCHEMATIC_SCALE_EXCESSIVE"
-    }
+const META: RuleMeta = RuleMeta {
+    id: "schematic_scale",
+    category: Category::Erc,
+    summary: "Schematic symbols stay inside a readable sheet.",
+    standard: None,
+    source_url: None,
+    default_severity: Severity::Warning,
+};
 
-    fn severity(&self) -> Severity {
-        Severity::Warning
+impl Rule for SchematicScaleRule {
+    fn meta(&self) -> &'static RuleMeta {
+        &META
     }
 
     fn check(&self, ctx: &LintContext<'_>) -> Vec<Diagnostic> {

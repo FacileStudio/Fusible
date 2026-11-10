@@ -1,4 +1,4 @@
-//! `E_SCHEMATIC_SCALE_EXCESSIVE` rule tests.
+//! `schematic_scale` rule tests.
 
 use miette::Diagnostic as _;
 
@@ -24,11 +24,8 @@ fn schematic_scale_reports_its_code_as_rule_name() {
     let circuit = schematic_component(serde_json::json!({ "x": 700.0, "y": -1000.0 }));
     let violations = Linter::new().with_rule(SchematicScaleRule).run(&circuit);
     assert_eq!(violations.len(), 1);
-    assert_eq!(violations[0].rule, "E_SCHEMATIC_SCALE_EXCESSIVE");
-    assert_eq!(
-        violations[0].code().unwrap().to_string(),
-        "E_SCHEMATIC_SCALE_EXCESSIVE"
-    );
+    assert_eq!(violations[0].rule, "schematic_scale");
+    assert_eq!(violations[0].code().unwrap().to_string(), "schematic_scale");
     assert_eq!(
         violations[0].message,
         "Component 'U1' placed at (700.0, -1000.0) exceeds standard schematic sheet bounds"

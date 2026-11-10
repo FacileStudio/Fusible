@@ -8,26 +8,66 @@
 
 use std::fmt;
 
+use serde::Serialize;
 use thiserror::Error;
 
-/// How a violation affects the fuse: errors blow it, warnings only print.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+/// How a violation affects the fuse: errors blow it, warnings and infos only
+/// print. Variants are ordered from most to least severe, so `max` picks the
+/// milder of two levels.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Default, Serialize)]
+#[serde(rename_all = "snake_case")]
 pub enum Severity {
     #[default]
     Error,
     Warning,
+    Info,
+}
+
+/// Where a violation sits on a board, in millimetres.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+pub struct Location {
+    /// Board name from the manifest, when the check knows it.
+    pub board: Option<String>,
+    /// X coordinate.
+    pub x: f64,
+    /// Y coordinate.
+    pub y: f64,
+    /// Copper layer, e.g. `top`, when the violation sits on one layer.
+    pub layer: Option<String>,
+}
+
+/// The source line that declares the offending element.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct SourceRef {
+    /// Path of the source file.
+    pub file: String,
+    /// 1-based line, when known.
+    pub line: Option<u32>,
+}
+
+/// A machine-applicable change that clears a violation.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Fix {
+    /// Set `prop` to `value` on the element matched by `selector`.
+    SetProp {
+        selector: String,
+        prop: String,
+        value: serde_json::Value,
+    },
+    /// Add this TSX element to the board.
+    AddElement { tsx: String },
+    /// A change a human has to make.
+    Note(String),
 }
 
 /// A violation detected by a rule.
 ///
 /// `miette::Diagnostic` is implemented **by hand** instead of derived: the
 /// `code` (rendered as `error[unconnected_net]`) and the `help` depend on
-/// which rule fired — they are instance data, and the derive macro only
-/// produces fixed literals at the struct level. The `code` also replaces the
-/// rule prefix the `Display` used to carry, so miette no longer prints the
-/// rule name twice.
-#[derive(Debug, Error, Default)]
-#[error("{message}")]
+/// which rule fired. `std::error::Error` is also written by hand, because
+/// thiserror would treat the `source` field as the error's cause.
+#[derive(Debug, Default, Serialize)]
 pub struct Diagnostic {
     /// Stable rule identifier, e.g. `unconnected_net`.
     pub rule: String,
@@ -45,7 +85,21 @@ pub struct Diagnostic {
     pub elements: Vec<String>,
     /// A concrete change that clears the violation.
     pub fix: Option<String>,
+    /// Where the violation sits on the board.
+    pub location: Option<Location>,
+    /// The source line that declares the offending element.
+    pub source: Option<SourceRef>,
+    /// Machine-applicable changes that clear the violation.
+    pub fixes: Vec<Fix>,
 }
+
+impl fmt::Display for Diagnostic {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(&self.message)
+    }
+}
+
+impl std::error::Error for Diagnostic {}
 
 impl miette::Diagnostic for Diagnostic {
     fn code(&self) -> Option<Box<dyn fmt::Display + '_>> {
@@ -56,6 +110,7 @@ impl miette::Diagnostic for Diagnostic {
         Some(match self.severity {
             Severity::Error => miette::Severity::Error,
             Severity::Warning => miette::Severity::Warning,
+            Severity::Info => miette::Severity::Advice,
         })
     }
 
@@ -85,6 +140,7 @@ pub struct FuseBlown {
 }
 
 impl FuseBlown {
+    /// Wraps the violations that blew the fuse.
     pub fn new(violations: Vec<Diagnostic>) -> Self {
         Self { violations }
     }

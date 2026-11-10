@@ -1,7 +1,7 @@
 //! `trace_clearance`: physical copper clearance design rule check (DRC).
 
 use super::pad_geometry::{pad_box, pad_net};
-use crate::linter::{Diagnostic, LintContext, Rule};
+use crate::linter::{Category, Diagnostic, LintContext, Rule, RuleMeta, Severity};
 
 /// Minimum copper clearance in millimeters (standard 6 mil / 0.15mm PCB manufacturing limit).
 const MIN_CLEARANCE_MM: f64 = 0.15;
@@ -28,9 +28,18 @@ struct CopperFeature {
     pub half_h: f64,
 }
 
+const META: RuleMeta = RuleMeta {
+    id: "trace_clearance",
+    category: Category::Drc,
+    summary: "Copper of distinct nets on one layer keeps 0.15 mm, or the fab minimum space when a fab is set.",
+    standard: None,
+    source_url: None,
+    default_severity: Severity::Error,
+};
+
 impl Rule for TraceClearanceRule {
-    fn name(&self) -> &'static str {
-        "trace_clearance"
+    fn meta(&self) -> &'static RuleMeta {
+        &META
     }
 
     fn check(&self, ctx: &LintContext<'_>) -> Vec<Diagnostic> {
