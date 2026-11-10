@@ -1,11 +1,13 @@
 //! Runs fuse-gated subcommands and maps their results onto the exit-code contract.
 
 mod body;
+mod firmware;
 mod json;
 mod misc;
 mod release;
 
 pub use body::body;
+pub use firmware::{bringup, flash};
 use json::check_json;
 pub use misc::{init, migrate, share};
 pub use release::release;
