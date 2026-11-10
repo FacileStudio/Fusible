@@ -77,7 +77,7 @@ export const frLanding: Landing = {
     },
     firmware: {
       title: "Le firmware suit la carte",
-      text: "Déplacez une broche dans le TSX, les constantes Rust typées suivent au prochain contrôle.",
+      text: "Déplacez une broche dans le TSX, les constantes Rust typées suivent à la prochaine compilation.",
     },
     cost: {
       title: "Des coûts toujours à jour",

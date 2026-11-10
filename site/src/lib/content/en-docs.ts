@@ -1,5 +1,5 @@
 import type { DocsContent } from "./types";
-import { BULLE_SNIPPET, CODEX_SNIPPET, MANIFEST_YAML, MCP_TOOLS } from "./shared";
+import { BULLE_SNIPPET, CODEX_SNIPPET, MANIFEST_YAML, MCP_TOOLS, RULES_YAML } from "./shared";
 
 export const enDocs: DocsContent = {
   title: "Fusible docs",
@@ -31,10 +31,17 @@ export const enDocs: DocsContent = {
       id: "quick-start",
       title: "Quick start",
       blocks: [
-        { kind: "code", code: "fusible init --name sensor-node\nfusible check\nfusible studio" },
+        {
+          kind: "code",
+          code: "fusible new sensor-node --template esp32-s3\ncd sensor-node\nfusible check\nfusible studio",
+        },
         {
           kind: "p",
-          text: "`init` writes a `fusible.yml`. `check` lints every board. `studio` opens the live viewer.",
+          text:
+            "`new` writes a board, a firmware crate, a generated enclosure and a `fusible.yml`. " +
+            "Templates are `esp32-s3`, `stm32g4`, `rp2040` and `blank`. " +
+            "Each ships a pre-built Circuit JSON, so `check` passes before any install. " +
+            "`init` still adds a manifest to an existing folder.",
         },
         {
           kind: "p",
@@ -78,7 +85,37 @@ export const enDocs: DocsContent = {
             ["mech.wall_thickness, mech.standoff_height, mech.draft", "DFAM Academy, RTP Company"],
           ],
         },
+        {
+          kind: "p",
+          text:
+            "`fusible rules` lists every rule with its category and level. " +
+            "`fusible explain <rule>` describes one. `docs/rules/` holds a page per rule.",
+        },
+        { kind: "code", code: RULES_YAML },
+        {
+          kind: "p",
+          text:
+            "`rules:` sets a level per rule. A waiver accepts one case and needs a reason. " +
+            "Waived diagnostics stay in the report under `waived`. Netlist rules cannot be lowered or waived.",
+        },
         { kind: "p", text: "Design pre-checks, not certifications. Safety-rated products still need a lab." },
+      ],
+    },
+    {
+      id: "upgrade",
+      title: "Upgrade to 2.0",
+      blocks: [
+        { kind: "code", code: "fusible migrate --check\nfusible migrate" },
+        {
+          kind: "list",
+          items: [
+            "`fusible migrate` rewrites a 1.x `fusible.yml`, keeps its comments and prints the diff.",
+            "`E_SCHEMATIC_SCALE_EXCESSIVE` is now `schematic_scale`. " +
+              "`autoroute` is now `unrouted` plus one id per tscircuit error kind.",
+            "`fusible check` no longer writes `pins.rs`. Run `fusible build` or `check --write-bindings`.",
+            "`check --json` prints the version 2 report.",
+          ],
+        },
       ],
     },
     {
