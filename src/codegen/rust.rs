@@ -44,10 +44,13 @@ fn header(b: &BoardBindings, hal: &Hal) -> String {
     );
     out.push_str("#![allow(dead_code)]\n\n");
     let _ = writeln!(out, "{}\n", hal.imports());
-    for input in b.adc.iter().filter(|a| a.divider.is_some()) {
-        let ratio = input.divider.unwrap_or(1.0);
-        let label = &input.pin.label;
-        let _ = writeln!(out, "/// Volts at the divider input per volt at `{label}`.");
+    for (input, divider) in b.adc.iter().filter_map(|a| Some((a, a.divider?))) {
+        let ratio = divider.ratio();
+        let _ = writeln!(
+            out,
+            "/// Volts at the divider input per volt at `{}`.",
+            input.pin.label
+        );
         let _ = writeln!(
             out,
             "pub const {}_DIVIDER: f32 = {ratio:.4};\n",

@@ -22,7 +22,7 @@ You are helping the user design, lint, verify, and manufacture electronic circui
 2. **Declarative Hardware in TSX**:
    - Circuits are defined in standard TypeScript React (`.tsx`), returning a `<board>` containing components, traces, and schematic sheets.
 3. **Hardware-Firmware Synchronization**:
-   - The microcontroller's GPIO netlist is the single source of truth. `fusible build` (or `fusible check --write-bindings`) generates typed pin bindings once the fuse is intact: `pins.rs` for Embassy or ESP-IDF, and `pins.h` or a Zephyr overlay when `firmware.<name>.outputs` asks for them. A plain `fusible check` writes no file. Never edit generated bindings manually.
+   - The microcontroller's GPIO netlist is the single source of truth. `fusible build` (or `fusible check --write-bindings`) generates typed pin bindings once the fuse is intact: `pins.rs` for Embassy or ESP-IDF, and `pins.h` or a Zephyr overlay when `firmware.<name>.outputs` asks for them. A plain `fusible check` writes no file. Never edit generated bindings manually. The experimental Zephyr overlay never guesses a `compatible` or an I2C address: a chip outside Fusible's part table gets a disabled `FUSIBLE TODO` node and a `warning:` line, fixed by `firmware.<name>.zephyr.<designator>: { compatible, reg, spi-max-frequency }`.
 4. **Declared Electrical Intent**:
    - The electrical rules read tscircuit `pinAttributes` on `<chip>` (`requiresPower`, `providesPower`, `requiresVoltage`, `providesVoltage`, `mustBeConnected`, `doNotConnect`, `isUsingOpenDrain`, `needsExternalPullup`, `shouldHaveDecouplingCapacitor`) and `noConnect`. Declare them on every MCU, regulator and connector-facing part. Without them a rule says so once at `info` level and falls back to pin names at `warning` level.
 
@@ -44,7 +44,7 @@ boards:
     entry: hardware/index.tsx
     out_dir: dist
     port: 3020
-    mcu: esp32-s3            # or stm32g431, rp2040, ...
+    mcu: esp32-s3            # or stm32g431, rp2040, rp2350a, rp2350b, ...
 firmware:
   app:
     board: main
@@ -52,6 +52,8 @@ firmware:
     framework: esp-idf       # embassy, zephyr, esp-idf-c
     outputs: [rust]          # rust, c, zephyr
     build_cmd: cargo test
+    zephyr:                  # overlay facts of parts Fusible's table does not know
+      U3: { compatible: "jedec,spi-nor", spi-max-frequency: 8000000 }
 nets:
   VDD3V3: { voltage: 3.3, limit: 0.6, loads: { U1: 0.34 } }
   VBUS: { voltage: 5, source: external }

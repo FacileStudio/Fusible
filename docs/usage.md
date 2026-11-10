@@ -140,6 +140,50 @@ already took. `board::init(config)` runs the HAL init and returns the `Board` al
 firmware that needs nothing else. The macro expects the file to be the crate's `board`
 module (`mod board;` at the crate root).
 
+### Zephyr overlay (experimental)
+
+`outputs: [zephyr]` writes `app.overlay` in the firmware directory. Fusible checks it against
+Zephyr's devicetree bindings during development, but no Zephyr build checks it. Review it
+before you flash.
+
+The overlay holds:
+
+- Each I2C, SPI and UART bus with its pinctrl (`hal_stm32` labels on STM32, a
+  `<bus>_fusible` state on RP2040, RP2350A, RP2350B, ESP32-S3 and ESP32-C3) and
+  `status = "okay"`. SPI buses get `cs-gpios`.
+- One child node per chip on a bus. `reg` is the I2C address or the chip-select index.
+- One ADC channel node per analog input, its `io-channels` entry under `zephyr,user`, and a
+  `voltage-divider` node when two resistors divide the input.
+- `gpio-leds` and `gpio-keys` nodes for LEDs and buttons whose polarity the netlist shows.
+  Other free pins become `<signal>-gpios` under `zephyr,user`.
+
+Fusible never guesses a `compatible` or an address. It takes them from the manifest, else
+from a small table of known parts: BME280, SHT30/31/35, MPU-6050, BH1750, VL53L0X, PCF8563,
+u-blox M8 and M10. For a part with an address strap pin (BME280 `SDO`, MPU-6050 `AD0`),
+the netlist must tie that pin to ground or a supply. Any other chip gets a disabled node
+marked `FUSIBLE TODO`, and `fusible build` prints a `warning:` line naming the facts to add:
+
+```yaml
+firmware:
+  app:
+    framework: zephyr
+    outputs: [zephyr]
+    zephyr:
+      U3: { compatible: "jedec,spi-nor", spi-max-frequency: 8000000 }
+      U5: { compatible: "ti,tmp11x", reg: 0x48 }
+```
+
+Each device node is labelled with its designator (`u3:`), so a second overlay of your own
+can add properties the binding needs, such as `size` and `jedec-id` for `jedec,spi-nor`.
+ADC channels use unity gain, the internal reference and the default acquisition time; check
+them against the input range. On ESP32 the channels come from the datasheet analog function
+tables (ESP32-S3 ADC1 on GPIO1-10, ADC2 on GPIO11-20; ESP32-C3 ADC1 on GPIO0-4). The ESP32-C3
+devicetree has no ADC2 node, so an input on its GPIO5 gets a TODO.
+
+A `compatible` that is not a binding name (lowercase letters, digits and `,._+-`) makes the
+manifest invalid (exit 2). A `zephyr:` entry whose designator is not a device on a bus of the
+board is a `warning:` line, because it changes nothing.
+
 ## `export`: fuse-gated deliverables
 
 ```sh

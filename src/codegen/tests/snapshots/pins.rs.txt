@@ -8,6 +8,8 @@
 
 /// Hardware GPIO pin constants extracted from the circuit netlist.
 pub mod gpio {
+    /// Pin 45 = `PC13` (port * 16 + pin) (hardware net `BUTTON`).
+    pub const BUTTON: u8 = 45;
     /// Pin 4 = `PA4` (port * 16 + pin) (hardware net `FLASH_CS`).
     pub const FLASH_CS: u8 = 4;
     /// Pin 10 = `PA10` (port * 16 + pin) (hardware net `GPS_RX`).
@@ -33,6 +35,7 @@ pub mod gpio {
 /// Peripheral pin mapping for `General`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GeneralPins {
+    pub button: u8,
     pub flash_cs: u8,
     pub gps_rx: u8,
     pub gps_tx: u8,
@@ -46,6 +49,7 @@ pub struct GeneralPins {
 
 /// Default `General` hardware configuration.
 pub const GENERAL_PINS: GeneralPins = GeneralPins {
+    button: gpio::BUTTON,
     flash_cs: gpio::FLASH_CS,
     gps_rx: gpio::GPS_RX,
     gps_tx: gpio::GPS_TX,

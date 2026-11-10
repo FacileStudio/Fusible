@@ -44,6 +44,15 @@ fn gpio_designator_missing_from_database_is_reported() {
 }
 
 #[test]
+fn gpio40_is_bonded_on_the_rp2350b_only() {
+    assert!(violations(&esp_circuit("GPIO40"), Some("rp2350b")).is_empty());
+    assert!(violations(&esp_circuit("GPIO40"), Some("RP2350B0A2")).is_empty());
+    let v = violations(&esp_circuit("GPIO40"), Some("rp2350a"));
+    assert_eq!(v.len(), 1);
+    assert!(v[0].message.contains("GPIO40"));
+}
+
+#[test]
 fn non_gpio_package_pins_are_ignored() {
     assert!(violations(&esp_circuit("VDD3V3"), Some("esp32-s3")).is_empty());
 }

@@ -73,7 +73,8 @@ fn adc_macros(out: &mut String, input: &AdcInput) {
             "#define {name}_ADC {adc}u\n#define {name}_ADC_CHANNEL {ch}u"
         );
     }
-    if let Some(ratio) = input.divider {
+    if let Some(divider) = input.divider {
+        let ratio = divider.ratio();
         let _ = writeln!(out, "#define {name}_DIVIDER {ratio:.4}f");
     }
 }

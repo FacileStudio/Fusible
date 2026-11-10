@@ -15,6 +15,9 @@ firmware:
     framework: zephyr
     flash_cmd: west flash
     outputs: { c: out/pins.h, zephyr: out/board.overlay }
+    zephyr:
+      U2: { compatible: "bosch,bme280", reg: 0x77 }
+      U3: { compatible: "jedec,spi-nor", spi-max-frequency: 8000000 }
 "#;
 
 fn firmware(name: &str) -> FirmwareConfig {
@@ -54,4 +57,17 @@ fn a_path_map_names_each_file_and_flash_cmd_parses() {
     assert_eq!(fw.flash_cmd.as_deref(), Some("west flash"));
     assert_eq!(fw.framework_kind(), Some(Framework::Zephyr));
     assert!(FusibleConfig::from_str("firmware: { a: { outputs: [cobol] } }").is_err());
+}
+
+#[test]
+fn zephyr_facts_read_per_designator_with_hex_addresses() {
+    let fw = firmware("paths");
+    assert_eq!(fw.zephyr["U2"].reg, Some(0x77));
+    assert_eq!(fw.zephyr["U3"].spi_max_frequency, Some(8_000_000));
+    assert!(firmware("kinds").zephyr.is_empty());
+    let typo = "firmware: { a: { zephyr: { U1: { address: 1 } } } }";
+    assert!(FusibleConfig::from_str(typo).is_err());
+    let bad = "firmware: { a: { zephyr: { U1: { compatible: \"Bosch BME280\" } } } }";
+    let err = FusibleConfig::from_str(bad).unwrap_err().to_string();
+    assert!(err.contains("zephyr.U1.compatible"), "{err}");
 }

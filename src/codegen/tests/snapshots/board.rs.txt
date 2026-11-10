@@ -30,6 +30,7 @@ pub struct Spi1 {
 }
 
 /// USART1: tx PA9, rx PA10.
+/// Devices: U4.
 pub struct Usart1 {
     pub peri: Peri<'static, hal::USART1>,
     pub tx: Peri<'static, hal::PA9>,
@@ -42,6 +43,7 @@ pub struct Board {
     pub spi1: Spi1,
     pub usart1: Usart1,
     pub vbat_sense: Peri<'static, hal::PA0>,
+    pub button: Peri<'static, hal::PC13>,
     pub led: Peri<'static, hal::PB0>,
 }
 
@@ -56,6 +58,7 @@ macro_rules! take {
             spi1: $crate::board::Spi1 { peri: $p.SPI1, sck: $p.PA5, mosi: $p.PA7, miso: $p.PA6, flash_cs: $p.PA4 },
             usart1: $crate::board::Usart1 { peri: $p.USART1, tx: $p.PA9, rx: $p.PA10 },
             vbat_sense: $p.PA0,
+            button: $p.PC13,
             led: $p.PB0,
         }
     };

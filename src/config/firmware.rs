@@ -27,6 +27,24 @@ pub struct FirmwareConfig {
     /// Board the firmware runs on; optional when the project has a single board.
     #[serde(default)]
     pub board: Option<String>,
+    /// Devicetree facts of parts the Zephyr overlay cannot name, by designator.
+    #[serde(default)]
+    pub zephyr: BTreeMap<String, ZephyrDevice>,
+}
+
+/// What the Zephyr overlay needs to emit one part's node: its binding and address.
+#[derive(Debug, Clone, Deserialize, Default, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+pub struct ZephyrDevice {
+    /// Binding name, such as `bosch,bme280`.
+    #[serde(default)]
+    pub compatible: Option<String>,
+    /// I2C address; the chip-select index gives an SPI device's.
+    #[serde(default)]
+    pub reg: Option<u16>,
+    /// Hertz, required on an SPI device.
+    #[serde(default, rename = "spi-max-frequency", alias = "spi_max_frequency")]
+    pub spi_max_frequency: Option<u32>,
 }
 
 /// A generated binding file.
@@ -75,7 +93,30 @@ impl Framework {
     }
 }
 
+/// A devicetree binding name: lowercase letters, digits and `,._+-` (`bosch,bme280`).
+fn is_compatible(text: &str) -> bool {
+    text.starts_with(|c: char| c.is_ascii_lowercase() || c.is_ascii_digit())
+        && text.chars().all(|c| {
+            c.is_ascii_lowercase() || c.is_ascii_digit() || matches!(c, ',' | '.' | '_' | '+' | '-')
+        })
+}
+
 impl FirmwareConfig {
+    /// Fails on a `zephyr:` entry whose `compatible` is not a binding name.
+    pub(super) fn validate_zephyr(&self, name: &str) -> Result<(), String> {
+        let bad = self.zephyr.iter().find_map(|(part, device)| {
+            let compatible = device.compatible.as_deref()?;
+            (!is_compatible(compatible)).then_some((part, compatible))
+        });
+        match bad {
+            Some((part, compatible)) => Err(format!(
+                "firmware `{name}`: `zephyr.{part}.compatible` is `{compatible}`, not a devicetree \
+                 binding name such as `bosch,bme280`"
+            )),
+            None => Ok(()),
+        }
+    }
+
     /// The parsed `framework:`, if Fusible knows it.
     pub fn framework_kind(&self) -> Option<Framework> {
         self.framework.as_deref().and_then(Framework::parse)

@@ -114,7 +114,10 @@ fn unsupported_function(
 ) -> Option<PinConflict> {
     let sig =
         PeripheralSignal::parse(&a.signal_name).or_else(|| PeripheralSignal::parse(&a.net_name))?;
-    if pin_spec.functions.is_empty() || pin_spec.supports_signal(&sig) {
+    if pin_spec.functions.is_empty()
+        || pin_spec.supports_signal(&sig)
+        || routed_anywhere(target, &sig)
+    {
         return None;
     }
     Some(PinConflict::UnsupportedFunction {
@@ -123,6 +126,13 @@ fn unsupported_function(
         signal: sig,
         chip_name: target.name,
     })
+}
+
+/// The Espressif GPIO matrix routes every digital peripheral to any GPIO; only the
+/// ADC and USB functions a pin lists are tied to it.
+fn routed_anywhere(target: &SiliconTarget, sig: &PeripheralSignal) -> bool {
+    use PeripheralSignal::{Adc, AdcChannel, UsbDm, UsbDp};
+    target.family == "Espressif" && !matches!(sig, Adc(_) | AdcChannel(..) | UsbDm | UsbDp)
 }
 
 /// True when the assigned load contradicts the pin's reset-time strapping level.

@@ -2,10 +2,11 @@
 //!
 //! Source: ESP32-C3 datasheet v2.x, chapter 2 "Pins" and 3.3 "Strapping
 //! pins". The GPIO matrix routes UART, SPI, I2C and LEDC to any GPIO, so no
-//! pin lists functions (an empty list accepts every signal). GPIO0-4 are
-//! ADC1 and GPIO5 ADC2; GPIO12-17 drive the in-package SPI flash; GPIO9
+//! pin lists them; GPIO0-4 list ADC1_CH0-4 and GPIO5 ADC2_CH0 (Table 2-6
+//! "Analog Functions"); GPIO12-17 drive the in-package SPI flash; GPIO9
 //! selects SPI boot when high at reset.
 
+use crate::silicon::model::PeripheralSignal::AdcChannel;
 use crate::silicon::model::{PinCapabilities, PinSpec, SiliconTarget, StrappingRequirement};
 
 const GPIO: PinCapabilities = PinCapabilities {
@@ -32,12 +33,12 @@ const BOOT: StrappingRequirement = StrappingRequirement::MustBeHigh {
 };
 
 static ESP32C3_PINS: &[PinSpec] = &[
-    gpio_pin!(0, "GPIO0", ADC, &[]),
-    gpio_pin!(1, "GPIO1", ADC, &[]),
-    gpio_pin!(2, "GPIO2", ADC, &[]),
-    gpio_pin!(3, "GPIO3", ADC, &[]),
-    gpio_pin!(4, "GPIO4", ADC, &[]),
-    gpio_pin!(5, "GPIO5", ADC, &[]),
+    gpio_pin!(0, "GPIO0", ADC, &[mux!(AdcChannel(1, 0), 0, "ADC1_CH0")]),
+    gpio_pin!(1, "GPIO1", ADC, &[mux!(AdcChannel(1, 1), 0, "ADC1_CH1")]),
+    gpio_pin!(2, "GPIO2", ADC, &[mux!(AdcChannel(1, 2), 0, "ADC1_CH2")]),
+    gpio_pin!(3, "GPIO3", ADC, &[mux!(AdcChannel(1, 3), 0, "ADC1_CH3")]),
+    gpio_pin!(4, "GPIO4", ADC, &[mux!(AdcChannel(1, 4), 0, "ADC1_CH4")]),
+    gpio_pin!(5, "GPIO5", ADC, &[mux!(AdcChannel(2, 0), 0, "ADC2_CH0")]),
     gpio_pin!(6, "GPIO6", GPIO, &[]),
     gpio_pin!(7, "GPIO7", GPIO, &[]),
     gpio_pin!(8, "GPIO8", GPIO, &[]),

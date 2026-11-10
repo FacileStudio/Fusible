@@ -51,7 +51,8 @@ pub use raw::LEGACY_BOARD;
 pub use rules::{is_netlist_rule, RuleLevel, NETLIST_RULES};
 pub use types::{
     AssemblyConfig, BoardConfig, BodyConfig, EnclosureConfig, FirmwareConfig, Framework,
-    LinkConfig, OutputKind, Outputs, PinId, PlacementConfig, WireConfig, DEFAULT_HOLE_MIN,
+    LinkConfig, OutputKind, Outputs, PinId, PlacementConfig, WireConfig, ZephyrDevice,
+    DEFAULT_HOLE_MIN,
 };
 pub use validate::GENERATORS;
 pub use waivers::Waiver;

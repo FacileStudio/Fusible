@@ -62,7 +62,7 @@ pub fn buses(b: &BoardBindings) -> Vec<Bus<'_>> {
         ),
         instance: port.instance,
         lines: vec![("tx", &port.tx), ("rx", &port.rx)],
-        devices: Vec::new(),
+        devices: port.devices.clone(),
         chip_selects: Vec::new(),
     });
     i2c.chain(spi).chain(uart).collect()
