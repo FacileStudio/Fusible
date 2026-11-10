@@ -61,10 +61,15 @@ impl Soc {
     }
 
     /// The ADC node label of `(adc, channel)`, where Zephyr has one.
+    /// ESP32 unit `n` is node `adc<n-1>` (`unit = <n>` in `esp32s3_common.dtsi`); the
+    /// ESP32-C3 tree has no node for ADC2.
     pub fn adc(&self, (adc, _): (u8, u8)) -> Option<String> {
-        match self.family {
-            Family::Stm32 => Some(format!("adc{adc}")),
-            Family::Rp => Some("adc".to_string()),
+        match (self.family, self.target, adc) {
+            (Family::Stm32, _, _) => Some(format!("adc{adc}")),
+            (Family::Rp, _, _) => Some("adc".to_string()),
+            (Family::Esp, "esp32-c3", 1) | (Family::Esp, "esp32-s3", 1 | 2) => {
+                Some(format!("adc{}", adc - 1))
+            }
             _ => None,
         }
     }

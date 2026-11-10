@@ -2,6 +2,7 @@
  * EXPERIMENTAL: no Zephyr build checked this overlay. DO NOT EDIT. */
 
 #include <zephyr/dt-bindings/gpio/gpio.h>
+#include <zephyr/dt-bindings/adc/adc.h>
 #include <zephyr/dt-bindings/pinctrl/esp32s3-pinctrl.h>
 
 &pinctrl {
@@ -67,9 +68,33 @@
 	};
 };
 
-/* FUSIBLE TODO ADC input GPIO4 (VBAT_SENSE): the silicon table gives no ADC channel Zephyr can name for this pin */
+&adc0 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "okay";
+
+	channel@3 {
+		/* VBAT_SENSE */
+		reg = <3>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
+};
 
 / {
+	zephyr,user {
+		io-channels = <&adc0 3>;
+	};
+
+	vbat_sense: vbat-sense {
+		compatible = "voltage-divider";
+		io-channels = <&adc0 3>;
+		output-ohms = <47000>;
+		full-ohms = <147000>;
+	};
+
 	fusible-leds {
 		compatible = "gpio-leds";
 		d1: d1 {

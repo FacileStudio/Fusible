@@ -131,3 +131,19 @@ fn missing(out: &mut Out, name: &str, kind: Kind, cs: Option<usize>) {
     out.line(2, "status = \"disabled\";");
     out.line(1, "};");
 }
+
+/// Warns about each `zephyr:` entry of the manifest that names no device on a bus.
+pub(super) fn unused_overrides(out: &mut Out, buses: &[Bus]) {
+    let on_bus: Vec<&String> = buses.iter().flat_map(|b| &b.devices).collect();
+    let unused: Vec<String> = out
+        .overrides
+        .keys()
+        .filter(|name| !on_bus.contains(name))
+        .cloned()
+        .collect();
+    for name in unused {
+        let why = "names no device on an I2C, SPI or UART bus of this board, so it is unused";
+        out.todo
+            .push(format!("`firmware.<name>.zephyr.{name}` {why}"));
+    }
+}

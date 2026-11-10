@@ -99,3 +99,31 @@ fn esp32c3_reserves_flash_and_straps_gpio9() {
     assert!(chip.find_pin("GPIO2").unwrap().capabilities.is_analog);
     assert!(chip.find_pin("GPIO22").is_none());
 }
+
+/// ESP32-S3 datasheet Table 2-8 and ESP32-C3 Table 2-6 "Analog Functions".
+#[test]
+fn esp32_adc_channels_follow_the_analog_function_tables() {
+    let channel = |chip: &str, pin: &str| {
+        let spec = find_target(chip).unwrap().find_pin(pin).unwrap();
+        spec.functions.iter().find_map(|f| match f.signal {
+            PeripheralSignal::AdcChannel(unit, ch) => Some((unit, ch)),
+            _ => None,
+        })
+    };
+    assert_eq!(channel("esp32-s3", "GPIO1"), Some((1, 0)));
+    assert_eq!(channel("esp32-s3", "GPIO10"), Some((1, 9)));
+    assert_eq!(channel("esp32-s3", "GPIO11"), Some((2, 0)));
+    assert_eq!(channel("esp32-s3", "GPIO20"), Some((2, 9)));
+    assert_eq!(channel("esp32-s3", "GPIO21"), None);
+    assert_eq!(channel("esp32-c3", "GPIO4"), Some((1, 4)));
+    assert_eq!(channel("esp32-c3", "GPIO5"), Some((2, 0)));
+    let i2c_on_usb_pin = AssignedPin {
+        pin_name: "GPIO19".to_string(),
+        net_name: "SDA".to_string(),
+        signal_name: "I2C0_SDA".to_string(),
+        is_pulled_to_gnd: false,
+        is_pulled_high: false,
+    };
+    let s3 = find_target("esp32-s3").unwrap();
+    assert!(validate_pin_assignments(s3, &[i2c_on_usb_pin]).is_empty());
+}

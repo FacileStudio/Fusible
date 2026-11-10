@@ -1,5 +1,9 @@
-//! Espressif ESP32-S3 IO MUX, boot strapping, and reserved memory pin tables.
+//! Espressif ESP32-S3 IO MUX, ADC, boot strapping, and reserved memory pin tables.
+//!
+//! ADC channels: ESP32-S3 datasheet, Table 2-8 "Analog Functions": GPIO1-10 are
+//! ADC1_CH0-9, GPIO11-20 ADC2_CH0-9 (`AdcChannel(unit, channel)`).
 
+use crate::silicon::model::PeripheralSignal::AdcChannel;
 use crate::silicon::model::{
     MuxFunction, PeripheralSignal, PinCapabilities, PinSpec, SiliconTarget, StrappingRequirement,
 };
@@ -9,6 +13,11 @@ const ESP_GPIO_CAP: PinCapabilities = PinCapabilities {
     is_analog: false,
     is_input_only: false,
     is_reserved_flash: false,
+};
+
+const ESP_ADC_CAP: PinCapabilities = PinCapabilities {
+    is_analog: true,
+    ..ESP_GPIO_CAP
 };
 
 const ESP_INPUT_ONLY: PinCapabilities = PinCapabilities {
@@ -26,9 +35,7 @@ const ESP_FLASH_CAP: PinCapabilities = PinCapabilities {
 };
 
 static GP0_FUNCS: &[MuxFunction] = &[];
-static GP3_FUNCS: &[MuxFunction] = &[];
-static GP19_FUNCS: &[MuxFunction] = &[mux!(PeripheralSignal::UsbDm, 0, "USB_DM")];
-static GP20_FUNCS: &[MuxFunction] = &[mux!(PeripheralSignal::UsbDp, 0, "USB_DP")];
+static GP3_FUNCS: &[MuxFunction] = &[mux!(AdcChannel(1, 2), 0, "ADC1_CH2")];
 static GP43_FUNCS: &[MuxFunction] = &[mux!(PeripheralSignal::UartTx(0), 0, "U0TXD")];
 static GP44_FUNCS: &[MuxFunction] = &[mux!(PeripheralSignal::UartRx(0), 0, "U0RXD")];
 static GP45_FUNCS: &[MuxFunction] = &[];
@@ -47,35 +54,136 @@ pub static ESP32S3_PINS: &[PinSpec] =
                 violation_consequence: "holding GPIO0 LOW at reset forces ROM download bootloader",
             }
         ),
-        gpio_pin!(1, "GPIO1", ESP_GPIO_CAP, EMPTY_FUNCS),
-        gpio_pin!(2, "GPIO2", ESP_GPIO_CAP, EMPTY_FUNCS),
+        gpio_pin!(
+            1,
+            "GPIO1",
+            ESP_ADC_CAP,
+            &[mux!(AdcChannel(1, 0), 0, "ADC1_CH0")]
+        ),
+        gpio_pin!(
+            2,
+            "GPIO2",
+            ESP_ADC_CAP,
+            &[mux!(AdcChannel(1, 1), 0, "ADC1_CH1")]
+        ),
         gpio_pin!(
             3,
             "GPIO3",
-            ESP_GPIO_CAP,
+            ESP_ADC_CAP,
             GP3_FUNCS,
             StrappingRequirement::MustBeLow {
                 purpose: "JTAG signal selection",
                 violation_consequence: "holding GPIO3 HIGH at reset alters JTAG routing",
             }
         ),
-        gpio_pin!(4, "GPIO4", ESP_GPIO_CAP, EMPTY_FUNCS),
-        gpio_pin!(5, "GPIO5", ESP_GPIO_CAP, EMPTY_FUNCS),
-        gpio_pin!(6, "GPIO6", ESP_GPIO_CAP, EMPTY_FUNCS),
-        gpio_pin!(7, "GPIO7", ESP_GPIO_CAP, EMPTY_FUNCS),
-        gpio_pin!(8, "GPIO8", ESP_GPIO_CAP, EMPTY_FUNCS),
-        gpio_pin!(9, "GPIO9", ESP_GPIO_CAP, EMPTY_FUNCS),
-        gpio_pin!(10, "GPIO10", ESP_GPIO_CAP, EMPTY_FUNCS),
-        gpio_pin!(11, "GPIO11", ESP_GPIO_CAP, EMPTY_FUNCS),
-        gpio_pin!(12, "GPIO12", ESP_GPIO_CAP, EMPTY_FUNCS),
-        gpio_pin!(13, "GPIO13", ESP_GPIO_CAP, EMPTY_FUNCS),
-        gpio_pin!(14, "GPIO14", ESP_GPIO_CAP, EMPTY_FUNCS),
-        gpio_pin!(15, "GPIO15", ESP_GPIO_CAP, EMPTY_FUNCS),
-        gpio_pin!(16, "GPIO16", ESP_GPIO_CAP, EMPTY_FUNCS),
-        gpio_pin!(17, "GPIO17", ESP_GPIO_CAP, EMPTY_FUNCS),
-        gpio_pin!(18, "GPIO18", ESP_GPIO_CAP, EMPTY_FUNCS),
-        gpio_pin!(19, "GPIO19", ESP_GPIO_CAP, GP19_FUNCS),
-        gpio_pin!(20, "GPIO20", ESP_GPIO_CAP, GP20_FUNCS),
+        gpio_pin!(
+            4,
+            "GPIO4",
+            ESP_ADC_CAP,
+            &[mux!(AdcChannel(1, 3), 0, "ADC1_CH3")]
+        ),
+        gpio_pin!(
+            5,
+            "GPIO5",
+            ESP_ADC_CAP,
+            &[mux!(AdcChannel(1, 4), 0, "ADC1_CH4")]
+        ),
+        gpio_pin!(
+            6,
+            "GPIO6",
+            ESP_ADC_CAP,
+            &[mux!(AdcChannel(1, 5), 0, "ADC1_CH5")]
+        ),
+        gpio_pin!(
+            7,
+            "GPIO7",
+            ESP_ADC_CAP,
+            &[mux!(AdcChannel(1, 6), 0, "ADC1_CH6")]
+        ),
+        gpio_pin!(
+            8,
+            "GPIO8",
+            ESP_ADC_CAP,
+            &[mux!(AdcChannel(1, 7), 0, "ADC1_CH7")]
+        ),
+        gpio_pin!(
+            9,
+            "GPIO9",
+            ESP_ADC_CAP,
+            &[mux!(AdcChannel(1, 8), 0, "ADC1_CH8")]
+        ),
+        gpio_pin!(
+            10,
+            "GPIO10",
+            ESP_ADC_CAP,
+            &[mux!(AdcChannel(1, 9), 0, "ADC1_CH9")]
+        ),
+        gpio_pin!(
+            11,
+            "GPIO11",
+            ESP_ADC_CAP,
+            &[mux!(AdcChannel(2, 0), 0, "ADC2_CH0")]
+        ),
+        gpio_pin!(
+            12,
+            "GPIO12",
+            ESP_ADC_CAP,
+            &[mux!(AdcChannel(2, 1), 0, "ADC2_CH1")]
+        ),
+        gpio_pin!(
+            13,
+            "GPIO13",
+            ESP_ADC_CAP,
+            &[mux!(AdcChannel(2, 2), 0, "ADC2_CH2")]
+        ),
+        gpio_pin!(
+            14,
+            "GPIO14",
+            ESP_ADC_CAP,
+            &[mux!(AdcChannel(2, 3), 0, "ADC2_CH3")]
+        ),
+        gpio_pin!(
+            15,
+            "GPIO15",
+            ESP_ADC_CAP,
+            &[mux!(AdcChannel(2, 4), 0, "ADC2_CH4")]
+        ),
+        gpio_pin!(
+            16,
+            "GPIO16",
+            ESP_ADC_CAP,
+            &[mux!(AdcChannel(2, 5), 0, "ADC2_CH5")]
+        ),
+        gpio_pin!(
+            17,
+            "GPIO17",
+            ESP_ADC_CAP,
+            &[mux!(AdcChannel(2, 6), 0, "ADC2_CH6")]
+        ),
+        gpio_pin!(
+            18,
+            "GPIO18",
+            ESP_ADC_CAP,
+            &[mux!(AdcChannel(2, 7), 0, "ADC2_CH7")]
+        ),
+        gpio_pin!(
+            19,
+            "GPIO19",
+            ESP_ADC_CAP,
+            &[
+                mux!(AdcChannel(2, 8), 0, "ADC2_CH8"),
+                mux!(PeripheralSignal::UsbDm, 0, "USB_DM")
+            ]
+        ),
+        gpio_pin!(
+            20,
+            "GPIO20",
+            ESP_ADC_CAP,
+            &[
+                mux!(AdcChannel(2, 9), 0, "ADC2_CH9"),
+                mux!(PeripheralSignal::UsbDp, 0, "USB_DP")
+            ]
+        ),
         gpio_pin!(21, "GPIO21", ESP_GPIO_CAP, EMPTY_FUNCS),
         // GPIO 26-32: Reserved for SPI Flash
         gpio_pin!(26, "GPIO26", ESP_FLASH_CAP, EMPTY_FUNCS),

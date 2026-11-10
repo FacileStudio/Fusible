@@ -153,8 +153,13 @@ firmware:
 Each device node is labelled with its designator (`u3:`), so a second overlay of your own
 can add properties the binding needs, such as `size` and `jedec-id` for `jedec,spi-nor`.
 ADC channels use unity gain, the internal reference and the default acquisition time; check
-them against the input range. ESP32 ADC inputs get a TODO: the ESP32 tables carry no ADC
-channel numbers yet.
+them against the input range. On ESP32 the channels come from the datasheet analog function
+tables (ESP32-S3 ADC1 on GPIO1-10, ADC2 on GPIO11-20; ESP32-C3 ADC1 on GPIO0-4). The ESP32-C3
+devicetree has no ADC2 node, so an input on its GPIO5 gets a TODO.
+
+A `compatible` that is not a binding name (lowercase letters, digits and `,._+-`) makes the
+manifest invalid (exit 2). A `zephyr:` entry whose designator is not a device on a bus of the
+board is a `warning:` line, because it changes nothing.
 
 ## `export`: fuse-gated deliverables
 

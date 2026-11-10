@@ -1,5 +1,6 @@
 //! The devicetree facts of one part on a bus: from the manifest, else the part
-//! table, else nothing and a reason the user must fill in.
+//! table, else nothing and a reason the user must fill in. The manifest loader
+//! already refused a `compatible` that is not a binding name.
 
 use crate::codegen::model::Part;
 use crate::codegen::view::Kind;
@@ -23,7 +24,7 @@ pub(super) fn facts(
     overrides: &Overrides,
 ) -> Result<Facts, String> {
     let given = overrides.get(name).cloned().unwrap_or_default();
-    let compatible = given.compatible.filter(|c| is_compatible(c));
+    let compatible = given.compatible;
     let mpn = part.and_then(|p| p.mpn.as_deref());
     let entry = match &compatible {
         Some(_) => None,
@@ -77,12 +78,4 @@ fn address(entry: Option<&Entry>, part: Option<&Part>) -> Result<u16, String> {
         }
         Address::None => Err("set the I2C address `reg`".to_string()),
     }
-}
-
-/// A `vendor,device` binding name with devicetree characters only.
-fn is_compatible(text: &str) -> bool {
-    !text.is_empty()
-        && text
-            .chars()
-            .all(|c| c.is_ascii_alphanumeric() || matches!(c, ',' | '.' | '_' | '+' | '-'))
 }

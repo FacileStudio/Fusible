@@ -49,10 +49,13 @@ fn node(out: &mut Out, adc: &str, inputs: &[&AdcInput]) {
             .iter()
             .filter_map(|a| Some(format!("&{}", out.soc.adc_pin(a.channel?, &a.pin))))
             .collect(),
-        _ => vec!["&adc_fusible".to_string()],
+        Family::Rp => vec!["&adc_fusible".to_string()],
+        _ => Vec::new(),
     };
-    out.line(1, &format!("pinctrl-0 = <{}>;", pinctrl.join(" ")));
-    out.line(1, "pinctrl-names = \"default\";");
+    if !pinctrl.is_empty() {
+        out.line(1, &format!("pinctrl-0 = <{}>;", pinctrl.join(" ")));
+        out.line(1, "pinctrl-names = \"default\";");
+    }
     out.line(1, "#address-cells = <1>;");
     out.line(1, "#size-cells = <0>;");
     out.line(1, "status = \"okay\";");

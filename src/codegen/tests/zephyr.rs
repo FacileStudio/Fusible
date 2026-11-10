@@ -46,6 +46,20 @@ const ESP32S3: &[(&str, &str)] = &[
     ("PC13", "GPIO0"),
 ];
 
+const ESP32C3: &[(&str, &str)] = &[
+    ("PB8", "GPIO7"),
+    ("PB9", "GPIO6"),
+    ("PA5", "GPIO10"),
+    ("PA6", "GPIO8"),
+    ("PA7", "GPIO11"),
+    ("PA4", "GPIO5"),
+    ("PA9", "GPIO21"),
+    ("PA10", "GPIO20"),
+    ("PA0", "GPIO1"),
+    ("PB0", "GPIO4"),
+    ("PC13", "GPIO9"),
+];
+
 fn text(chip: &str, pins: &[(&str, &str)]) -> String {
     overlay(&board_on(chip, pins), &Overrides::new()).text
 }
@@ -56,6 +70,7 @@ fn each_family_matches_its_snapshot() {
     snapshot("app.rp2350a.overlay.txt", &text("rp2350a", RP2040));
     snapshot("app.rp2350b.overlay.txt", &text("rp2350b", RP2350B));
     snapshot("app.esp32s3.overlay.txt", &text("esp32-s3", ESP32S3));
+    snapshot("app.esp32c3.overlay.txt", &text("esp32-c3", ESP32C3));
 }
 
 #[test]
@@ -65,13 +80,15 @@ fn the_manifest_names_a_part_the_table_does_not_know() {
         spi_max_frequency: Some(8_000_000),
         ..Default::default()
     };
-    let overrides = Overrides::from([("U3".to_string(), flash)]);
+    let typo = ZephyrDevice::default();
+    let overrides = Overrides::from([("U3".to_string(), flash), ("U9".to_string(), typo)]);
     let out = overlay(&board_on("stm32g431cbu", &[]), &overrides);
     assert!(out
         .text
         .contains("u3: u3@0 {\n\t\tcompatible = \"jedec,spi-nor\";"));
     assert!(out.text.contains("spi-max-frequency = <8000000>;"));
-    assert!(out.todo.is_empty(), "{:?}", out.todo);
+    assert_eq!(out.todo.len(), 1, "{:?}", out.todo);
+    assert!(out.todo[0].contains("zephyr.U9` names no device"));
 }
 
 #[test]

@@ -83,6 +83,7 @@ pub fn overlay(b: &BoardBindings, overrides: &Overrides) -> Overlay {
     analog::adc_nodes(&mut out);
     high_bank(&mut out);
     root::root(&mut out);
+    bus::unused_overrides(&mut out, &buses);
     Overlay {
         text: out.text,
         todo: out.todo,

@@ -18,10 +18,16 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 - `firmware.<name>.zephyr.<designator>: { compatible, reg, spi-max-frequency }` names a part
   for the overlay. Without it, a table of known parts (BME280, SHT3x, MPU-6050, BH1750,
   VL53L0X, PCF8563, u-blox M8/M10) supplies them; any other chip gets a disabled
-  `FUSIBLE TODO` node and a `warning:` line instead of a guess.
+  `FUSIBLE TODO` node and a `warning:` line instead of a guess. A `compatible` that is not a
+  binding name is a manifest error (exit 2); an entry naming no device on a bus is a `warning:`.
+- ESP32-S3 (ADC1 GPIO1-10, ADC2 GPIO11-20) and ESP32-C3 (ADC1 GPIO0-4, ADC2 GPIO5) ADC unit and
+  channel numbers from the datasheets' analog function tables. The Zephyr overlay emits ESP ADC
+  channel nodes and dividers, and `pins.h` carries the unit and channel.
 
 ### Fixed
 
+- `pin_mux` on ESP32: the GPIO matrix routes UART, SPI, I2C and PWM to any pin, so a pin
+  that lists only fixed functions (USB on GPIO19/20, ADC) no longer rejects them.
 - RP2040 pin table: GPIO26-29 now list SPI1 (F1), UART1 CTS/RTS on GPIO26/27 (F2) and I2C0
   on GPIO28/29 (F3), as in datasheet Table 279 and pico-sdk `io_bank0.h`. `pin_mux` no longer
   reports those valid assignments as conflicts.

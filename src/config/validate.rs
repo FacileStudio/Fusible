@@ -22,6 +22,7 @@ pub(super) fn validate(cfg: &FusibleConfig) -> Result<(), String> {
     validate_waivers(&cfg.waivers)?;
     for (name, fw) in &cfg.firmware {
         board_reference(cfg, "firmware", name, fw.board.as_deref())?;
+        fw.validate_zephyr(name)?;
     }
     for (name, body) in &cfg.bodies {
         reserved_name(name)?;

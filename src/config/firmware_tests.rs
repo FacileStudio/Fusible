@@ -67,4 +67,7 @@ fn zephyr_facts_read_per_designator_with_hex_addresses() {
     assert!(firmware("kinds").zephyr.is_empty());
     let typo = "firmware: { a: { zephyr: { U1: { address: 1 } } } }";
     assert!(FusibleConfig::from_str(typo).is_err());
+    let bad = "firmware: { a: { zephyr: { U1: { compatible: \"Bosch BME280\" } } } }";
+    let err = FusibleConfig::from_str(bad).unwrap_err().to_string();
+    assert!(err.contains("zephyr.U1.compatible"), "{err}");
 }
