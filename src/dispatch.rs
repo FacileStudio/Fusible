@@ -33,6 +33,7 @@ pub fn check(project: &Project, args: CheckArgs) -> ExitCode {
     let CheckArgs {
         file,
         mcu,
+        write_bindings,
         pins_rs,
         json,
         opus,
@@ -40,7 +41,11 @@ pub fn check(project: &Project, args: CheckArgs) -> ExitCode {
     if json {
         return check_json(project, file, mcu);
     }
-    match commands::check::run(project, file.clone(), mcu, pins_rs) {
+    let bindings = commands::check::Bindings {
+        write: write_bindings,
+        path: pins_rs,
+    };
+    match commands::check::run(project, file.clone(), mcu, bindings) {
         Ok(()) => ExitCode::SUCCESS,
         Err(CheckError::FuseBlown(blown)) => {
             if opus.opus {

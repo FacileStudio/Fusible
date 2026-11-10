@@ -11,8 +11,12 @@ fusible check                       # every board of fusible.yml, then every lin
 fusible check sensor                # one board
 fusible check hardware/index.tsx    # compiles TSX on the fly
 fusible check --mcu stm32g431       # also validates pin muxing against the silicon
+fusible check --write-bindings      # also writes pins.rs once the fuse is intact
 fusible --input circuit.json        # Circuit JSON directly
 ```
+
+`check` writes no file unless `--write-bindings` (or `--pins-rs PATH`) asks for the pin
+bindings; `fusible build` always writes them.
 
 ```
 the fuse blew: 1 electrical violation(s)
@@ -110,8 +114,8 @@ fusible build           # every board, then every firmware
 fusible build main-fw   # one firmware and its board
 ```
 
-Checks the boards and links, writes `pins.rs`, and builds the firmware only if the fuse is
-intact.
+Checks the boards and links, then, only if the fuse is intact, writes `pins.rs` and builds
+the firmware.
 
 ## `export`: fuse-gated deliverables
 

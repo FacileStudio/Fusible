@@ -35,6 +35,7 @@ Fusible/
 └── src/
     ├── main.rs              # CLI entry point & exit code translation
     ├── cli.rs               # Clap command definitions (check, dev, build, export, init, doctor)
+    ├── check/               # Check pipeline: board lint, levels, waivers, links, assembly -> Report
     ├── linter.rs            # Linter engine, Rule trait, FuseBlown diagnostic
     ├── parser.rs            # Serde Circuit JSON parser & span tracking
     ├── commands/            # Subcommand execution pipelines
@@ -84,7 +85,8 @@ Commit messages MUST adhere to [Conventional Commits](https://www.conventionalco
 
 ## 4. Fusible CLI Commands Reference
 
-- `fusible check [TARGET] [--mcu <MCU>]`: Runs the electrical linter on a board name, Circuit JSON, or TSX file. Without a target it checks every board of `fusible.yml`. Falls back to cached `dist/circuit.json` if runner is absent.
+- `fusible check [TARGET] [--mcu <MCU>] [--write-bindings] [--pins-rs <PATH>] [--json]`: Runs the electrical linter on a board name, Circuit JSON, or TSX file. Without a target it checks every board of `fusible.yml`. Falls back to cached `dist/circuit.json` if runner is absent. It writes no file: `--write-bindings` (or `--pins-rs PATH`, which implies it) writes `pins.rs` once the fuse is intact, and `fusible build` always writes them. `--json` prints the v2 report (`version`, `fuse`, `boards[]`, `links[]`, `assembly[]`, `waived[]`, `unused_waivers[]`, `expired_waivers[]`).
+- Check pipeline (`src/check/`): `check::run(&Project, Scope) -> Result<Report, CheckError>` parses each board once, lints it, applies `rules:` levels and `waivers:` (`levels.rs`, matching in `waive.rs`), then runs links (every board checked) and assembly plus bodies (every board and link passed). It prints nothing. The CLI renderer (`src/commands/check.rs`), `check --json`, the studio (`src/dev/pipeline.rs`) and the MCP `check` tool all call it; the fuse gates of export, body and assembly go through `check::check_entry`. An unknown rule id in `rules:` or `waivers:` is exit 2; a waiver that matches nothing is an `unused_waiver` warning; an expired one is listed and no longer applies.
 - `fusible studio [FILE] [-p <PORT>] [--desktop]` (aliases `dev`, `view`, `webview`): Launches interactive hot-reloading webview. `--desktop` prints one `FUSIBLE_READY {"url","port"}` line when bound, exits 0 when stdin closes, and adds a Projects button to the studio dock.
 - `fusible export [FILE] [--preset <PRESET>] [-f <FORMAT>] [-o <PATH>]`:
   - **Fuse-gated**: Validates rules before creating any files.

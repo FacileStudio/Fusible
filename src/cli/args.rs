@@ -16,12 +16,16 @@ pub struct CheckArgs {
     #[arg(long, value_name = "MCU")]
     pub mcu: Option<String>,
 
-    /// Destination path for generated firmware pin bindings (pins.rs)
+    /// Write firmware pin bindings (pins.rs) when the fuse stays intact
+    #[arg(long)]
+    pub write_bindings: bool,
+
+    /// Destination path for generated firmware pin bindings (pins.rs); implies --write-bindings
     #[arg(long, value_name = "PATH")]
     pub pins_rs: Option<PathBuf>,
 
     /// Print one JSON document with the fuse verdict and every diagnostic
-    #[arg(long, conflicts_with_all = ["pins_rs", "opus"])]
+    #[arg(long, conflicts_with_all = ["pins_rs", "write_bindings", "opus"])]
     pub json: bool,
 
     #[command(flatten)]

@@ -1,4 +1,4 @@
-//! Firmware pin bindings (`pins.rs`), written by `fusible build` and `fusible check`.
+//! Firmware pin bindings (`pins.rs`), written by `fusible build` and `check --write-bindings`.
 
 use std::path::{Path, PathBuf};
 

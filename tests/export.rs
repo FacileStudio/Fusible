@@ -105,9 +105,17 @@ fn subcommand_export_docs_does_not_write_pins_rs() {
     )
     .unwrap();
 
-    let check = fusible()
+    let plain = fusible()
         .current_dir(&dir.path)
         .args(["check", "circuit.json"])
+        .output()
+        .expect("binary should run");
+    assert_eq!(plain.status.code(), Some(0));
+    assert!(!dir.path.join("out/pins.rs").exists());
+
+    let check = fusible()
+        .current_dir(&dir.path)
+        .args(["check", "--write-bindings", "circuit.json"])
         .output()
         .expect("binary should run");
     assert_eq!(check.status.code(), Some(0));

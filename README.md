@@ -188,8 +188,9 @@ help: every net must connect at least two pads/ports: complete the routing in ts
 ```
 
 TSX compilation stops after 120 seconds (`FUSIBLE_BUILD_TIMEOUT_SECS`) and results are cached
-in `.fusible/cache` (`FUSIBLE_NO_CACHE=1` bypasses it). `--json` prints the verdict with every
-diagnostic, and exit codes do not change. A rule that cannot prove a net is connected reports
+in `.fusible/cache` (`FUSIBLE_NO_CACHE=1` bypasses it). `check` writes no file; `fusible build`
+or `check --write-bindings` writes `pins.rs`. `--json` prints the verdict with every
+diagnostic, links, assembly and waivers, and exit codes do not change. A rule that cannot prove a net is connected reports
 it: silence is never the default.
 
 ## Rules

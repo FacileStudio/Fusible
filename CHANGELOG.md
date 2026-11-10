@@ -13,8 +13,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
   set its severity, and a waiver moves a matching diagnostic to `waived`. An unknown rule id
   is exit 2, a waiver that matches nothing is an `unused_waiver` warning, and an expired
   waiver no longer applies.
+- `fusible check --write-bindings` writes `pins.rs` once the fuse is intact.
 
 ### Changed
+
+- **Breaking:** `fusible check` no longer writes `pins.rs`. Run `fusible build`, or pass
+  `--write-bindings` (`--pins-rs PATH` implies it).
 
 - **Breaking:** `fusible check --json` and the MCP `check` tool return the version 2 report:
   `version`, `fuse`, `boards[]`, `links[]`, `assembly[]`, `waived[]`, `unused_waivers[]` and

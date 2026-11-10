@@ -10,6 +10,15 @@ use crate::commands::target::{resolve_boards, BoardTarget};
 use crate::linter::{Diagnostic, FuseBlown, Severity};
 use crate::project::Project;
 
+/// Where `fusible check` writes firmware pin bindings, when asked to.
+#[derive(Debug, Default)]
+pub struct Bindings {
+    /// Write the `pins_rs` files of the firmware bound to each board.
+    pub write: bool,
+    /// Write to this path instead of the manifest's; implies `write`.
+    pub path: Option<PathBuf>,
+}
+
 /// Loads, lints and renders the circuit at `entry` without writing any file: the fuse gate
 /// of exports, bodies and assemblies.
 ///
@@ -30,17 +39,20 @@ pub fn lint_source(
 
 /// Runs the electrical linter on the target board, or on every board of the manifest.
 ///
-/// `mcu` overrides the manifest MCU of each board. Once the fuse is intact, pin bindings
-/// are written to `pins_rs`, else to the manifest's firmware paths.
+/// `mcu` overrides the manifest MCU of each board. Pin bindings are written only when
+/// `bindings` asks for them and the fuse stayed intact.
 pub fn run(
     project: &Project,
     file: Option<PathBuf>,
     mcu: Option<String>,
-    pins_rs: Option<PathBuf>,
+    bindings: Bindings,
 ) -> Result<(), CheckError> {
     let boards = with_mcu(resolve_boards(project, file)?, mcu);
     run_boards(project, &boards)?;
-    bindings::write(&boards, pins_rs)
+    if bindings.write || bindings.path.is_some() {
+        bindings::write(&boards, bindings.path)?;
+    }
+    Ok(())
 }
 
 /// Sets `mcu`, when given, as the target of every board.

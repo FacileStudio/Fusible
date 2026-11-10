@@ -52,6 +52,7 @@ fn main() -> ExitCode {
             CheckArgs {
                 file: cli.input,
                 mcu: cli.mcu,
+                write_bindings: false,
                 pins_rs: None,
                 json: false,
                 opus: OpusArgs::default(),
