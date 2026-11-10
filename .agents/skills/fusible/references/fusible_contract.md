@@ -42,7 +42,7 @@ hardware:
 
 # Silicon target configuration
 mcu:
-  # Chip family or part number (e.g. esp32-s3, stm32g431, rp2040)
+  # Chip family or part number (e.g. esp32-s3, stm32g431, rp2040, rp2350b)
   chip: esp32-s3
 
 # Firmware integration

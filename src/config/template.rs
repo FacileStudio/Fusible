@@ -15,7 +15,7 @@ boards:
     out_dir: dist
     # Dev server port for interactive previewer
     port: 3020
-    # Target silicon identifier (e.g., stm32g431, esp32-s3, rp2040)
+    # Target silicon identifier (e.g., stm32g431, esp32-s3, rp2040, rp2350b)
     mcu: stm32g431
 
 # Firmware crates, by name. Each one runs on one board.

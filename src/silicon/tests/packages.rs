@@ -1,4 +1,4 @@
-//! STM32G431 48-pin package variants against DS12589 Rev 6, Table 12.
+//! Package variants: STM32G431 48-pin against DS12589 Rev 6, Table 12; RP2350A/B; ESP32-C3.
 
 use crate::silicon::*;
 
@@ -30,6 +30,37 @@ fn rp2350_follows_the_rp2040_matrix_with_uart_aux() {
         .unwrap()
         .supports_signal(&PeripheralSignal::Adc(3)));
     assert_eq!(chip.pins.len(), 30);
+}
+
+#[test]
+fn rp2350b_bonds_gpio0_to_47_with_the_adc_on_gpio40_to_47() {
+    let chip = find_target("RP2350B").unwrap();
+    assert_eq!(chip.pins.len(), 48);
+    let pin = |n: u8| chip.find_pin(&format!("GPIO{n}")).unwrap();
+    assert!(pin(47).supports_signal(&PeripheralSignal::Adc(7)));
+    assert!(pin(40).supports_signal(&PeripheralSignal::Adc(0)));
+    assert!(!pin(26).capabilities.is_analog);
+    assert!(pin(36).supports_signal(&PeripheralSignal::Pwm(10, 'A')));
+    assert_eq!(
+        pin(46)
+            .get_af(&PeripheralSignal::UartTx(0))
+            .unwrap()
+            .af_number,
+        11
+    );
+    assert!(pin(33).supports_signal(&PeripheralSignal::SpiCs(0, 0)));
+}
+
+#[test]
+fn rp235x_ids_resolve_by_package_letter() {
+    let name = |id: &str| find_target(id).map(|t| t.name);
+    assert_eq!(name("rp2350"), Some("rp2350"));
+    assert_eq!(name("RP2350A0A2"), Some("rp2350"));
+    assert_eq!(name("rp2354b"), Some("rp2350b"));
+    assert_eq!(name("RP2350B0A4"), Some("rp2350b"));
+    assert_eq!(name("rp2350c"), None);
+    assert_eq!(name("rp2350b0a9"), None);
+    assert!(find_target("rp2350a").unwrap().find_pin("GPIO30").is_none());
 }
 
 #[test]

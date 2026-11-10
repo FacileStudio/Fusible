@@ -125,3 +125,14 @@ fn known_silicon_skips_package_only_pins() {
     let labels: Vec<_> = info.pins.iter().map(|p| p.pin_label.as_str()).collect();
     assert_eq!(labels, ["GPIO2"]);
 }
+
+#[test]
+fn rp2350b_binds_the_qfn80_only_gpios() {
+    let pins = [("GPIO40", "VBAT_SENSE", 40), ("GPIO26", "LED", 26)];
+    let (info, code) = generate("RP2350B", Some("rp2350b"), &pins);
+    assert_eq!(info.pins.len(), 2);
+    assert!(code.contains("pub const VBAT_SENSE: u8 = 40;"));
+    let (narrow, _) = generate("RP2350A", Some("rp2350a"), &pins);
+    let labels: Vec<_> = narrow.pins.iter().map(|p| p.pin_label.as_str()).collect();
+    assert_eq!(labels, ["GPIO26"]);
+}

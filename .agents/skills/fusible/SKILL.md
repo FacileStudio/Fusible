@@ -44,7 +44,7 @@ boards:
     entry: hardware/index.tsx
     out_dir: dist
     port: 3020
-    mcu: esp32-s3            # or stm32g431, rp2040, ...
+    mcu: esp32-s3            # or stm32g431, rp2040, rp2350a, rp2350b, ...
 firmware:
   app:
     board: main

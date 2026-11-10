@@ -1,38 +1,23 @@
 //! Raspberry Pi RP2350A (QFN-60, GPIO0-29) Function Select and ADC tables.
 //!
-//! Source: RP2350 datasheet, section 9.4 "Function select". F1 to F4 follow
-//! the RP2040 pattern; F11 adds the UART TX/RX "aux" function on each CTS
-//! and RTS pin. ADC0-3 sit on GPIO26-29. RP2350B (48 GPIOs) is not listed.
+//! Source: RP2350 datasheet, section 9.4 "Function select", Table 677. F1 to
+//! F4 follow the RP2040 pattern; F11 adds the UART TX/RX "aux" function on
+//! each CTS and RTS pin. ADC0-3 sit on GPIO26-29. RP2350B is in [`super::rp2350b`].
 
 use crate::silicon::model::{PinCapabilities, PinSpec, SiliconTarget};
 use crate::silicon::PeripheralSignal::*;
 
-const GPIO: PinCapabilities = PinCapabilities {
+pub(super) const GPIO: PinCapabilities = PinCapabilities {
     is_gpio: true,
     is_analog: false,
     is_input_only: false,
     is_reserved_flash: false,
 };
 
-const ADC: PinCapabilities = PinCapabilities {
+pub(super) const ADC: PinCapabilities = PinCapabilities {
     is_analog: true,
     ..GPIO
 };
-
-/// Builds the F1-F4 functions of one pin, plus the optional F11 UART aux
-/// function and ADC channel.
-macro_rules! rp {
-    ($spi:expr, $uart:expr, $i2c:expr, $pwm:expr $(, aux($aux:expr))? $(, adc($adc:expr))?) => {
-        &[
-            mux!($spi, 1, "F1"),
-            mux!($uart, 2, "F2"),
-            mux!($i2c, 3, "F3"),
-            mux!($pwm, 4, "F4"),
-            $(mux!($aux, 11, "F11"),)?
-            $(mux!(Adc($adc), 0, "ADC"),)?
-        ]
-    };
-}
 
 #[rustfmt::skip]
 static RP2350_PINS: &[PinSpec] = &[

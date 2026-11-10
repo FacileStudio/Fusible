@@ -7,6 +7,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 
 ## [Unreleased]
 
+### Added
+
+- RP2350B (QFN-80, GPIO0-47, ADC0-7 on GPIO40-47) pin table from the RP2350 datasheet, Table 677,
+  checked against pico-sdk `io_bank0.h`: `mcu: rp2350b`, `--mcu`, `pin_mux` and pin bindings.
+  `RP2354A`/`RP2354B` and marked part numbers such as `RP2350B0A2` resolve to the same tables.
+
 ## [2.0.0] - 2026-11-10
 
 ### Added

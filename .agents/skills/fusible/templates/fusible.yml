@@ -12,7 +12,7 @@ hardware:
   port: 3020
 
 mcu:
-  # Target microcontroller silicon: esp32-s3 | stm32g431 | rp2040
+  # Target microcontroller silicon: esp32-s3 | esp32-c3 | stm32g431 | rp2040 | rp2350a | rp2350b
   chip: esp32-s3
 
 firmware:
