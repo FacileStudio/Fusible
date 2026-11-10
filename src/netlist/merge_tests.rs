@@ -100,3 +100,11 @@ fn pad_on_another_net_than_its_port_is_a_short() {
     assert_eq!(n.shorts().len(), 1);
     assert_eq!(n.shorts()[0].trace, r#"pad "pad_a""#);
 }
+
+#[test]
+fn a_named_trace_parses_and_names_its_net() {
+    let n = netlist(include_str!("../parser/fixtures/named_trace.json"));
+    let name = |port: &str| n.nets[n.port_to_net[port]].display_name().to_string();
+    assert_eq!(name("source_port_0"), "RESET_LINE");
+    assert_eq!(name("source_port_2"), ".R2 > .pin1 to .U1 > .pin3");
+}

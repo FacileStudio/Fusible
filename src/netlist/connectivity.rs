@@ -129,7 +129,7 @@ impl Connectivity {
             self.reference(&id);
             self.synthetic
                 .entry(id)
-                .or_insert_with(|| trace.name.clone());
+                .or_insert_with(|| trace.name.clone().or_else(|| trace.display_name.clone()));
         }
         let Some(&anchor) = nodes.first() else {
             return;

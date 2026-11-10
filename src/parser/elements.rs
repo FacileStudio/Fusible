@@ -134,9 +134,12 @@ pub struct Trace {
         alias = "connectedNetIds"
     )]
     pub connected_source_net_ids: Vec<String>,
-    /// Optional display or trace name.
-    #[serde(default, alias = "display_name", alias = "displayName")]
+    /// The name the author gave the trace (`<trace name="...">`).
+    #[serde(default)]
     pub name: Option<String>,
+    /// The label tscircuit writes on every trace, beside `name` when both exist.
+    #[serde(default, alias = "displayName")]
+    pub display_name: Option<String>,
     /// Optional subcircuit connectivity map key.
     #[serde(default, alias = "subcircuit_connectivity_map_key")]
     pub connectivity_key: Option<String>,
