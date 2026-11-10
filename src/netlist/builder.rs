@@ -29,7 +29,8 @@ pub fn build_netlist(circuit: &Circuit) -> Netlist {
         netlist.shorts.extend(group.short(&graph));
         root_to_net.insert(group.root, idx);
     }
-    let order = attach_order(circuit, joined, &ports);
+    let internal = std::mem::take(&mut graph.internal_ports);
+    let order = attach_order(circuit, &internal, joined, &ports);
     attach_ports(&mut netlist, &mut graph, order, &root_to_net);
     netlist.dangling_refs = std::mem::take(&mut graph.dangling);
     index_pads(&mut netlist, circuit, &ports);
@@ -49,9 +50,11 @@ fn index_pads(netlist: &mut Netlist, circuit: &Circuit, ports: &PortMap<'_>) {
 type Attachment<'a> = (&'a Port, Option<usize>);
 
 /// Ports attach in the order the old lowering used: ports carrying a
-/// `net_id` first, then each trace's ports, so endpoint order is stable.
+/// `net_id` first, then each trace's ports, then internally joined ports,
+/// so endpoint order is stable.
 fn attach_order<'a>(
     circuit: &'a Circuit,
+    internal: &'a [String],
     joined: Vec<Option<usize>>,
     ports: &PortMap<'a>,
 ) -> Vec<Attachment<'a>> {
@@ -62,6 +65,7 @@ fn attach_order<'a>(
     let on_traces = circuit
         .traces()
         .flat_map(|trace| &trace.connected_source_port_ids)
+        .chain(internal)
         .filter_map(|id| ports.get(id.as_str()).map(|port| (*port, None)));
     on_nets.chain(on_traces).collect()
 }
@@ -75,7 +79,9 @@ fn attach_ports(
     for (port, joined) in order {
         if let Some(node) = graph.port_node(port, joined) {
             let root = graph.sets.find(node);
-            attach_port(netlist, root_to_net[&root], port);
+            if let Some(&idx) = root_to_net.get(&root) {
+                attach_port(netlist, idx, port);
+            }
         }
     }
 }

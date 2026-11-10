@@ -13,7 +13,8 @@
 //!   linked to a port counted once, as that port;
 //! - **Trace routing**: nets, ports and traces join a union-find, and one
 //!   net is cut per connected component, so a trace tying two nets merges
-//!   them and a short between declared nets is recorded;
+//!   them and a short between declared nets is recorded; pins a part ties
+//!   internally (`source_component_internal_connection`) join the same way;
 //! - **Fail-closed tracking**: undefined ("ghost") nets, anonymous
 //!   endpoints, and references to elements that do not exist are preserved
 //!   for the linter to report.
@@ -24,6 +25,9 @@ mod builder;
 mod connectivity;
 mod endpoint;
 mod groups;
+mod internal;
+#[cfg(test)]
+mod internal_tests;
 mod joins;
 mod labels;
 #[cfg(test)]

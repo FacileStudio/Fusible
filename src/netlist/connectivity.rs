@@ -28,6 +28,7 @@ pub(super) struct Connectivity {
     pub short_joins: Vec<TraceJoin>,
     pub declared_nodes: Vec<usize>,
     pub dangling: Vec<DanglingRef>,
+    pub internal_ports: Vec<String>,
 }
 
 impl Connectivity {
@@ -47,6 +48,7 @@ impl Connectivity {
         for (index, trace) in circuit.traces().enumerate() {
             graph.join_trace(index, trace, ports);
         }
+        graph.join_internal(circuit, ports);
         graph.join_pads(circuit, ports);
         (graph, anonymous)
     }
@@ -91,9 +93,16 @@ impl Connectivity {
         Some(node)
     }
 
-    fn trace_ports(&mut self, label: &str, trace: &Trace, ports: &PortMap<'_>) -> Vec<usize> {
+    /// Port nodes for `port_ids`; each id no port defines is recorded as a
+    /// dangling reference owned by `label`.
+    pub(super) fn known_ports(
+        &mut self,
+        label: &str,
+        port_ids: &[String],
+        ports: &PortMap<'_>,
+    ) -> Vec<usize> {
         let mut nodes = Vec::new();
-        for port_id in &trace.connected_source_port_ids {
+        for port_id in port_ids {
             if ports.contains_key(port_id.as_str()) {
                 nodes.push(self.port(Some(port_id)));
             } else {
@@ -108,7 +117,7 @@ impl Connectivity {
 
     fn join_trace(&mut self, index: usize, trace: &Trace, ports: &PortMap<'_>) {
         let label = trace_label(trace, index);
-        let mut nodes = self.trace_ports(&label, trace, ports);
+        let mut nodes = self.known_ports(&label, &trace.connected_source_port_ids, ports);
         let port_only = trace.connected_source_net_ids.is_empty() && !nodes.is_empty();
         for net_id in &trace.connected_source_net_ids {
             nodes.push(self.net(net_id));
