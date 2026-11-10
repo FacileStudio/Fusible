@@ -73,11 +73,6 @@ fn drills_pads_rings_and_via_spacing_are_checked() {
         "{msgs:?}"
     );
     assert!(
-        msgs.iter()
-            .any(|m| m.starts_with("via annular ring 0.125 mm")),
-        "{msgs:?}"
-    );
-    assert!(
         msgs.iter().any(|m| m.starts_with("via to via 0.05 mm")),
         "{msgs:?}"
     );

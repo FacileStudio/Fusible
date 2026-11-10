@@ -37,7 +37,7 @@ fn slug(text: &str) -> String {
         .join("-")
 }
 
-fn part_id(kind: &str, value: Option<&str>, mpn: Option<&str>, name: &str) -> String {
+pub(super) fn part_id(kind: &str, value: Option<&str>, mpn: Option<&str>, name: &str) -> String {
     let identity = match (value, mpn) {
         (None, None) => vec![name],
         (value, mpn) => value.into_iter().chain(mpn).collect(),

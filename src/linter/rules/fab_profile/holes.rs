@@ -52,8 +52,12 @@ fn check_drill(profile: &FabProfile, d: &Drill<'_>) -> Vec<Diagnostic> {
             d.kind
         ));
     }
-    if let Some(outer) = d.outer {
-        messages.extend(check_copper(profile, d, outer));
+    if let Some(outer) = d
+        .outer
+        .filter(|o| d.kind == "via" && *o < profile.min_via_pad - EPSILON)
+    {
+        let (pad, min) = (mm(outer), mm(profile.min_via_pad));
+        messages.push(format!("via pad {pad} mm is below {name} minimum {min} mm"));
     }
     messages
         .into_iter()
@@ -61,25 +65,8 @@ fn check_drill(profile: &FabProfile, d: &Drill<'_>) -> Vec<Diagnostic> {
         .collect()
 }
 
-fn check_copper(profile: &FabProfile, d: &Drill<'_>, outer: f64) -> Vec<String> {
-    let name = &profile.name;
-    let mut messages = Vec::new();
-    if d.kind == "via" && outer < profile.min_via_pad - EPSILON {
-        let (pad, min) = (mm(outer), mm(profile.min_via_pad));
-        messages.push(format!("via pad {pad} mm is below {name} minimum {min} mm"));
-    }
-    let ring = (outer - d.hole) / 2.0;
-    if ring < profile.min_annular - EPSILON {
-        let (ring, min) = (mm(ring), mm(profile.min_annular));
-        messages.push(format!(
-            "{} annular ring {ring} mm is below {name} minimum {min} mm",
-            d.kind
-        ));
-    }
-    messages
-}
-
-/// Drill, via pad, annular ring, via-to-via and board-size violations.
+/// Drill, via pad, via-to-via and board-size violations. Rings belong to
+/// `annular_ring`.
 pub(super) fn check(profile: &FabProfile, geometry: &Geometry) -> Vec<Diagnostic> {
     let per_drill = drills(geometry)
         .into_iter()

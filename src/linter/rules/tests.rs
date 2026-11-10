@@ -9,6 +9,7 @@
 
 mod bypass;
 mod clearance;
+mod dfm;
 mod fab_profile;
 mod mcu_target;
 mod physical;

@@ -7,7 +7,8 @@ use super::math::finite_or;
 use super::GerberError;
 use crate::gerber::writer::FilePolarity;
 
-const DEFAULT_MASK_MARGIN_MM: f64 = 0.05;
+/// Solder mask expansion around a pad that sets none, in millimetres.
+pub const DEFAULT_MASK_MARGIN_MM: f64 = 0.05;
 
 impl PcbModel {
     /// Builds a copper layer: SMT pads, plated hole rings, via pads and trace strokes.

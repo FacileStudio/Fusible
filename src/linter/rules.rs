@@ -20,6 +20,8 @@ mod copper;
 mod copper_drill;
 mod dangling_reference;
 mod decoupling_capacitor;
+mod dfa;
+mod dfm;
 mod fab_profile;
 mod geom2d;
 mod ghost_net;
@@ -44,6 +46,13 @@ mod voltage_clearance;
 
 pub use dangling_reference::DanglingReferenceRule;
 pub use decoupling_capacitor::DecouplingCapacitorRule;
+pub use dfa::{
+    BomIncompleteRule, ComponentEdgeClearanceRule, CourtyardClearanceRule, FiducialsRule,
+};
+pub use dfm::{
+    AcidTrapRule, AnnularRingRule, DrillToCopperRule, EdgeClearanceRule, HoleSpacingRule,
+    MaskSliverRule, SilkOverPadRule, SilkTextSizeRule, ViaAspectRatioRule,
+};
 pub use fab_profile::FabProfileRule;
 pub use ghost_net::GhostNetRule;
 pub use malformed_element::MalformedElementRule;
