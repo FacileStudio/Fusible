@@ -9,6 +9,7 @@ use clap::{Parser, Subcommand};
 
 mod args;
 mod args_body;
+mod args_studio;
 mod mcp_args;
 
 pub use args::{
@@ -16,6 +17,7 @@ pub use args::{
     ReleaseArgs, RouteArgs, SyncArgs,
 };
 pub use args_body::{EjectArgs, KitArgs, NewArgs};
+pub use args_studio::StudioArgs;
 pub use mcp_args::{McpArgs, McpClient, NuageArgs, OpusArgs, ShareArgs, ShareTarget};
 
 /// Fusible — electronic linter & hardware-firmware bridge for tscircuit.
@@ -45,27 +47,7 @@ pub struct Cli {
 pub enum Commands {
     /// Open the studio: the interactive viewer with hot reload
     #[command(alias = "dev", alias = "view", alias = "webview")]
-    Studio {
-        /// Entry file (.tsx, .json) or directory
-        #[arg(value_name = "FILE")]
-        file: Option<PathBuf>,
-
-        /// Port to run dev server on (default: 3020)
-        #[arg(short = 'p', long)]
-        port: Option<u16>,
-
-        /// Use legacy tsci dev server instead of native Fusible Studio
-        #[arg(long)]
-        legacy: bool,
-
-        /// Run under the desktop shell: print a ready line, exit when stdin closes
-        #[arg(long)]
-        desktop: bool,
-
-        /// Also listen on the local network so a paired phone can view the project
-        #[arg(long)]
-        share: bool,
-    },
+    Studio(StudioArgs),
 
     /// Run the electronic linter on a circuit file or monorepo project
     #[command(alias = "lint")]
@@ -126,6 +108,13 @@ pub enum Commands {
 
     /// Initialize a new Fusible project and tscircuit hardware workspace
     Init(InitArgs),
+
+    /// Rewrite a 1.x fusible.yml into the 2.0 form and print the diff
+    Migrate {
+        /// Write nothing; exit 1 when the manifest needs a rewrite
+        #[arg(long)]
+        check: bool,
+    },
 
     /// Add a tscircuit component or registry package to the hardware project
     Add {

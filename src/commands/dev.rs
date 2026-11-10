@@ -5,7 +5,9 @@ use std::path::PathBuf;
 use miette::Diagnostic;
 use thiserror::Error;
 
+use crate::cli::StudioArgs;
 use crate::commands::target::{resolve_boards, BoardTarget, TargetError};
+use crate::project::Project;
 use crate::tscircuit::{Runner, RunnerError};
 
 #[derive(Debug, Error, Diagnostic)]
@@ -26,14 +28,15 @@ pub enum DevError {
 /// Starts the Fusible development server and interactive dark-theme web viewer.
 ///
 /// Without a target it serves every board of the manifest in one studio.
-pub fn run(
-    file: Option<PathBuf>,
-    port: Option<u16>,
-    legacy: bool,
-    desktop: bool,
-    share: bool,
-) -> Result<i32, DevError> {
-    let boards = match resolve_boards(file) {
+pub fn run(project: &Project, options: StudioArgs) -> Result<i32, DevError> {
+    let StudioArgs {
+        file,
+        port,
+        legacy,
+        desktop,
+        share,
+    } = options;
+    let boards = match resolve_boards(project, file) {
         Err(TargetError::Missing) => vec![fallback_board()],
         other => other?,
     };

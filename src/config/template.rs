@@ -55,4 +55,13 @@ firmware:
 # fab: jlcpcb-2l          # jlcpcb-2l | jlcpcb-4l | inline limits for another fab
 # clearance_class: B2     # B1 internal | B2 external uncoated | B4 external coated
 # copper: { outer_oz: 1, inner_oz: 0.5 }
+
+# Rule severities and waivers. Netlist rules can be neither lowered nor waived.
+# rules:
+#   test_point_coverage: off      # off | info | warning | error
+# waivers:
+#   - rule: decoupling_capacitor
+#     match: "U3.VDD"             # element id or refdes.pin, exact
+#     reason: "bulk cap C12 shared, checked on rev A"
+#     until: 2027-03-01           # optional; the waiver stops applying after this day
 "#;

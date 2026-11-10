@@ -12,8 +12,8 @@ use crate::bom::{Line, Report};
 use crate::cli::OpusArgs;
 use crate::commands::mcp::report;
 use crate::commands::target::resolve_boards;
-use crate::config::FusibleConfig;
 use crate::linter::{Diagnostic, Severity};
+use crate::project::Project;
 use dedup::{fuse_key, Store};
 use task::{clean_title, create};
 
@@ -24,11 +24,10 @@ fn on_path() -> bool {
     std::env::split_paths(&path).any(|dir| dir.join("opus").is_file())
 }
 
-fn project_root() -> PathBuf {
-    let manifest = FusibleConfig::nearest().map(|(path, _)| path);
-    manifest
-        .and_then(|p| p.parent().map(Path::to_path_buf))
-        .unwrap_or_else(|| PathBuf::from("."))
+fn project_root(project: &Project) -> PathBuf {
+    project
+        .manifest_dir()
+        .map_or_else(|| PathBuf::from("."), Path::to_path_buf)
 }
 
 fn fuse_args(board: &str, d: &Diagnostic) -> Vec<String> {
@@ -48,15 +47,15 @@ fn fuse_args(board: &str, d: &Diagnostic) -> Vec<String> {
 }
 
 /// Opens a task for each new blown-fuse error of the boards `file` selects.
-pub fn report_check(file: Option<PathBuf>, opus: &OpusArgs) {
+pub fn report_check(project: &Project, file: Option<PathBuf>, opus: &OpusArgs) {
     if !on_path() {
         return eprintln!("{MISSING}");
     }
-    let Ok(boards) = resolve_boards(file) else {
+    let Ok(boards) = resolve_boards(project, file) else {
         return;
     };
-    let mut store = Store::load(&project_root());
-    for board in boards.iter().map(report::lint_board) {
+    let mut store = Store::load(&project_root(project));
+    for board in boards.iter().map(|b| report::lint_board(project, b)) {
         for d in board
             .diagnostics
             .iter()
@@ -87,11 +86,11 @@ fn bom_task(line: &Line) -> (String, Vec<String>) {
 }
 
 /// Opens a "Buy" task for each BOM row with no price or not picked.
-pub fn report_bom(report: &Report, opus: &OpusArgs) {
+pub fn report_bom(project: &Project, report: &Report, opus: &OpusArgs) {
     if !on_path() {
         return eprintln!("{MISSING}");
     }
-    let mut store = Store::load(&project_root());
+    let mut store = Store::load(&project_root(project));
     for line in report
         .lines
         .iter()

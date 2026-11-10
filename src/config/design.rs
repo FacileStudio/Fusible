@@ -128,11 +128,6 @@ impl DesignRules {
             copper: cfg.copper.clone().unwrap_or_default(),
         }
     }
-
-    /// Design rules of the manifest nearest to the working directory, if there is one.
-    pub fn nearest() -> Option<Self> {
-        FusibleConfig::nearest().map(|(_, cfg)| Self::from_config(&cfg))
-    }
 }
 
 fn profile_name(profile: &FabProfile) -> String {

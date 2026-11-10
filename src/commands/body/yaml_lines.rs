@@ -2,17 +2,17 @@
 
 use std::ops::Range;
 
-pub(super) fn indent_of(line: &str) -> usize {
+pub(crate) fn indent_of(line: &str) -> usize {
     line.len() - line.trim_start_matches(' ').len()
 }
 
-pub(super) fn is_skippable(line: &str) -> bool {
+pub(crate) fn is_skippable(line: &str) -> bool {
     let text = line.trim();
     text.is_empty() || text.starts_with('#')
 }
 
 /// Splits `key: value` into the key and the trimmed value; `None` for any other shape.
-pub(super) fn key_value(line: &str) -> Option<(&str, &str)> {
+pub(crate) fn key_value(line: &str) -> Option<(&str, &str)> {
     let (key, rest) = line.trim_start().split_once(':')?;
     let plain = !key.is_empty()
         && key
@@ -54,7 +54,7 @@ pub(super) fn entry(
 }
 
 /// The end (exclusive) of the block that starts at `start`: deeper lines, minus trailing blanks.
-pub(super) fn block_end(lines: &[String], start: usize, indent: usize, limit: usize) -> usize {
+pub(crate) fn block_end(lines: &[String], start: usize, indent: usize, limit: usize) -> usize {
     let mut end = start + 1;
     for (i, line) in lines.iter().enumerate().take(limit).skip(start + 1) {
         if is_skippable(line) {

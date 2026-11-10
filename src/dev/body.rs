@@ -12,6 +12,8 @@ use tiny_http::{Header, Request};
 use super::assets::{http_response, HttpResponse};
 use super::limiter::{conversions, lock};
 use crate::commands::body::{preview, preview_config, BodyPreview};
+use crate::config::EnclosureConfig;
+use crate::project::Project;
 
 const JSON: &str = "application/json";
 const TEXT: &str = "text/plain; charset=utf-8";
@@ -44,9 +46,12 @@ impl BodyCache {
     }
 
     /// Answers `request` on the calling thread, which the server dedicates to this request.
-    pub fn serve(&self, request: Request, glb: bool) {
+    ///
+    /// The generator settings come from the first generated body of `project` for this board.
+    pub fn serve(&self, request: Request, glb: bool, project: &Project) {
         let board = lock(&self.current).board.clone();
-        let _ = request.respond(self.response(glb, |json| generate(json, board.as_deref())));
+        let settings = preview_config(project, board.as_deref());
+        let _ = request.respond(self.response(glb, |json| generate(json, settings)));
     }
 
     /// Returns the preview for the current revision, generating it at most once per revision.
@@ -88,9 +93,9 @@ impl BodyCache {
     }
 }
 
-fn generate(json: &str, board: Option<&str>) -> Generated {
+fn generate(json: &str, settings: Option<EnclosureConfig>) -> Generated {
     let _slot = conversions().acquire();
-    preview(json, preview_config(board))
+    preview(json, settings)
         .map(Arc::new)
         .map_err(|e| match e.help() {
             Some(help) => format!("{e}: {help}"),

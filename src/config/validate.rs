@@ -3,7 +3,9 @@
 use std::collections::BTreeSet;
 
 use super::design_validate::validate_design;
+use super::rules::validate_levels;
 use super::types::{AssemblyConfig, BodyConfig, LinkConfig};
+use super::waivers::validate_waivers;
 use super::FusibleConfig;
 
 /// Generators a body can name in `generate:`.
@@ -16,6 +18,8 @@ const RESERVED_BODY_NAMES: &[&str] = &["eject", "kit", "new"];
 pub(super) fn validate(cfg: &FusibleConfig) -> Result<(), String> {
     unique_names(cfg)?;
     validate_design(cfg)?;
+    validate_levels(&cfg.rules)?;
+    validate_waivers(&cfg.waivers)?;
     for (name, fw) in &cfg.firmware {
         board_reference(cfg, "firmware", name, fw.board.as_deref())?;
     }

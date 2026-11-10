@@ -1,18 +1,8 @@
 //! Lookups across the named sections of a loaded manifest.
 
-use std::path::{Path, PathBuf};
-
 use super::{BodyConfig, FirmwareConfig, FusibleConfig};
 
 impl FusibleConfig {
-    /// Loads the manifest nearest to the working directory, ignoring lookup errors.
-    ///
-    /// `main` reports manifest errors before any command runs, so callers can treat
-    /// an unreadable manifest like a missing one.
-    pub fn nearest() -> Option<(PathBuf, Self)> {
-        Self::find_and_load(Path::new(".")).ok().flatten()
-    }
-
     /// Returns the firmware bound to `board`, or every firmware when `board` is `None`.
     ///
     /// A firmware without `board:` belongs to the only board of the project.

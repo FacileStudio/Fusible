@@ -8,6 +8,7 @@ use crate::codegen::{extract_mcu_pins, generate_pins_rs, McuInfo};
 use crate::commands::mcp::report;
 use crate::commands::mcp::session::Session;
 use crate::netlist::Netlist;
+use crate::project::Project;
 
 pub const DESCRIPTION: &str = "Generate the Rust pin bindings (pins.rs) of a firmware. \
 Refuses while the fuse of its board is blown.";
@@ -34,13 +35,13 @@ fn board_of(session: &Session, firmware: &str) -> Result<Option<String>, String>
     Ok(fw.board.clone())
 }
 
-fn generate(board: Option<String>) -> Outcome {
-    let target = match report::select(board.as_deref()) {
+fn generate(project: &Project, board: Option<String>) -> Outcome {
+    let target = match report::select(project, board.as_deref()) {
         Ok(mut targets) if targets.len() == 1 => targets.remove(0),
         Ok(_) => return Outcome::fail("the firmware names no board and the project has several"),
         Err(message) => return Outcome::fail(message),
     };
-    let lint = report::lint_board(&target);
+    let lint = report::lint_board(project, &target);
     if lint.blown {
         return Outcome::fail_with(
             json!({"fuse": "blown", "violations": report::diagnostics_json(&lint)}),
@@ -66,7 +67,7 @@ pub fn run(session: &mut Session, args: &Value) -> Outcome {
         Err(outcome) => return outcome,
     };
     match board_of(session, firmware) {
-        Ok(board) => generate(board),
+        Ok(board) => generate(&session.project(), board),
         Err(message) => Outcome::fail(message),
     }
 }

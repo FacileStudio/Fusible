@@ -2,26 +2,20 @@ use std::thread;
 
 use tiny_http::{Request, Response};
 
-use super::api;
-use super::assembly;
 use super::bind::bind;
-use super::bodies;
-use super::bom;
 use super::desktop::{announce_ready, exit_on_stdin_eof};
-use super::firmware;
-use super::git_api;
 use super::guard::admit;
 use super::hub::stream_events;
 use super::kicad_watch::start_kicad_watchers;
 use super::limiter::handlers;
-use super::pair::{self, enable_sharing, lan_ip};
+use super::pair::{enable_sharing, lan_ip};
 use super::refresh::{load_bundle, rebuild_trigger, refresh, warn_if_bundle_missing, watch_dir};
-use super::rules_api;
-use super::run_api;
+use super::routes::api_route;
 use super::serve::serve_static;
 use super::state::{Slot, State};
 use super::watcher::start_file_watcher;
 use crate::commands::target::BoardTarget;
+use crate::project::Project;
 
 /// Returns the percent-decoded value of `key` in the URL's query string; empty counts as absent.
 pub(super) fn query_param(url: &str, key: &str) -> Option<String> {
@@ -62,22 +56,8 @@ pub(super) fn handle(request: Request, state: &State, port: u16) {
     }
     let path = route_path(request.url()).to_string();
     match path.as_str() {
-        "/api/mechanical" => api::body_preview(request, state, false),
-        "/api/mechanical.glb" => api::body_preview(request, state, true),
-        "/api/circuit" => api::circuit(request, state),
-        "/api/project" => api::project(request, state),
-        "/api/bom" => bom::serve(request, state, port),
-        "/api/runs" => api::runs(request, state),
-        "/api/rules" => rules_api::serve(request),
-        p if pair::owns(p) => pair::serve(request, state, p),
-        p if assembly::owns(p) => assembly::serve(request, p),
-        "/api/bodies" => bodies::list(request),
-        p if p.starts_with("/api/bodies/") => bodies::serve(request, p),
-        "/api/kicad" => api::kicad(request, state),
-        "/api/firmware" => firmware::serve(request, state),
-        "/api/run" => run_api::start_run(request, state, port),
-        p if git_api::owns(p) => git_api::serve(request, state, port),
         "/events" => subscribe(request, state),
+        p if p.starts_with("/api/") => api_route(request, state, port, p, &Project::current()),
         _ => serve_static(request, state, &path),
     }
 }

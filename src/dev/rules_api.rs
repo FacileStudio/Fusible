@@ -5,6 +5,7 @@ use tiny_http::Request;
 use super::api::respond_json;
 use crate::config::DesignRules;
 use crate::linter::Linter;
+use crate::project::Project;
 
 /// The JSON list of every registered rule for the manifest nearest to the working directory.
 pub(super) fn rules_json(design: Option<&DesignRules>) -> String {
@@ -13,6 +14,6 @@ pub(super) fn rules_json(design: Option<&DesignRules>) -> String {
 }
 
 /// Serves the rule list.
-pub(super) fn serve(request: Request) {
-    respond_json(request, 200, rules_json(DesignRules::nearest().as_ref()));
+pub(super) fn serve(request: Request, project: &Project) {
+    respond_json(request, 200, rules_json(project.design_rules()));
 }

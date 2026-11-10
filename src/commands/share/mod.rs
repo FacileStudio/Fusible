@@ -9,11 +9,11 @@ use std::path::{Path, PathBuf};
 use miette::Diagnostic;
 use thiserror::Error;
 
-use crate::cli::{NuageArgs, ShareArgs, ShareTarget};
+use crate::cli::{ExportArgs, NuageArgs, ShareArgs, ShareTarget};
 use crate::commands::check::CheckError;
 use crate::commands::export::{self, ExportError};
 use crate::commands::target::{resolve_board, TargetError};
-use crate::config::FusibleConfig;
+use crate::project::Project;
 
 /// A share that could not complete.
 #[derive(Debug, Error, Diagnostic)]
@@ -59,43 +59,39 @@ impl ShareError {
     }
 }
 
-fn export_to_temp(preset: &str) -> Result<PathBuf, ShareError> {
-    let board = resolve_board(None)?;
+fn export_to_temp(project: &Project, preset: &str) -> Result<PathBuf, ShareError> {
+    let board = resolve_board(project, None)?;
     let tmp = stage::unique_dir()?;
-    export::run(
-        Some(board.entry),
-        Some(preset),
-        "gerbers",
-        Some(tmp.clone()),
-        false,
-    )?;
+    let args = ExportArgs {
+        file: Some(board.entry),
+        preset: Some(preset.to_string()),
+        format: "gerbers".into(),
+        output: Some(tmp.clone()),
+        skip_lint: false,
+    };
+    export::run(project, args)?;
     Ok(tmp)
 }
 
-fn project_name() -> String {
-    let (manifest, cfg) = FusibleConfig::nearest().unzip();
-    let dir = manifest
-        .as_deref()
-        .and_then(Path::parent)
-        .map(Path::to_path_buf);
+fn project_name(project: &Project) -> String {
+    let dir = project.manifest_dir().map(Path::to_path_buf);
     let folder = dir.or_else(|| std::env::current_dir().ok());
     let folder = folder.and_then(|d| d.file_name().map(|n| n.to_string_lossy().into_owned()));
-    cfg.and_then(|c| c.name)
-        .or(folder)
-        .unwrap_or_else(|| "project".into())
+    let name = project.found().and_then(|(_, c)| c.name.clone());
+    name.or(folder).unwrap_or_else(|| "project".into())
 }
 
 /// Exports, copies into the space's sync folder, syncs, and optionally links.
-pub fn run(args: ShareArgs) -> Result<(), ShareError> {
+pub fn run(project: &Project, args: ShareArgs) -> Result<(), ShareError> {
     let ShareTarget::Nuage(args) = args.target;
-    share_nuage(&args)
+    share_nuage(project, &args)
 }
 
-fn share_nuage(args: &NuageArgs) -> Result<(), ShareError> {
+fn share_nuage(current: &Project, args: &NuageArgs) -> Result<(), ShareError> {
     let sync_dir = nuage::sync_dir(&args.space)?;
-    let project = project_name();
+    let project = project_name(current);
     stage::valid_name(&project)?;
-    let tmp = export_to_temp(&args.preset)?;
+    let tmp = export_to_temp(current, &args.preset)?;
     let rev = revision::current();
     let dest = stage::destination(&sync_dir, &project, &rev, args.force)?;
     let count = stage::copy_tree(&tmp, &dest);

@@ -10,6 +10,7 @@ use crate::config::DesignRules;
 use crate::linter::{Diagnostic, LintContext, Linter, Severity};
 use crate::netlist::Netlist;
 use crate::parser::{self, Circuit};
+use crate::project::Project;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct DevDiagnostic {
@@ -64,11 +65,15 @@ pub struct DevPayload {
 }
 
 /// Builds the studio payload for `entry`, returning the Circuit JSON source text alongside it.
-pub fn execute_pipeline(entry: &Path) -> (DevPayload, Option<String>) {
-    let board = board_for_entry(entry);
+///
+/// The board settings and design rules come from `project`.
+pub fn execute_pipeline(project: &Project, entry: &Path) -> (DevPayload, Option<String>) {
+    let board = board_for_entry(project, entry);
+    let design = project.design_rules();
     let (mut payload, source) = match load_circuit_source(entry) {
         Ok((json_path, source)) => {
-            let payload = analyze(board.title, board.mcu.as_deref(), &json_path, &source);
+            let mcu = board.mcu.as_deref();
+            let payload = analyze(board.title, mcu, design, &json_path, &source);
             (payload, Some(source))
         }
         Err(err) => (source_failure(board.title, err.to_string()), None),
@@ -108,7 +113,13 @@ fn source_failure(board_name: String, message: String) -> DevPayload {
     }
 }
 
-fn analyze(board_name: String, mcu: Option<&str>, json_path: &Path, source: &str) -> DevPayload {
+fn analyze(
+    board_name: String,
+    mcu: Option<&str>,
+    design: Option<&DesignRules>,
+    json_path: &Path,
+    source: &str,
+) -> DevPayload {
     let mut payload = DevPayload {
         board_name,
         board: None,
@@ -118,7 +129,7 @@ fn analyze(board_name: String, mcu: Option<&str>, json_path: &Path, source: &str
         revision: revision(source),
     };
     match parser::parse(source, json_path) {
-        Ok(circuit) => lint(&mut payload, &circuit, mcu),
+        Ok(circuit) => lint(&mut payload, &circuit, mcu, design),
         Err(err) => payload.diagnostics.push(diagnostic(
             "parse_error",
             err.to_string(),
@@ -128,12 +139,16 @@ fn analyze(board_name: String, mcu: Option<&str>, json_path: &Path, source: &str
     payload
 }
 
-fn lint(payload: &mut DevPayload, circuit: &Circuit, mcu: Option<&str>) {
+fn lint(
+    payload: &mut DevPayload,
+    circuit: &Circuit,
+    mcu: Option<&str>,
+    design: Option<&DesignRules>,
+) {
     let netlist = Netlist::from_circuit(circuit);
-    let design = DesignRules::nearest();
     let ctx = LintContext::new(circuit, &netlist)
         .with_mcu(mcu)
-        .with_design(design.as_ref());
+        .with_design(design);
     let violations = Linter::default().run_with_context(&ctx);
     payload.fuse_blown = violations.iter().any(|v| v.severity == Severity::Error);
     payload.diagnostics = violations.into_iter().map(DevDiagnostic::from).collect();

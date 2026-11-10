@@ -12,6 +12,7 @@ fn job(output: Option<&str>) -> ExportJob {
         out_dir: PathBuf::from("dist"),
         output: output.map(PathBuf::from),
         source: None,
+        manifest: None,
     }
 }
 

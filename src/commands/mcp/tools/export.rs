@@ -6,11 +6,13 @@ use serde_json::{json, Value};
 
 use super::args::{choice, object, optional_str, required_str, shown, string};
 use super::outcome::Outcome;
+use crate::cli::ExportArgs;
 use crate::commands::check::CheckError;
 use crate::commands::export::{self, ExportError};
 use crate::commands::mcp::report;
 use crate::commands::mcp::session::Session;
 use crate::commands::target::BoardTarget;
+use crate::project::Project;
 
 pub const DESCRIPTION: &str =
     "Export fab (gerbers), cad (KiCad, STEP), docs (SVG, PDF) or all files. \
@@ -52,14 +54,20 @@ fn written(root: &Path, target: &BoardTarget, preset: &str) -> Vec<String> {
     files.iter().map(|p| shown(root, p)).collect()
 }
 
-fn export_one(root: &Path, target: &BoardTarget, preset: &str) -> Result<Vec<String>, Outcome> {
-    match export::run(
-        Some(target.entry.clone()),
-        Some(preset),
-        "gerbers",
-        None,
-        false,
-    ) {
+fn export_one(
+    root: &Path,
+    project: &Project,
+    target: &BoardTarget,
+    preset: &str,
+) -> Result<Vec<String>, Outcome> {
+    let args = ExportArgs {
+        file: Some(target.entry.clone()),
+        preset: Some(preset.to_string()),
+        format: "gerbers".into(),
+        output: None,
+        skip_lint: false,
+    };
+    match export::run(project, args) {
         Ok(()) => Ok(written(root, target, preset)),
         Err(ExportError::Check(CheckError::FuseBlown(blown))) => Err(Outcome::fail_with(
             json!({"fuse": "blown", "violations": report::violations_json(&blown)}),
@@ -70,10 +78,11 @@ fn export_one(root: &Path, target: &BoardTarget, preset: &str) -> Result<Vec<Str
 
 fn export_all(session: &Session, args: &Value) -> Result<Outcome, Outcome> {
     let preset = required_str(args, "preset")?;
-    let targets = report::select(optional_str(args, "board")).map_err(Outcome::fail)?;
+    let project = session.project();
+    let targets = report::select(&project, optional_str(args, "board")).map_err(Outcome::fail)?;
     let mut files = Vec::new();
     for target in &targets {
-        files.extend(export_one(&session.root, target, preset)?);
+        files.extend(export_one(&session.root, &project, target, preset)?);
     }
     Ok(Outcome::ok(json!({"files": files})))
 }

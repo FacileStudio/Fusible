@@ -39,7 +39,8 @@ fn detects_tsx_target_extensions() {
 #[test]
 fn resolves_explicit_entry_first() {
     let explicit = Some(PathBuf::from("custom/path.json"));
-    let res = resolve_entry(explicit).expect("must resolve explicit");
+    let res = resolve_entry(&crate::project::Project::current(), explicit)
+        .expect("must resolve explicit");
     assert_eq!(res, PathBuf::from("custom/path.json"));
 }
 

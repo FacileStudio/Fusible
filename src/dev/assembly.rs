@@ -10,6 +10,7 @@ use super::api::{error_body, JSON};
 use super::assets::http_response;
 use super::body::no_store;
 use crate::config::FusibleConfig;
+use crate::project::Project;
 
 const GLB: &str = "model/gltf-binary";
 
@@ -68,13 +69,10 @@ pub(super) fn model_reply(
 }
 
 /// Answers a request for one of the assembly routes.
-pub(super) fn serve(request: Request, path: &str) {
-    let (manifest, cfg) = FusibleConfig::nearest().unzip();
-    let root = manifest
-        .as_deref()
-        .and_then(Path::parent)
-        .unwrap_or(Path::new(""));
-    let (status, content_type, body) = reply(request.method(), path, cfg.as_ref(), root);
+pub(super) fn serve(request: Request, path: &str, project: &Project) {
+    let cfg = project.found().map(|(_, cfg)| cfg);
+    let root = project.manifest_dir().unwrap_or(Path::new(""));
+    let (status, content_type, body) = reply(request.method(), path, cfg, root);
     let _ = request.respond(no_store(http_response(status, content_type, body)));
 }
 

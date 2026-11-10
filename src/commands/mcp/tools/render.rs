@@ -11,6 +11,7 @@ use crate::commands::check::load_circuit_source;
 use crate::commands::mcp::report;
 use crate::commands::mcp::session::Session;
 use crate::netlist::Netlist;
+use crate::project::Project;
 use crate::{parser, svg};
 
 pub const DESCRIPTION: &str = "Render the PCB layout or the schematic of a board as SVG. \
@@ -63,8 +64,8 @@ fn png(svg: &str) -> Option<Vec<u8>> {
     (output.status.success() && !output.stdout.is_empty()).then_some(output.stdout)
 }
 
-fn draw(board: &str, view: &str) -> Result<String, String> {
-    let target = report::select(Some(board))?.remove(0);
+fn draw(project: &Project, board: &str, view: &str) -> Result<String, String> {
+    let target = report::select(project, Some(board))?.remove(0);
     let (path, source) = load_circuit_source(&target.entry).map_err(|e| e.to_string())?;
     if view == "pcb" {
         return Ok(svg::render_pcb_svg(&source));
@@ -76,13 +77,13 @@ fn draw(board: &str, view: &str) -> Result<String, String> {
     ))
 }
 
-fn rendered(args: &Value) -> Result<Outcome, Outcome> {
+fn rendered(project: &Project, args: &Value) -> Result<Outcome, Outcome> {
     let board = required_str(args, "board")?;
     let view = required_str(args, "view")?;
     if !["pcb", "schematic"].contains(&view) {
         return Err(Outcome::fail("view must be pcb or schematic"));
     }
-    let svg = draw(board, view).map_err(Outcome::fail)?;
+    let svg = draw(project, board, view).map_err(Outcome::fail)?;
     let outcome = Outcome::ok(json!({"board": board, "view": view, "svg": svg}));
     Ok(match png(&svg) {
         Some(bytes) => outcome
@@ -92,6 +93,6 @@ fn rendered(args: &Value) -> Result<Outcome, Outcome> {
 }
 
 /// Draws the requested view.
-pub fn run(_session: &mut Session, args: &Value) -> Outcome {
-    rendered(args).unwrap_or_else(|outcome| outcome)
+pub fn run(session: &mut Session, args: &Value) -> Outcome {
+    rendered(&session.project(), args).unwrap_or_else(|outcome| outcome)
 }

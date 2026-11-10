@@ -5,6 +5,7 @@ use std::path::Path;
 use super::new_manifest::add_entry;
 use super::BodyError;
 use crate::config::FusibleConfig;
+use crate::project::Project;
 
 const TYPES: &str = include_str!("../../assets/part.d.ts");
 const TEMPLATE: &str = r#"import type { Ctx } from "./fusible";
@@ -97,15 +98,17 @@ fn edited_manifest(old: &str, name: &str, fields: &[String]) -> Result<String, B
 /// The name must be new across boards, firmware and bodies. The manifest is edited as text so
 /// its comments survive, and the result must parse with the new body in it.
 pub fn new(
+    project: &Project,
     name: String,
     board: Option<String>,
     material: String,
     process: String,
 ) -> Result<(), BodyError> {
-    let (manifest, cfg) = FusibleConfig::nearest()
+    let (manifest, cfg) = project
+        .found()
         .ok_or_else(|| refuse(&name, "no fusible.yml found", "run `fusible init` first"))?;
-    check_name(&cfg, &name)?;
-    check_choices(&cfg, &name, board.as_ref(), (&material, &process))?;
+    check_name(cfg, &name)?;
+    check_choices(cfg, &name, board.as_ref(), (&material, &process))?;
     let mut fields = vec![format!("source: mech/{name}.ts")];
     fields.extend([
         format!("material: {material}"),
@@ -113,9 +116,9 @@ pub fn new(
     ]);
     fields.extend(["format: all".to_string()]);
     fields.extend(board.map(|b| format!("board: {b}")));
-    let edited = edited_manifest(&std::fs::read_to_string(&manifest)?, &name, &fields)?;
+    let edited = edited_manifest(&std::fs::read_to_string(manifest)?, &name, &fields)?;
     write_files(manifest.parent().unwrap_or(Path::new(".")), &name)?;
-    std::fs::write(&manifest, edited)?;
+    std::fs::write(manifest, edited)?;
     println!("✅ Body {name} added to {}", manifest.display());
     Ok(())
 }

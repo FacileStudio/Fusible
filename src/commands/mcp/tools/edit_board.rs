@@ -36,12 +36,13 @@ pub fn schema() -> Value {
 
 fn prepare(session: &mut Session, args: &Value) -> Result<Outcome, Outcome> {
     let board = required_str(args, "board")?;
-    let target = report::select(Some(board))
+    let project = session.project();
+    let target = report::select(&project, Some(board))
         .map_err(Outcome::fail)?
         .remove(0);
     let change = edit::change_from(args).map_err(Outcome::fail)?;
     let check = || {
-        let lint = report::lint_board(&target);
+        let lint = report::lint_board(&project, &target);
         (
             json!(report::fuse(std::slice::from_ref(&lint))),
             report::diagnostics_json(&lint),

@@ -7,6 +7,7 @@
 mod assembly_tests;
 #[cfg(test)]
 mod code_part_tests;
+mod date;
 mod design;
 #[cfg(test)]
 mod design_tests;
@@ -20,6 +21,9 @@ mod kicad_tests;
 mod links_tests;
 mod query;
 mod raw;
+mod rules;
+#[cfg(test)]
+mod rules_tests;
 #[cfg(test)]
 mod sections_tests;
 mod template;
@@ -27,21 +31,25 @@ mod template;
 mod tests;
 mod types;
 mod validate;
+mod waivers;
 
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
+pub use date::Date;
 pub use design::{ClearanceClass, CopperSpec, DesignRules, FabProfile, FabSpec, NetSpec};
 use discovery::{check_file_target, find_in_dir};
 pub use error::ConfigError;
 pub use fab::{builtin_fab, builtin_fab_names};
 use raw::RawConfig;
 pub use raw::LEGACY_BOARD;
+pub use rules::{is_netlist_rule, RuleLevel, NETLIST_RULES};
 pub use types::{
     AssemblyConfig, BoardConfig, BodyConfig, EnclosureConfig, FirmwareConfig, LinkConfig, PinId,
     PlacementConfig, WireConfig, DEFAULT_HOLE_MIN,
 };
 pub use validate::GENERATORS;
+pub use waivers::Waiver;
 
 /// Recognized filenames for the Fusible manifest, in order of precedence.
 pub const CONFIG_FILENAMES: &[&str] = &["fusible.yml", "fusible.yaml"];
@@ -61,6 +69,10 @@ pub struct FusibleConfig {
     pub fab: Option<FabSpec>,
     pub clearance_class: Option<String>,
     pub copper: Option<CopperSpec>,
+    /// Severity per rule id, from `rules:`.
+    pub rules: BTreeMap<String, RuleLevel>,
+    /// Reasoned exceptions, from `waivers:`.
+    pub waivers: Vec<Waiver>,
 }
 
 impl FusibleConfig {

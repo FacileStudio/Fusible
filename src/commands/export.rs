@@ -15,8 +15,10 @@ use std::path::{Path, PathBuf};
 use miette::Diagnostic;
 use thiserror::Error;
 
+use crate::cli::ExportArgs;
 use crate::commands::check::{self, CheckError};
 use crate::commands::target::{resolve_board, BoardTarget, TargetError};
+use crate::project::Project;
 use crate::tscircuit::{Runner, RunnerError};
 
 /// Unified error enum for the export pipeline.
@@ -52,6 +54,7 @@ struct ExportJob {
     out_dir: PathBuf,
     output: Option<PathBuf>,
     source: Option<String>,
+    manifest: Option<PathBuf>,
 }
 
 impl ExportJob {
@@ -80,18 +83,13 @@ impl ExportJob {
 ///
 /// By default, all exports are **fuse-gated**: electrical rules are checked first.
 /// If any violation is found, the process halts and no export occurs.
-pub fn run(
-    file: Option<PathBuf>,
-    preset: Option<&str>,
-    format: &str,
-    output: Option<PathBuf>,
-    skip_lint: bool,
-) -> Result<(), ExportError> {
-    if let Some(preset_name) = preset {
+pub fn run(project: &Project, args: ExportArgs) -> Result<(), ExportError> {
+    let skip_lint = args.skip_lint;
+    if let Some(preset_name) = args.preset.as_deref() {
         presets::validate_preset(preset_name)?;
     }
 
-    let board = match resolve_board(file) {
+    let board = match resolve_board(project, args.file) {
         Err(TargetError::Missing) if skip_lint => BoardTarget {
             entry: PathBuf::from("index.tsx"),
             out_dir: PathBuf::from("dist"),
@@ -99,33 +97,38 @@ pub fn run(
         },
         other => other.map_err(CheckError::from)?,
     };
-    let source = fuse_gate(&board, skip_lint)?;
+    let source = fuse_gate(project, &board, skip_lint)?;
 
     let job = ExportJob {
         runner: Runner::detect().ok(),
         entry: board.entry,
         board_title: board.title,
         out_dir: board.out_dir,
-        output,
+        output: args.output,
         source,
+        manifest: project.manifest.clone(),
     };
 
-    match preset {
+    match args.preset.as_deref() {
         Some(preset_name) => presets::run_preset(&job, preset_name),
-        None => formats::run_format(&job, format),
+        None => formats::run_format(&job, &args.format),
     }
 }
 
 /// Runs the electrical check unless the user asked to skip it.
 ///
 /// Returns the Circuit JSON the check validated, or `None` when it was skipped.
-fn fuse_gate(board: &BoardTarget, skip_lint: bool) -> Result<Option<String>, ExportError> {
+fn fuse_gate(
+    project: &Project,
+    board: &BoardTarget,
+    skip_lint: bool,
+) -> Result<Option<String>, ExportError> {
     if skip_lint {
         println!("⚠️  Skipping electrical rule verification (--skip-lint requested).\n");
         return Ok(None);
     }
     println!("🔍 Verifying electrical rules before export (fuse check)...");
-    let (_, source) = check::lint_source(&board.entry, board.mcu.clone())?;
+    let (_, source) = check::lint_source(project, &board.entry, board.mcu.clone())?;
     println!("⚡ Fuse intact — proceeding with artifact export.\n");
     Ok(Some(source))
 }

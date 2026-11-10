@@ -6,9 +6,10 @@ use super::eject_files::{publish_new, staging_path, write_atomic};
 use super::eject_manifest::eject_manifest;
 use super::settings::{resolve_settings, Settings};
 use super::spec::Output;
-use super::{fuse_gate, generate, BodyError, FORMATS};
+use super::{fuse_gate, generate, BodyError, Gate, FORMATS};
 use crate::commands::target::resolve_board;
 use crate::config::{EnclosureConfig, FusibleConfig};
+use crate::project::Project;
 
 /// Generates body `name` once into a file, then rewrites its manifest entry to `source:`.
 ///
@@ -18,12 +19,17 @@ use crate::config::{EnclosureConfig, FusibleConfig};
 /// moved into place only when generation succeeds, so a failed run leaves nothing behind.
 /// A manifest edit that cannot be done safely leaves `fusible.yml` untouched and fails with
 /// a tool error (exit 2) that lists the lines to change by hand.
-pub fn eject(name: String, output: Option<PathBuf>, skip_lint: bool) -> Result<(), BodyError> {
-    let (manifest, cfg) = FusibleConfig::nearest().ok_or_else(|| unknown(&name, None))?;
+pub fn eject(
+    project: &Project,
+    name: String,
+    output: Option<PathBuf>,
+    skip_lint: bool,
+) -> Result<(), BodyError> {
+    let (manifest, cfg) = project.found().ok_or_else(|| unknown(&name, None))?;
     let body = cfg
         .bodies
         .get(&name)
-        .ok_or_else(|| unknown(&name, Some(&cfg)))?;
+        .ok_or_else(|| unknown(&name, Some(cfg)))?;
     if body.generate.is_none() {
         return Err(BodyError::NotGenerated { name });
     }
@@ -36,11 +42,11 @@ pub fn eject(name: String, output: Option<PathBuf>, skip_lint: bool) -> Result<(
     if path.exists() {
         return Err(BodyError::Exists { path });
     }
-    let board = resolve_board(body.board.clone().map(PathBuf::from))?;
-    let json = fuse_gate(&board, skip_lint)?;
+    let board = resolve_board(project, body.board.clone().map(PathBuf::from))?;
+    let json = fuse_gate(Gate { project, skip_lint }, &board)?;
     generate_staged(&json, &settings, format, &path)?;
     println!("✅ Ejected body {name} ({format}) -> {}", path.display());
-    update_manifest(&manifest, &name, &manifest_path(&path, root))
+    update_manifest(manifest, &name, &manifest_path(&path, root))
 }
 
 /// Generates the model next to `path` and moves it into place; a failure leaves no file behind.

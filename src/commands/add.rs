@@ -5,7 +5,7 @@ use std::path::{Path, PathBuf};
 use miette::Diagnostic;
 use thiserror::Error;
 
-use crate::config::FusibleConfig;
+use crate::project::Project;
 use crate::tscircuit::error::RunnerError;
 use crate::tscircuit::Runner;
 
@@ -21,8 +21,8 @@ pub enum AddError {
 }
 
 /// Discovers the hardware workspace directory.
-pub fn find_hardware_dir() -> PathBuf {
-    if let Some(dir) = manifest_hardware_dir() {
+pub fn find_hardware_dir(project: &Project) -> PathBuf {
+    if let Some(dir) = manifest_hardware_dir(project) {
         return dir;
     }
 
@@ -34,8 +34,8 @@ pub fn find_hardware_dir() -> PathBuf {
 }
 
 /// Returns the existing parent directory of the manifest's hardware entry, if any.
-fn manifest_hardware_dir() -> Option<PathBuf> {
-    let (_, config) = FusibleConfig::nearest()?;
+fn manifest_hardware_dir(project: &Project) -> Option<PathBuf> {
+    let (_, config) = project.found()?;
     let (_, board) = config
         .boards
         .iter()
@@ -46,8 +46,8 @@ fn manifest_hardware_dir() -> Option<PathBuf> {
 }
 
 /// Installs the given packages into the project's hardware workspace.
-pub fn run(packages: &[String]) -> Result<(), AddError> {
-    let hw_dir = find_hardware_dir();
+pub fn run(project: &Project, packages: &[String]) -> Result<(), AddError> {
+    let hw_dir = find_hardware_dir(project);
     let runner = Runner::detect()?;
 
     println!(

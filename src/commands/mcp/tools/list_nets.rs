@@ -27,12 +27,13 @@ fn describe(circuit: &Circuit, net: &Net) -> Value {
 }
 
 /// Lists nets of the named board.
-pub fn run(_session: &mut Session, args: &Value) -> Outcome {
+pub fn run(session: &mut Session, args: &Value) -> Outcome {
     let board = match required_str(args, "board") {
         Ok(board) => board,
         Err(outcome) => return outcome,
     };
-    let loaded = report::select(Some(board)).and_then(|targets| report::load(&targets[0]));
+    let loaded = report::select(&session.project(), Some(board))
+        .and_then(|targets| report::load(&targets[0]));
     match loaded {
         Ok(circuit) => {
             let rows: Vec<Value> = circuit.nets().map(|n| describe(&circuit, n)).collect();
