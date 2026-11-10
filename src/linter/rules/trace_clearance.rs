@@ -1,7 +1,8 @@
 //! `trace_clearance`: physical copper clearance design rule check (DRC).
 
+use super::copper::Shape;
 use super::geom2d::TOLERANCE;
-use super::pad_geometry::{pad_box, pad_net};
+use super::pad_geometry::{pad_box, pad_net, pad_shape};
 use crate::linter::{Category, Diagnostic, LintContext, Rule, RuleMeta, Severity};
 
 /// Minimum copper clearance in millimeters (standard 6 mil / 0.15mm PCB manufacturing limit).
@@ -25,8 +26,7 @@ struct CopperFeature {
     pub layer: String,
     pub x: f64,
     pub y: f64,
-    pub half_w: f64,
-    pub half_h: f64,
+    pub shape: Shape,
 }
 
 const META: RuleMeta = RuleMeta {
@@ -70,13 +70,9 @@ fn clearance_violation(f1: &CopperFeature, f2: &CopperFeature, min: f64) -> Opti
     if f1.net_id == f2.net_id || !f1.layer.eq_ignore_ascii_case(&f2.layer) {
         return None;
     }
-    let dx = (f1.x - f2.x).abs();
-    let dy = (f1.y - f2.y).abs();
-    let reach_x = f1.half_w + f2.half_w;
-    let reach_y = f1.half_h + f2.half_h;
-    let clearance_gap = ((dx - reach_x).max(0.0)).hypot((dy - reach_y).max(0.0));
+    let clearance_gap = f1.shape.gap(&f2.shape);
     (clearance_gap < min - TOLERANCE).then(|| {
-        if dx < reach_x && dy < reach_y {
+        if clearance_gap <= 0.0 {
             format!(
                 "direct copper short-circuit on {}: net \"{}\" and net \"{}\" overlap at \
                  ({:.2}, {:.2})",
@@ -98,7 +94,7 @@ fn extract_copper_features(ctx: &LintContext<'_>) -> Vec<CopperFeature> {
         .pads()
         .enumerate()
         .filter_map(|(index, pad)| {
-            let (x, y, half_w, half_h) = pad_box(pad)?;
+            let (x, y, _, _) = pad_box(pad)?;
             let label = pad.pad_id.clone().unwrap_or_else(|| format!("#{index}"));
             let (net_id, net_name) = pad_net(ctx, pad, &label);
             Some(CopperFeature {
@@ -107,8 +103,7 @@ fn extract_copper_features(ctx: &LintContext<'_>) -> Vec<CopperFeature> {
                 layer: pad.layer.clone().unwrap_or_else(|| "top".to_string()),
                 x,
                 y,
-                half_w,
-                half_h,
+                shape: pad_shape(pad)?,
             })
         })
         .collect()

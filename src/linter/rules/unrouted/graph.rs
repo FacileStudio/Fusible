@@ -94,15 +94,10 @@ impl<'a> Graph<'a> {
                     (self.sets.add(), net)
                 }
             };
-            let (c, half) = ((via.x, via.y), via.outer_diameter / 2.0);
             self.pieces.push(Piece {
                 owner,
                 layer: None,
-                shape: Shape::Rect {
-                    c,
-                    hw: half,
-                    hh: half,
-                },
+                shape: Shape::disc((via.x, via.y), via.outer_diameter / 2.0),
             });
         }
     }

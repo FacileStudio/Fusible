@@ -16,7 +16,8 @@ fn worst_pairs(items: &[Copper], min: f64) -> BTreeMap<(String, String), Worst> 
     for (i, j) in neighbours(items, min) {
         let (a, b) = (&items[i], &items[j]);
         let gap = a.shape.gap(&b.shape);
-        let has_trace = [a, b].iter().any(|c| matches!(c.shape, Shape::Seg { .. }));
+        let trace = |c: &&Copper| matches!(c.shape, Shape::Seg { .. }) && !c.shape.is_disc();
+        let has_trace = [a, b].iter().any(trace);
         let key = (
             a.net.clone().min(b.net.clone()),
             a.net.clone().max(b.net.clone()),
