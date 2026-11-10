@@ -14,8 +14,23 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
   is exit 2, a waiver that matches nothing is an `unused_waiver` warning, and an expired
   waiver no longer applies.
 - `fusible check --write-bindings` writes `pins.rs` once the fuse is intact.
+- `fusible migrate [--check]` rewrites a 1.x `fusible.yml` to the 2.0 form and keeps its comments.
+- The parser reads tscircuit pin attributes (`requires_power`, `do_not_connect`, ...), part data
+  (part numbers, values, ratings) and a typed PCB model.
+- Pins tied inside a part (`internallyConnectedPins`) join one net. Two declared nets tied that
+  way are a `shorted_nets` violation.
+- Diagnostics carry an optional `location`, `source` and structured `fixes`, and a third level,
+  `info`, which never blows the fuse.
+- `/api/rules` lists each rule's category.
 
 ### Changed
+
+- **Breaking:** `autoroute` is split. `unrouted` blows the fuse on nets with no routed trace.
+  Each tscircuit error kind has its own id (`footprint_overlap`, `off_board`, `placement`,
+  `trace_missing`, `port_not_connected`, `autorouting`, ...); an unknown `*_error` is
+  `upstream_error` and still blows the fuse. tscircuit warnings now print, as
+  `upstream_warning`, and unnamed traces as `unnamed_trace` at info level.
+- **Breaking:** the rule id `E_SCHEMATIC_SCALE_EXCESSIVE` is now `schematic_scale`.
 
 - **Breaking:** `fusible check` no longer writes `pins.rs`. Run `fusible build`, or pass
   `--write-bindings` (`--pins-rs PATH` implies it).

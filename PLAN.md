@@ -52,6 +52,15 @@ Every step ends with the four gates of `AGENTS.md` section 3. `[filet]` applies 
 12. New `src/commands/migrate.rs`, `src/cli.rs` — `fusible migrate` rewrites a 1.x `fusible.yml` (legacy `hardware:` form, old rule ids) to 2.0 and prints a diff. `--check` exits 1 when a rewrite is needed.
 13. Library output — replace `println!`/`eprintln!` outside `src/main.rs`, `src/dispatch/` and `src/commands/*` render functions with returned values or a `Reporter` trait passed in (`rg -c 'println!|eprintln!' src`). Exit: `fusible check --json` and `fusible mcp` write nothing but JSON on stdout, asserted in `tests/exit_code.rs` and `tests/mcp.rs`.
 
+Phase 0 follow-ups found during the work (do these first in Phase A, they are small):
+- `Model.unreadable` lists schematic, silkscreen, courtyard, part-data and pin-attribute entries that no rule reports. Report them through `malformed_element`, or the fail-closed contract has a hole.
+- Cross-world rule ids are a hand list in `src/check/levels.rs`. Register `harness_mismatch`, `body_interference`, `hole_misaligned`, `connector_blocked` and the `mech.*` rules in the registry, so a new one cannot be forgotten.
+- `decoupling_capacitor` lists parts, never the port, in `Diagnostic.elements`, so waivers fall back to message matching. List the port ids.
+- `nc_connected` (step 17) must exempt pins joined by `source_component_internal_connection` (FieldCam `SW_WAKE` has wired pins tied to `do_not_connect` pins).
+- The studio Checks panel shows `info` in the error colour (step 37).
+- `fusible migrate` replaces rule ids as substrings of the whole file. Make it key-scoped before it learns more ids.
+- The global `tsci` on the dev machine fails (`simulation_ibis_model` export missing); `bun x --bun --package tscircuit tsci` works.
+
 Phase 0 exit: FieldCam (`/home/yann/Code/Kono/FieldCam`) gives the same fuse verdict as 1.1.2 on the old rules; `fusible check --json` there contains links and assembly.
 
 ### Phase A: electrical rules (`feat/erc`, owns `src/linter/rules/erc/`, `examples/erc-*.json`)
