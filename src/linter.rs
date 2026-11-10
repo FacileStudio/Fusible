@@ -13,6 +13,7 @@
 //! Diagnostics and their miette rendering live in the `diagnostics`
 //! submodule: only the engine stays here.
 mod context;
+mod cross;
 mod diagnostics;
 mod info;
 mod rule;
@@ -21,6 +22,7 @@ mod rules;
 mod tests;
 
 pub use context::LintContext;
+pub use cross::{cross_world_ids, CROSS_WORLD};
 pub use diagnostics::{Diagnostic, Fix, FuseBlown, Location, Severity, SourceRef};
 pub use info::RuleInfo;
 pub use rule::{Category, Rule, RuleMeta};

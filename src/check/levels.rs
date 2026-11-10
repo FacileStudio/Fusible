@@ -6,33 +6,13 @@ use super::report::{WaivedDiagnostic, WaiverEntry};
 use super::waive::matches;
 use super::CheckError;
 use crate::config::{Date, FusibleConfig, RuleLevel, Waiver};
-use crate::linter::{Diagnostic, Linter, Severity};
+use crate::linter::{cross_world_ids, Category, Diagnostic, Linter, Severity, CROSS_WORLD};
 use crate::parser::Circuit;
-
-/// Rule id of the `links:` check, outside the linter's registry.
-const LINK_RULE: &str = "harness_mismatch";
-
-/// Rule ids of the assembly and body checks, outside the linter's registry.
-const ASSEMBLY_RULES: &[&str] = &[
-    "body_interference",
-    "hole_misaligned",
-    "connector_blocked",
-    "mech.wall_thickness",
-    "mech.boss",
-    "mech.port_clearance",
-    "mech.vent_width",
-    "mech.standoff_height",
-    "mech.component_clearance",
-    "mech.draft",
-    "mech.stale",
-    "mech.not_built",
-];
 
 /// Every rule id a manifest may name: the linter registry plus the cross-world rules.
 pub fn known_rule_ids() -> Vec<&'static str> {
     let registry = Linter::default().describe(None).into_iter().map(|r| r.id);
-    let cross = std::iter::once(LINK_RULE).chain(ASSEMBLY_RULES.iter().copied());
-    registry.chain(cross).collect()
+    registry.chain(CROSS_WORLD.iter().map(|m| m.id)).collect()
 }
 
 /// The levels and waivers of one check run, with the waivers that matched so far.
@@ -111,7 +91,8 @@ impl<'a> Levels<'a> {
     /// and are left out.
     pub(super) fn unused(&self, assembly_ran: bool) -> Vec<Diagnostic> {
         let unused = self.active.iter().filter(|(w, used)| {
-            !used && (assembly_ran || !ASSEMBLY_RULES.contains(&w.rule.as_str()))
+            let assembly = cross_world_ids(Category::Mechanical).any(|id| id == w.rule);
+            !used && (assembly_ran || !assembly)
         });
         unused.map(|(w, _)| unused_warning(w)).collect()
     }
