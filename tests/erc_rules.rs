@@ -11,6 +11,7 @@ use serde_json::Value;
 type Expected = (&'static str, &'static str, &'static [&'static str]);
 
 const VOLTAGES: &str = "nets:\n  VDD3V3: { voltage: 3.3 }\n  VDD1V8: { voltage: 1.8 }\n";
+const SIGNALS: &str = "nets:\n  VDD3V3: { voltage: 3.3 }\n  VBAT: { voltage: 3.8 }\n";
 const BUDGET: &str = "nets:\n  VDD3V3: { limit: 0.6, loads: { U1: 0.35, MODEM1: 2.0 } }\n";
 const BATTERY: &str = "nets:\n  VBAT: { voltage: 4.2 }\n";
 
@@ -48,6 +49,11 @@ const CASES: &[(&str, &str, &[Expected])] = &[
             ("voltage_domain", "error", &["sp_u3_vdd"]),
             ("voltage_domain", "error", &["sp_u1_tx", "sp_u2_rx"]),
         ],
+    ),
+    (
+        "voltage_signal",
+        SIGNALS,
+        &[("voltage_domain", "error", &["sp_u1_tx", "sp_u2_rx"])],
     ),
     (
         "rail_budget",

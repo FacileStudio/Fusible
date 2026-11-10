@@ -3,6 +3,8 @@
 //!
 //! Runs only when `nets:` declares voltages. A part's domain is the highest voltage its
 //! power inputs need: their `requires_voltage`, else the declared voltage of their net.
+//! A signal pin that declares `provides_voltage` or `requires_voltage` uses that level
+//! in place of its part's domain.
 
 use std::collections::BTreeMap;
 
@@ -86,11 +88,13 @@ fn crossing(net: &[&Pin<'_>], domains: &BTreeMap<&str, f64>) -> Option<Diagnosti
         others.map(move |r| (*d, *r))
     });
     let (d, r, high, low) = pairs.find_map(|(d, r)| {
-        let (high, low) = (*domains.get(d.part_id)?, *domains.get(r.part_id)?);
+        let level = |own: Option<f64>, pin: &Pin<'_>| own.or(domains.get(pin.part_id).copied());
+        let high = level(d.attributes().provides_voltage, d)?;
+        let low = level(r.attributes().requires_voltage, r)?;
         (high > low * (1.0 + DEFAULT_TOLERANCE)).then_some((d, r, high, low))
     })?;
     let message = format!(
-        "{} ({high} V domain) drives {} ({low} V domain) on net \"{}\"",
+        "{} ({high} V) drives {} ({low} V) on net \"{}\"",
         d.label(),
         r.label(),
         d.net_name
