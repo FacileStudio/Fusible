@@ -5,6 +5,7 @@ use thiserror::Error;
 
 use crate::commands::assembly::AssemblyError;
 use crate::commands::target::TargetError;
+use crate::config::ConfigError;
 use crate::linter::FuseBlown;
 use crate::parser;
 use crate::tscircuit::RunnerError;
@@ -37,6 +38,10 @@ pub enum CheckError {
     #[error(transparent)]
     #[diagnostic(transparent)]
     Parse(#[from] parser::JsonDiagnostic),
+
+    #[error(transparent)]
+    #[diagnostic(transparent)]
+    Config(#[from] ConfigError),
 
     #[error(transparent)]
     #[diagnostic(transparent)]

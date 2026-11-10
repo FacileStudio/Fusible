@@ -83,9 +83,9 @@ fn failure(error: CheckError) -> Diagnostic {
             diagnostic("parse_error", err.to_string(), "Check circuit JSON syntax")
         }
         other => diagnostic(
-            "source_error",
+            "config_error",
             other.to_string(),
-            "Check circuit JSON syntax",
+            "Fix fusible.yml: its rules and waivers must name known rule ids",
         ),
     }
 }

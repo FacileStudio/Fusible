@@ -7,11 +7,19 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 
 ## [Unreleased]
 
+### Added
+
+- `rules:` levels and `waivers:` now apply: `off` drops a rule, `info`, `warning` and `error`
+  set its severity, and a waiver moves a matching diagnostic to `waived`. An unknown rule id
+  is exit 2, a waiver that matches nothing is an `unused_waiver` warning, and an expired
+  waiver no longer applies.
+
 ### Changed
 
 - **Breaking:** `fusible check --json` and the MCP `check` tool return the version 2 report:
-  `version`, `fuse`, `boards[]`, `links[]` and `assembly[]`. Each diagnostic carries every
-  field, `null` when unknown, plus `location`, `source` and `fixes`.
+  `version`, `fuse`, `boards[]`, `links[]`, `assembly[]`, `waived[]`, `unused_waivers[]` and
+  `expired_waivers[]`. Each diagnostic carries every field, `null` when unknown, plus
+  `location`, `source` and `fixes`.
 - The CLI, `--json`, the studio and MCP share one check pipeline (`src/check/`), which parses
   each board once.
 

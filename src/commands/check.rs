@@ -75,6 +75,26 @@ fn print_intact(mcu: Option<&str>) {
     }
 }
 
+fn print_waivers(report: &mut Report) {
+    for waived in &report.waived {
+        let d = &waived.diagnostic;
+        let until = waived.until.as_deref().map(|u| format!(", until {u}"));
+        let until = until.unwrap_or_default();
+        eprintln!(
+            "waived [{}] {} ({}{until})",
+            d.rule, d.message, waived.reason
+        );
+    }
+    for expired in &report.expired_waivers {
+        let until = expired.until.as_deref().unwrap_or("?");
+        eprintln!(
+            "warning: the waiver for `{}` at `{}` expired on {until} and no longer applies",
+            expired.rule, expired.matches
+        );
+    }
+    print_warnings(std::mem::take(&mut report.unused_waivers));
+}
+
 /// Prints each board's warnings and verdict, then returns every error as one blown fuse.
 ///
 /// With several boards, each error message is prefixed with its board name.
@@ -101,6 +121,7 @@ fn render(mut report: Report, boards: &[BoardTarget]) -> Result<(), CheckError> 
     }
     errors.extend(print_warnings(std::mem::take(&mut report.links)));
     errors.extend(print_warnings(std::mem::take(&mut report.assembly)));
+    print_waivers(&mut report);
     match errors.is_empty() {
         true => Ok(()),
         false => Err(FuseBlown::new(errors).into()),

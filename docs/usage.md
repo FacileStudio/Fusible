@@ -22,9 +22,29 @@ help: every net must connect at least two pads/ports: complete the routing in ts
 
 Compiling TSX stops after 120 seconds (`FUSIBLE_BUILD_TIMEOUT_SECS`). Compiled circuits and
 exports are cached in `.fusible/cache`; unchanged sources skip `tsci` and print a `⚡` line
-(`FUSIBLE_NO_CACHE=1` bypasses the cache). `--json` prints one document with the verdict and
-every diagnostic (rule, message, help, severity, and when known the standard, source URL,
-element ids and a fix); exit codes stay the same.
+(`FUSIBLE_NO_CACHE=1` bypasses the cache). `--json` prints one report, version 2: `fuse`,
+`boards[]` with their diagnostics (rule, message, help, severity, and when known the
+standard, source URL, element ids and a fix), `links[]`, `assembly[]`, `waived[]`,
+`unused_waivers[]` and `expired_waivers[]`. Exit codes stay the same.
+
+### Rule levels and waivers
+
+```yaml
+rules:
+  decoupling_capacitor: warning   # off | info | warning | error
+waivers:
+  - rule: decoupling_capacitor
+    match: "U3.VDD"               # element id, part name, or REFDES.PIN
+    reason: "bulk cap C12 shared, checked on rev A"
+    until: 2027-03-01             # optional, last day it applies
+```
+
+A waiver applies when its rule matches and `match` names an element id of the diagnostic,
+the name of a listed part, or `REFDES.PIN` (`U3.VDD` or `U3.4`) of a listed port. For rules
+that list the part and not the port, `REFDES.PIN` also matches when the message names that
+pin. A waived diagnostic leaves the verdict and shows up under "waived". An unknown rule id
+is a tool error (exit 2). A waiver that matches nothing prints an `unused_waiver` warning.
+An expired waiver no longer applies. Netlist rules can be neither lowered nor waived.
 
 A rule that cannot prove a net is connected reports it. Silence is never the default.
 

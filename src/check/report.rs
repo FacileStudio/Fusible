@@ -2,6 +2,7 @@
 
 use serde::Serialize;
 
+use crate::config::Waiver;
 use crate::linter::{Diagnostic, Severity};
 
 /// The `version` field of every report this build writes.
@@ -27,6 +28,44 @@ pub struct BoardReport {
     pub diagnostics: Vec<Diagnostic>,
 }
 
+/// A diagnostic a manifest waiver took out of the verdict.
+#[derive(Debug, Serialize)]
+pub struct WaivedDiagnostic {
+    /// The board it came from, or `None` for links and assembly.
+    pub board: Option<String>,
+    /// The waived diagnostic, unchanged.
+    pub diagnostic: Diagnostic,
+    /// The waiver's reason.
+    pub reason: String,
+    /// The last day the waiver applies, `YYYY-MM-DD`.
+    pub until: Option<String>,
+}
+
+/// A manifest waiver as the report lists it.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+pub struct WaiverEntry {
+    /// The rule it waives.
+    pub rule: String,
+    /// The element id or `REFDES.PIN` it names.
+    #[serde(rename = "match")]
+    pub matches: String,
+    /// Why the exception holds.
+    pub reason: String,
+    /// The last day it applies, `YYYY-MM-DD`.
+    pub until: Option<String>,
+}
+
+impl From<&Waiver> for WaiverEntry {
+    fn from(waiver: &Waiver) -> Self {
+        Self {
+            rule: waiver.rule.clone(),
+            matches: waiver.matches.clone(),
+            reason: waiver.reason.clone(),
+            until: waiver.until.map(|d| d.to_string()),
+        }
+    }
+}
+
 /// Everything one `check` found, across boards, links and assembly.
 #[derive(Debug, Serialize)]
 pub struct Report {
@@ -40,6 +79,12 @@ pub struct Report {
     pub links: Vec<Diagnostic>,
     /// Assembly and body diagnostics, run only once every board and link passed.
     pub assembly: Vec<Diagnostic>,
+    /// Diagnostics an active waiver took out.
+    pub waived: Vec<WaivedDiagnostic>,
+    /// One `unused_waiver` warning per active waiver that matched nothing.
+    pub unused_waivers: Vec<Diagnostic>,
+    /// Waivers past their `until` day; they no longer apply.
+    pub expired_waivers: Vec<WaiverEntry>,
 }
 
 impl Default for Report {
@@ -50,6 +95,9 @@ impl Default for Report {
             boards: Vec::new(),
             links: Vec::new(),
             assembly: Vec::new(),
+            waived: Vec::new(),
+            unused_waivers: Vec::new(),
+            expired_waivers: Vec::new(),
         }
     }
 }
