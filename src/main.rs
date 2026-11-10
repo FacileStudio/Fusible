@@ -83,6 +83,12 @@ fn load_project(command: Option<&Commands>) -> Result<Project, config::ConfigErr
     }
 }
 
+/// Prints the rule registry; it cannot fail.
+fn rules(project: &Project, json: bool) -> ExitCode {
+    commands::rules::run(project, json);
+    ExitCode::SUCCESS
+}
+
 /// Dispatches one subcommand and returns its exit code.
 fn run_command(command: Commands, project: &Project) -> ExitCode {
     match command {
@@ -108,10 +114,7 @@ fn run_command(command: Commands, project: &Project) -> ExitCode {
         Commands::Explain(args) => {
             tool_exit(commands::explain::run(project, &args.rule, args.json))
         }
-        Commands::Rules { json } => {
-            commands::rules::run(project, json);
-            ExitCode::SUCCESS
-        }
+        Commands::Rules { json } => rules(project, json),
         Commands::Add { packages } => tool_exit(commands::add::run(project, &packages)),
         Commands::Install { dir } => tool_exit(commands::install::run(project, dir)),
         Commands::Search { query } => tool_exit(commands::search::run(&query)),

@@ -6,7 +6,7 @@
 
 use std::collections::HashMap;
 
-use crate::linter::rules::geom2d::Point;
+use crate::linter::rules::geom2d::{crosses, point_seg, Point};
 use crate::parser::model::{CourtyardRect, Model};
 
 const EPSILON: f64 = 1e-6;
@@ -74,26 +74,28 @@ impl Courtyard {
         (sum.0 / n, sum.1 / n)
     }
 
-    fn span(&self, axis: Point) -> (f64, f64) {
-        let dots = self.points.iter().map(|p| p.0 * axis.0 + p.1 * axis.1);
-        dots.fold((f64::MAX, f64::MIN), |(lo, hi), d| (lo.min(d), hi.max(d)))
+    /// Whether `p` lies inside the polygon and off its boundary.
+    fn holds(&self, p: Point) -> bool {
+        let on_edge = |(a, b): (Point, Point)| point_seg(p, a, b) <= EPSILON;
+        let hit = |(a, b): &(Point, Point)| {
+            (a.1 > p.1) != (b.1 > p.1) && p.0 < a.0 + (p.1 - a.1) / (b.1 - a.1) * (b.0 - a.0)
+        };
+        !self.edges().any(on_edge) && self.edges().filter(hit).count() % 2 == 1
     }
 
-    fn separates(&self, other: &Courtyard, axis: Point) -> bool {
-        let ((a0, a1), (b0, b1)) = (self.span(axis), other.span(axis));
-        a1.min(b1) - a0.max(b0) <= EPSILON
-    }
-
-    /// Whether the two courtyards share area, by the separating axis test
-    /// over both polygons' edge normals. Touching edges do not count. A
-    /// concave outline is tested as its convex hull.
+    /// Whether the two courtyards share area: two edges cross, or a vertex
+    /// or the centre of one lies inside the other. Touching edges do not
+    /// count, and a concave outline keeps its notches.
     pub fn overlaps(&self, other: &Courtyard) -> bool {
-        let mut normals = self.edges().chain(other.edges()).filter_map(|(a, b)| {
-            let (dx, dy) = (b.0 - a.0, b.1 - a.1);
-            let len = dx.hypot(dy);
-            (len > EPSILON).then(|| (-dy / len, dx / len))
-        });
-        !normals.any(|axis| self.separates(other, axis))
+        let crossing = self
+            .edges()
+            .any(|(a, b)| other.edges().any(|(c, d)| crosses(a, b, c, d)));
+        let within = |inner: &Courtyard, outer: &Courtyard| {
+            let centre = Some(inner.centre()).filter(|c| inner.holds(*c));
+            let mut probes = inner.points.iter().copied().chain(centre);
+            probes.any(|p| outer.holds(p))
+        };
+        crossing || within(self, other) || within(other, self)
     }
 
     /// The polygon's edges, for distance checks.
@@ -101,3 +103,7 @@ impl Courtyard {
         self.edges().collect()
     }
 }
+
+#[cfg(test)]
+#[path = "courtyard_tests.rs"]
+mod tests;
