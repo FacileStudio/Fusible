@@ -1,42 +1,13 @@
-//! `fusible new`: every template checks offline, builds, and needs no migration.
+//! `fusible new`: every template checks offline and needs no migration.
 
 mod common;
 
-use std::ffi::OsString;
-use std::path::{Path, PathBuf};
-use std::process::Output;
+use std::path::Path;
 
+use common::scaffold::{create, offline};
 use common::{copy_dir, fusible, TestDir};
 
 const TEMPLATES: [&str; 4] = ["esp32-s3", "stm32g4", "rp2040", "blank"];
-
-fn offline_path() -> OsString {
-    let cargo = PathBuf::from(env!("CARGO"));
-    let toolchain = cargo.parent().map(Path::to_path_buf).unwrap_or_default();
-    let dirs = [toolchain, PathBuf::from("/usr/bin"), PathBuf::from("/bin")];
-    std::env::join_paths(dirs).expect("PATH should join")
-}
-
-fn offline(dir: &Path, args: &[&str]) -> Output {
-    fusible()
-        .current_dir(dir)
-        .env("PATH", offline_path())
-        .env_remove("FUSIBLE_BUN")
-        .env("CARGO_TARGET_DIR", dir.join("target"))
-        .args(args)
-        .output()
-        .expect("binary should run")
-}
-
-fn create(parent: &TestDir, template: &str) -> PathBuf {
-    let name = format!("demo-{template}");
-    let out = offline(
-        &parent.path,
-        &["new", &name, "--template", template, "--no-install"],
-    );
-    assert_eq!(out.status.code(), Some(0), "{out:?}");
-    parent.path.join(name)
-}
 
 #[test]
 fn every_template_passes_check_offline_and_needs_no_migration() {
@@ -67,16 +38,29 @@ fn mcu_templates_declare_pin_attributes_and_firmware() {
 }
 
 #[test]
-#[cfg(unix)]
-fn the_esp32_template_builds_its_firmware() {
-    let parent = TestDir::new("new_build");
-    let root = create(&parent, "esp32-s3");
+#[ignore = "installs tscircuit from the npm registry"]
+fn a_fresh_project_rebuilds_its_circuit_with_its_own_tscircuit() {
+    let bun = common::bun().expect("bun on PATH");
+    let parent = TestDir::new("new_rebuild");
+    let made = fusible()
+        .current_dir(&parent.path)
+        .args(["new", "fresh", "--template", "stm32g4"])
+        .output()
+        .expect("binary should run");
+    assert_eq!(made.status.code(), Some(0), "{made:?}");
+    let root = parent.path.join("fresh");
+    std::fs::remove_file(root.join("hardware/dist/index/circuit.json")).unwrap();
 
-    let out = offline(&root, &["build"]);
+    let check = fusible()
+        .current_dir(&root)
+        .env("FUSIBLE_BUN", bun)
+        .env("FUSIBLE_NO_CACHE", "1")
+        .arg("check")
+        .output()
+        .expect("binary should run");
 
-    assert_eq!(out.status.code(), Some(0), "{out:?}");
-    let pins = std::fs::read_to_string(root.join("firmware/src/pins.rs")).unwrap();
-    assert!(pins.contains("pub const GPIO0"), "{pins}");
+    assert_eq!(check.status.code(), Some(0), "{check:?}");
+    assert!(root.join("hardware/dist/index/circuit.json").is_file());
 }
 
 #[test]

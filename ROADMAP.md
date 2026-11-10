@@ -13,9 +13,11 @@ my-project/
 │   ├── index.tsx                  # the board, with pinAttributes on the MCU and regulator
 │   ├── package.json               # tscircuit, pinned
 │   └── dist/index/circuit.json    # pre-built, so check passes before any install
-└── firmware/
-    ├── Cargo.toml
-    └── src/{main.rs,pins.rs}      # pins.rs is written by fusible build
+└── firmware/                      # embedded Rust that blinks the board LED
+    ├── Cargo.toml                 # embassy-stm32, embassy-rp or esp-hal, pinned
+    ├── .cargo/config.toml         # target and probe-rs or espflash runner
+    ├── rust-toolchain.toml
+    └── src/{main.rs,pins.rs,board.rs}  # generated bindings; main.rs calls board::take!(p)
 ```
 
 The manifest:
@@ -33,9 +35,11 @@ firmware:
   app:
     board: main
     path: firmware
-    framework: esp-idf          # embassy | cortex-m | esp-idf
+    framework: esp-hal          # embassy | cortex-m | esp-hal | esp-idf
     pins_rs: firmware/src/pins.rs
-    build_cmd: cargo build --quiet
+    outputs: [rust]
+    build_cmd: cargo build --release
+    flash_cmd: cargo run --release
 
 bodies:
   enclosure:

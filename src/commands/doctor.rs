@@ -10,6 +10,7 @@ use crate::config::FusibleConfig;
 use crate::tscircuit::detect::{find_binary_in_path, resolve_program};
 use crate::tscircuit::{bun_path, Runner};
 
+pub mod firmware;
 pub mod flash;
 pub mod installs;
 pub mod json;
@@ -79,6 +80,7 @@ fn report_manifest() {
         Ok(Some((path, cfg))) => {
             println!("  ✅ Found manifest at \"{}\"", path.display());
             report_sections(&cfg, path.parent().unwrap_or(Path::new("")));
+            firmware::print(&cfg);
         }
         Ok(None) => {
             println!("  ℹ️  No fusible.yml found in current directory (run `fusible init` to create one)");

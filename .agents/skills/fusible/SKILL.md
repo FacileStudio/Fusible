@@ -36,7 +36,7 @@ fusible new <project-name> --template esp32-s3   # or stm32g4, rp2040, blank
 fusible init --name <project-name>               # manifest only, in an existing repo
 fusible migrate                                  # rewrite a 1.x fusible.yml to 2.0 (--check to test)
 ```
-`fusible new` writes a board with `pinAttributes`, a firmware crate, an enclosure and this manifest:
+`fusible new` writes a board with `pinAttributes`, an enclosure, and embedded firmware that blinks the LED through the generated `board.rs`: Embassy on `stm32g4` and `rp2040`, `esp-hal` on `esp32-s3`. `let board = board::take!(p);` moves the board's pins out of the HAL `Peripherals` and leaves every other peripheral in `p`; `board::init(config)` returns the `Board` alone. `fusible build` compiles it, `fusible flash` flashes it, `fusible doctor` names a missing toolchain (the ESP32-S3 needs `espup install`). A manifest can look like this:
 ```yaml
 name: sensor-node
 boards:

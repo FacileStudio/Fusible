@@ -64,3 +64,25 @@ fn renderers_match_their_snapshots() {
     snapshot("pins.h.txt", &c::pins_h(&b));
     snapshot("app.overlay.txt", &zephyr::overlay(&b));
 }
+
+#[test]
+fn an_esp32_board_rs_owns_gpio_singletons() {
+    let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("src/commands/init/templates/esp32-s3/circuit.json");
+    let source = std::fs::read_to_string(&path).unwrap();
+    let circuit = parser::parse(&source, &path).unwrap();
+    let netlist = Netlist::from_circuit(&circuit);
+    let mcu = extract_mcu_pins(&circuit, &netlist, Some("esp32-s3")).unwrap();
+    let board = rust::board_rs(&board_bindings("demo", mcu, &circuit, &netlist)).unwrap();
+
+    assert!(
+        board.contains("use esp_hal::peripherals as hal;"),
+        "{board}"
+    );
+    assert!(board.contains("pub led: hal::GPIO48<'static>,"), "{board}");
+    assert!(board.contains("            led: $p.GPIO48,"), "{board}");
+    assert!(
+        board.contains("pub fn init(config: esp_hal::Config) -> Board {"),
+        "{board}"
+    );
+}

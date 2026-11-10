@@ -46,7 +46,7 @@ export default () => (
       pcbY={0}
       pinLabels={{
         pin1: "VDD1",
-        pin4: "PG10",
+        pin4: "NRST",
         pin7: "PA2",
         pin8: "PA3",
         pin10: "PA5",
@@ -66,7 +66,7 @@ export default () => (
         VSS1: { requiresGround: true },
         VSS2: { requiresGround: true },
         VSSA: { requiresGround: true },
-        PG10: { isInput: true, canUseInternalPullup: true, isUsingInternalPullup: true },
+        NRST: { isInput: true, canUseInternalPullup: true, isUsingInternalPullup: true },
         PA2: { isOutput: true, isConfiguredForUartTx: true },
         PA3: { isInput: true, isConfiguredForUartRx: true },
         PA5: { isGpio: true, isOutput: true, isUsingPushPull: true },
@@ -78,6 +78,8 @@ export default () => (
     <capacitor name="C3" capacitance="100nF" footprint="0402" maxDecouplingTraceLength={30} pcbX={1} pcbY={5} />
     <capacitor name="C4" capacitance="100nF" footprint="0402" maxDecouplingTraceLength={30} pcbX={9} pcbY={-5} />
     <capacitor name="C5" capacitance="100nF" footprint="0402" maxDecouplingTraceLength={30} pcbX={9} pcbY={5} />
+    <capacitor name="C6" capacitance="100nF" footprint="0402" pcbX={-2} pcbY={2} />
+    <capacitor name="C7" capacitance="1uF" footprint="0402" maxDecouplingTraceLength={30} pcbX={12} pcbY={-2} />
     <resistor name="R1" resistance="10k" footprint="0402" pcbX={1} pcbY={-5} />
     <resistor name="R2" resistance="330" footprint="0402" pcbX={14} pcbY={-5} />
     <led name="D1" color="green" footprint="0603" pcbX={17} pcbY={-5} />
@@ -90,11 +92,15 @@ export default () => (
       pinLabels={{ pin1: "V3V3", pin2: "SWDIO", pin3: "SWCLK", pin4: "GND" }}
     />
 
-    <trace from=".J2 > .SWCLK" to=".U1 > .PA14" />
-    <trace from=".J2 > .SWDIO" to=".U1 > .PA13" />
+    <trace from=".U1 > .PA14" to="net.SWCLK" />
+    <trace from=".J2 > .SWCLK" to="net.SWCLK" />
+    <trace from=".U1 > .PA13" to="net.SWDIO" />
+    <trace from=".J2 > .SWDIO" to="net.SWDIO" />
     <trace from=".R2 > .pin2" to=".D1 > .anode" />
-    <trace from=".U1 > .PA5" to=".R2 > .pin1" />
-    <trace from=".R1 > .pin1" to=".U1 > .PB8" />
+    <trace from=".U1 > .PA5" to="net.LED" />
+    <trace from=".R2 > .pin1" to="net.LED" />
+    <trace from=".U1 > .PB8" to="net.BOOT0" />
+    <trace from=".R1 > .pin1" to="net.BOOT0" />
     <trace from=".U1 > .VDDA" to=".C4 > .pin1" />
     <trace from=".U1 > .VDDA" to=".U1 > .VDD2" />
     <trace from=".U2 > .VOUT" to=".C2 > .pin1" />
@@ -118,5 +124,9 @@ export default () => (
     <trace from=".U2 > .VIN" to=".U2 > .EN" />
     <trace from=".C1 > .pin1" to=".U2 > .VIN" />
     <trace from=".J1 > .VBUS" to=".C1 > .pin1" />
+    <trace from=".C6 > .pin1" to=".U1 > .NRST" />
+    <trace from=".C6 > .pin2" to=".U2 > .GND" />
+    <trace from=".C7 > .pin1" to=".U1 > .VDDA" />
+    <trace from=".C7 > .pin2" to=".U1 > .VSSA" />
   </board>
 )

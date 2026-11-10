@@ -4,16 +4,19 @@
 pub(super) const GITIGNORE: &str =
     "node_modules/\ndist/\n.tscircuit/\n.fusible/\ntarget/\n*.kicad_prl\n*.bak\n";
 
-/// Default `hardware/tsconfig.json`.
+/// Default `hardware/tsconfig.json`, the compiler options `tsci init` writes.
+///
+/// No `jsxImportSource`: tscircuit resolves JSX through `react`, and pointing it at
+/// `@tscircuit/core` makes `tsci build` fail on `@tscircuit/core/jsx-dev-runtime`.
 pub(super) const TSCONFIG_JSON: &str = r#"{
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
-    "jsxImportSource": "@tscircuit/core",
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": ["tscircuit"]
   },
   "include": ["**/*.ts", "**/*.tsx"]
 }

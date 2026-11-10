@@ -37,6 +37,24 @@ fn a_failing_flash_cmd_is_a_tool_error() {
 }
 
 #[test]
+fn a_missing_cargo_runner_is_named_before_the_flash_runs() {
+    let dir = project(
+        "flash_runner",
+        "circuit.json",
+        "path: fw, flash_cmd: cargo run",
+    );
+    std::fs::create_dir_all(dir.path.join("fw/.cargo")).unwrap();
+    let config = "[target.x]\nrunner = \"fusible-missing-flasher --chip X\"\n";
+    std::fs::write(dir.path.join("fw/.cargo/config.toml"), config).unwrap();
+    let (code, _, stderr) = run_in(&dir.path, &["flash"]);
+    assert_eq!(code, Some(2), "{stderr}");
+    assert!(
+        stderr.contains("flash tool not found: fusible-missing-flasher"),
+        "{stderr}"
+    );
+}
+
+#[test]
 fn a_blown_fuse_exits_one_before_the_flash_cmd_runs() {
     let dir = project(
         "flash_blown",

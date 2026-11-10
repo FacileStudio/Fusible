@@ -101,4 +101,4 @@ The 1.x document held only `fuse` and `boards[]`. A script that read `boards[].d
 
 ## Start a new project instead
 
-`fusible new <name> --template esp32-s3|stm32g4|rp2040|blank` writes a 2.0 project from scratch: a board with `pinAttributes` on the MCU and the regulator, a firmware crate, a generated enclosure and a `fusible.yml`. Each template ships a pre-built Circuit JSON, so `fusible check` passes before any install.
+`fusible new <name> --template esp32-s3|stm32g4|rp2040|blank` writes a 2.0 project from scratch: a board with `pinAttributes` on the MCU and the regulator, an embedded firmware crate (Embassy, or `esp-hal` on the ESP32-S3) that blinks the LED through the generated bindings, a generated enclosure and a `fusible.yml`. Each template ships a pre-built Circuit JSON, so `fusible check` passes before any install.

@@ -19,7 +19,9 @@ pub enum BuildError {
     Check(#[from] CheckError),
 
     #[error("firmware build command failed: {0}")]
-    #[diagnostic(help("check firmware build configuration and dependencies"))]
+    #[diagnostic(help(
+        "read the compiler output above; a missing target or toolchain shows in `fusible doctor`"
+    ))]
     FirmwareFailed(String),
 
     #[error("firmware build tool not found: {0}")]

@@ -8,6 +8,7 @@ mod adc;
 mod buses;
 pub mod c;
 mod groups;
+mod hal;
 pub mod model;
 mod naming;
 pub mod pins;
