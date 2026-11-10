@@ -63,6 +63,16 @@ jobs:
             ./target/release/fusible export "$board" --preset fab -o "viewer-out/$name" --skip-lint
             mkdir -p "viewer-out/$name/layers"
             unzip -q "viewer-out/$name/gerbers.zip" -d "viewer-out/$name/layers"
+            required="Edge_Cuts.gbr"
+            if grep -q '"pcb_hole"' "$board"; then required="$required drill_npth.drl"; fi
+            if grep -qE '"pcb_(via|plated_hole)"' "$board"; then required="$required drill_pth.drl"; fi
+            for file in $required; do
+              layer="viewer-out/$name/layers/$file"
+              if [ ! -f "$layer" ] || { ! grep -q "^%ADD" "$layer" && ! grep -q "^T[0-9]*C" "$layer"; }; then
+                echo "$name: $file is missing or empty"
+                exit 1
+              fi
+            done
             for layer in "viewer-out/$name/layers"/*; do
               out="viewer-out/$name-$(basename "$layer").png"
               if ! grep -q "^%ADD" "$layer" && ! grep -q "^T[0-9]*C" "$layer"; then continue; fi
