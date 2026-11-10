@@ -7,6 +7,8 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-11-10
+
 ### Added
 
 - `rules:` levels and `waivers:` now apply: `off` drops a rule, `info`, `warning` and `error`
