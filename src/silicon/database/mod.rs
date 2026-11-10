@@ -34,25 +34,10 @@ macro_rules! gpio_pin {
     };
 }
 
-/// Builds a `PinSpec` for a port/pin designator
-/// without a GPIO number.
-#[cfg(test)]
-macro_rules! port_pin {
-    ($name:expr, $caps:expr, $funcs:expr) => {
-        $crate::silicon::model::PinSpec {
-            gpio: None,
-            name: $name,
-            capabilities: $caps,
-            strapping: None,
-            functions: $funcs,
-        }
-    };
-}
-
+pub mod esp32c3;
 pub mod esp32s3;
 pub mod rp2040;
-#[cfg(test)]
-pub mod stm32;
+pub mod rp2350;
 
 use super::model::SiliconTarget;
 
@@ -72,6 +57,8 @@ pub fn find_target(query: &str) -> Option<&'static SiliconTarget> {
     match clean.as_str() {
         "rp2040" => Some(&rp2040::RP2040),
         "esp32s3" => Some(&esp32s3::ESP32S3),
+        "esp32c3" => Some(&esp32c3::ESP32C3),
+        "rp2350" | "rp2350a" | "rp235xa" => Some(&rp2350::RP2350),
         _ => crate::silicon::stm32::find(&clean),
     }
 }

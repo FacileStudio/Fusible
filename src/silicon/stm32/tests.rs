@@ -1,53 +1,12 @@
-//! Generated STM32 tables: token round trip and the hand-written G431 tables.
+//! Generated STM32 tables: token round trip, one chip per family, queries.
+//!
+//! The STM32G431 tables were checked equal to the hand-written DS12589
+//! tables they replaced, with two upstream differences: USB DM/DP on
+//! PA11/PA12 (the old table omitted them), and no USART3/UART4 on the
+//! 32-pin package, whose TX pins are not bonded.
 
 use super::*;
-use crate::silicon::database::stm32 as old;
 use crate::silicon::model::PeripheralSignal;
-
-fn usb(signal: &PeripheralSignal) -> bool {
-    matches!(signal, PeripheralSignal::UsbDm | PeripheralSignal::UsbDp)
-}
-
-/// USART3 and UART4 lack a bonded TX on the 32-pin package, so upstream
-/// (CubeMX) drops them there while the datasheet AF table lists them.
-fn uart_without_pins_on_32(signal: &PeripheralSignal) -> bool {
-    use PeripheralSignal::*;
-    matches!(
-        signal,
-        UartTx(3 | 4) | UartRx(3 | 4) | UartCts(3 | 4) | UartRts(3 | 4)
-    )
-}
-
-fn same_as_old(query: &str, old: &SiliconTarget) {
-    let new = find(query).unwrap_or_else(|| panic!("{query} missing"));
-    let names = |t: &SiliconTarget| t.pins.iter().map(|p| p.name).collect::<Vec<_>>();
-    assert_eq!(names(new), names(old), "{query} pins");
-    for (n, o) in new.pins.iter().zip(old.pins) {
-        let mut got: Vec<_> = n.functions.iter().filter(|f| !usb(&f.signal)).collect();
-        let mut want: Vec<_> = o
-            .functions
-            .iter()
-            .filter(|f| !(old.pins.len() == 26 && uart_without_pins_on_32(&f.signal)))
-            .collect();
-        got.sort_by_key(|f| (f.signal.name(), f.af_number));
-        want.sort_by_key(|f| (f.signal.name(), f.af_number));
-        assert_eq!(got, want, "{query} {}", n.name);
-        assert_eq!(n.capabilities, o.capabilities, "{query} {}", n.name);
-    }
-}
-
-#[test]
-fn generated_g431_matches_the_datasheet_tables() {
-    same_as_old("stm32g431", &old::STM32G431);
-    same_as_old("stm32g431kb", &old::STM32G431K);
-    same_as_old("stm32g431cbt", &old::STM32G431C);
-    same_as_old("stm32g431cb", &old::STM32G431C);
-    same_as_old("stm32g431cbu", &old::STM32G431CU);
-    same_as_old("stm32g431cby", &old::STM32G431CY);
-    same_as_old("stm32g431rb", &old::STM32G431R);
-    same_as_old("stm32g431mb", &old::STM32G431M);
-    same_as_old("stm32g431vb", &old::STM32G431V);
-}
 
 #[test]
 fn every_token_of_every_family_parses() {
@@ -73,6 +32,16 @@ fn resolves_one_chip_of_each_family() {
         let found = target.find_pin(pin).and_then(|p| p.get_af(&signal));
         assert_eq!(found.map(|f| f.af_number), Some(af), "{chip} {pin}");
     }
+}
+
+#[test]
+fn drops_uarts_without_bonded_pins_on_the_32_pin_package() {
+    let pb8 = |chip: &str| find(chip).and_then(|t| t.find_pin("PB8"));
+    let k = pb8("stm32g431kb").unwrap();
+    assert!(!k.supports_signal(&PeripheralSignal::UartRx(3)));
+    assert!(pb8("stm32g431rb")
+        .unwrap()
+        .supports_signal(&PeripheralSignal::UartRx(3)));
 }
 
 #[test]
