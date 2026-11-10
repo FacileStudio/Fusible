@@ -9,6 +9,7 @@ use clap::{Parser, Subcommand};
 
 mod args;
 mod args_body;
+mod args_new;
 mod args_studio;
 mod mcp_args;
 
@@ -17,6 +18,7 @@ pub use args::{
     ReleaseArgs, RouteArgs, SyncArgs,
 };
 pub use args_body::{EjectArgs, KitArgs, NewArgs};
+pub use args_new::ExplainArgs;
 pub use args_studio::StudioArgs;
 pub use mcp_args::{McpArgs, McpClient, NuageArgs, OpusArgs, ShareArgs, ShareTarget};
 
@@ -108,6 +110,16 @@ pub enum Commands {
 
     /// Initialize a new Fusible project and tscircuit hardware workspace
     Init(InitArgs),
+
+    /// Describe one rule: what it checks, its standard, its level here
+    Explain(ExplainArgs),
+
+    /// List every rule with its category and level
+    Rules {
+        /// Print one JSON array
+        #[arg(long)]
+        json: bool,
+    },
 
     /// Rewrite a 1.x fusible.yml into the 2.0 form and print the diff
     Migrate {
