@@ -163,4 +163,4 @@ async fn main(_spawner: Spawner) {
 ## 5. Preventing Pin Drift in Teams & Repositories
 
 - Always run `fusible check` in CI (`.github/workflows/ci.yml`).
-- If a developer moves a hardware trace in `hardware/index.tsx`, `fusible check` immediately updates `pins.rs`. If the firmware driver uses a relocated pin, Cargo compilation will catch the type error instantly.
+- If a developer moves a hardware trace in `hardware/index.tsx`, `fusible build` updates `pins.rs`. If the firmware driver uses a relocated pin, Cargo compilation will catch the type error instantly.

@@ -22,7 +22,9 @@ You are helping the user design, lint, verify, and manufacture electronic circui
 2. **Declarative Hardware in TSX**:
    - Circuits are defined in standard TypeScript React (`.tsx`), returning a `<board>` containing components, traces, and schematic sheets.
 3. **Hardware-Firmware Synchronization**:
-   - The microcontroller's GPIO netlist is the single source of truth. Running `fusible check` or `fusible build` auto-generates typed Rust pin constants (`pins.rs`) for Embassy or ESP-IDF. Never edit `pins.rs` manually.
+   - The microcontroller's GPIO netlist is the single source of truth. `fusible build` (or `fusible check --write-bindings`) generates typed pin bindings once the fuse is intact: `pins.rs` for Embassy or ESP-IDF, and `pins.h` or a Zephyr overlay when `firmware.<name>.outputs` asks for them. A plain `fusible check` writes no file. Never edit generated bindings manually.
+4. **Declared Electrical Intent**:
+   - The electrical rules read tscircuit `pinAttributes` on `<chip>` (`requiresPower`, `providesPower`, `requiresVoltage`, `providesVoltage`, `mustBeConnected`, `doNotConnect`, `isUsingOpenDrain`, `needsExternalPullup`, `shouldHaveDecouplingCapacitor`) and `noConnect`. Declare them on every MCU, regulator and connector-facing part. Without them a rule says so once at `info` level and falls back to pin names at `warning` level.
 
 ---
 
@@ -30,27 +32,46 @@ You are helping the user design, lint, verify, and manufacture electronic circui
 
 ### Project Initialization
 ```sh
-fusible init --name <project-name>
+fusible new <project-name> --template esp32-s3   # or stm32g4, rp2040, blank
+fusible init --name <project-name>               # manifest only, in an existing repo
+fusible migrate                                  # rewrite a 1.x fusible.yml to 2.0 (--check to test)
 ```
-Creates `fusible.yml`:
+`fusible new` writes a board with `pinAttributes`, a firmware crate, an enclosure and this manifest:
 ```yaml
 name: sensor-node
-hardware:
-  entry: hardware/index.tsx
-  out_dir: dist
-  port: 3020
-mcu:
-  chip: esp32-s3  # or stm32g431, rp2040
+boards:
+  main:
+    entry: hardware/index.tsx
+    out_dir: dist
+    port: 3020
+    mcu: esp32-s3            # or stm32g431, rp2040, ...
 firmware:
-  path: apps/firmware
-  framework: esp-idf  # or embassy
-  pins_rs: apps/firmware/src/pins.rs
-  build_cmd: cargo test
+  app:
+    board: main
+    path: apps/firmware
+    framework: esp-idf       # embassy, zephyr, esp-idf-c
+    outputs: [rust]          # rust, c, zephyr
+    build_cmd: cargo test
+nets:
+  VDD3V3: { voltage: 3.3, limit: 0.6, loads: { U1: 0.34 } }
+  VBUS: { voltage: 5, source: external }
+rules:
+  rail_test_point: off       # off | info | warning | error
+waivers:
+  - rule: decoupling_capacitor
+    match: "U3.VDD"
+    reason: "bulk cap C12 shared, checked on rev A"
+    until: 2027-03-01
 ```
+A waiver needs a reason. Waived diagnostics stay in the report under `waived`. Netlist rules (`shorted_nets`, `ghost_net`, `malformed_element`, `dangling_reference`) cannot be turned off or waived.
 
 ### Electrical Rule Checking (`check` / `lint`)
 ```sh
-fusible check                     # uses entry from fusible.yml and generates pins.rs
+fusible check                     # every board of fusible.yml, then links and assembly; writes no file
+fusible check --json              # the version 2 report, and nothing else on stdout
+fusible check --write-bindings    # also writes the pin bindings once the fuse is intact
+fusible rules                     # every rule id with its category and default level
+fusible explain <rule>            # what a rule checks, its standard and how to fix it
 fusible check hardware/index.tsx  # compiles .tsx on the fly and lints
 fusible --input circuit.json      # lint precompiled Circuit JSON
 ```
@@ -68,7 +89,7 @@ fusible build
 ```
 1. Compiles TSX circuit to Circuit JSON via tscircuit.
 2. Evaluates electrical rules. If rules fail, **the fuse blows and execution halts**.
-3. Synchronizes MCU pin mappings to `pins.rs`.
+3. Writes the pin bindings of `firmware.<name>.outputs` (`pins.rs` by default).
 4. Executes firmware `build_cmd` (e.g. `cargo build`).
 
 ### Fuse-Gated Artifact Exports (`export`)
@@ -209,7 +230,18 @@ let led = peripherals.pins.gpio4.into_output()?;
 // Embassy example:
 let led = Output::new(p.PIN_4, Level::Low, OutputType::PushPull);
 ```
-Net name changes in `hardware/index.tsx` propagate directly through `fusible check`, keeping pin assignments synchronized across hardware and firmware.
+Net name changes in `hardware/index.tsx` propagate through `fusible build`, keeping pin assignments synchronized across hardware and firmware.
+
+### Flash and bring-up
+```sh
+fusible flash [FIRMWARE]   # checks the board first; a blown fuse flashes nothing
+fusible bringup [BOARD]    # writes dist/bringup.md: rails in power order, strap pins, debug pinout
+```
+
+### Working from the report (agents)
+- Read `fusible check --json`: `fuse`, `boards[].diagnostics[]` (each with `rule`, `severity`, `message`, `elements`, optional `location` and `fixes`), `links`, `assembly`, `waived`.
+- Fix errors in the TSX first. Use `fusible explain <rule>` before changing a design to silence a rule.
+- The MCP server (`fusible mcp`) offers `check`, `explain_rule`, `apply_fix` (applies a `set_prop` fix) and `waive` (requires a reason). Waive only with the user's agreement.
 
 ---
 
