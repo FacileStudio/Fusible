@@ -1,0 +1,4 @@
+[
+  {"type": "pcb_board", "pcb_board_id": "pcb_board_0", "center": {"x": 0, "y": 0}, "width": 20, "height": 20, "thickness": 1.6, "num_layers": 2},
+  {"type": "pcb_via", "pcb_via_id": "pcb_via_0", "x": 0, "y": 0, "outer_diameter": 0.45, "hole_diameter": 0.15, "layers": ["top", "bottom"]}
+]
