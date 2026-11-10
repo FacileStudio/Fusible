@@ -1,5 +1,6 @@
 {
   "name": "fusible-scripts",
+  "license": "GPL-3.0-only",
   "private": true,
   "type": "module",
   "devDependencies": { "playwright": "^1.58.0" }
