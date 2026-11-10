@@ -67,6 +67,7 @@ fn mcu_templates_declare_pin_attributes_and_firmware() {
 }
 
 #[test]
+#[cfg(unix)]
 fn the_esp32_template_builds_its_firmware() {
     let parent = TestDir::new("new_build");
     let root = create(&parent, "esp32-s3");
