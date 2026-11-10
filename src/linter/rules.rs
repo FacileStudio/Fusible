@@ -15,8 +15,6 @@
 //! One rule per file — filet's functions-per-file budget counts `impl`
 //! methods, so a hub module keeps every rule comfortably under the limit.
 
-mod autoroute;
-mod autoroute_scan;
 pub(super) mod bypass_distance;
 mod copper;
 mod copper_drill;
@@ -39,9 +37,11 @@ mod tests;
 mod trace_clearance;
 mod trace_current;
 mod unconnected_net;
+mod unrouted;
+mod unrouted_scan;
+mod upstream;
 mod voltage_clearance;
 
-pub use autoroute::AutorouteRule;
 pub use dangling_reference::DanglingReferenceRule;
 pub use decoupling_capacitor::DecouplingCapacitorRule;
 pub use fab_profile::FabProfileRule;
@@ -54,4 +54,6 @@ pub use shorted_nets::ShortedNetsRule;
 pub use trace_clearance::TraceClearanceRule;
 pub use trace_current::TraceCurrentRule;
 pub use unconnected_net::UnconnectedNetRule;
+pub use unrouted::UnroutedRule;
+pub use upstream::UpstreamRule;
 pub use voltage_clearance::VoltageClearanceRule;

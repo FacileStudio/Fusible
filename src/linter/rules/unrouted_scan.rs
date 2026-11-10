@@ -1,28 +1,8 @@
-//! Reads tscircuit circuit elements for the `autoroute` rule.
+//! Reads the routed and unrouted connections for the `unrouted` rule.
 
 use std::collections::{HashMap, HashSet};
 
 use crate::linter::LintContext;
-use crate::parser::model::UpstreamIssue;
-
-pub(super) const HELP: &str =
-    "fix the placement or routing error; fab files from an unrouted board are unusable";
-const THERMALPAD_HINT: &str =
-    "a thermalpad only connects when the chip has a pinLabel named thermalpad";
-pub(super) const UNROUTED: &str = "board has nets but no routed traces";
-
-pub(super) fn error_message(issue: &UpstreamIssue) -> String {
-    let message = issue.message.as_deref().unwrap_or("no message");
-    format!("{}: {message}", issue.kind)
-}
-
-pub(super) fn error_help(issue: &UpstreamIssue) -> String {
-    let thermalpad = error_message(issue).contains("thermalpad");
-    match thermalpad {
-        true => format!("{HELP}; {THERMALPAD_HINT}"),
-        false => HELP.to_string(),
-    }
-}
 
 fn pads_only_connect(ctx: &LintContext<'_>) -> bool {
     let model = ctx.circuit.model();

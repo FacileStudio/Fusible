@@ -25,9 +25,10 @@ pub use diagnostics::{Diagnostic, Fix, FuseBlown, Location, Severity, SourceRef}
 pub use info::RuleInfo;
 pub use rule::{Category, Rule, RuleMeta};
 pub use rules::{
-    AutorouteRule, DanglingReferenceRule, DecouplingCapacitorRule, FabProfileRule, GhostNetRule,
+    DanglingReferenceRule, DecouplingCapacitorRule, FabProfileRule, GhostNetRule,
     MalformedElementRule, PinMuxRule, QfnFootprintSpanRule, SchematicScaleRule, ShortedNetsRule,
-    TraceClearanceRule, TraceCurrentRule, UnconnectedNetRule, VoltageClearanceRule,
+    TraceClearanceRule, TraceCurrentRule, UnconnectedNetRule, UnroutedRule, UpstreamRule,
+    VoltageClearanceRule,
 };
 
 /// The fuse: runs every pass and aggregates their violations.
@@ -86,7 +87,8 @@ impl Default for Linter {
             .with_rule(DecouplingCapacitorRule)
             .with_rule(TraceClearanceRule)
             .with_rule(SchematicScaleRule)
-            .with_rule(AutorouteRule)
+            .with_rule(UnroutedRule)
+            .with_rule(UpstreamRule)
             .with_rule(QfnFootprintSpanRule)
             .with_rule(TraceCurrentRule)
             .with_rule(VoltageClearanceRule)
