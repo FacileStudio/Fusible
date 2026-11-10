@@ -8,7 +8,7 @@ use crate::linter::rules::copper::Shape;
 type Entry = GeomWithData<Rectangle<[f64; 2]>, usize>;
 
 /// Shapes indexed by their position in the slice they came from.
-pub(super) struct Index {
+pub(in crate::linter::rules) struct Index {
     tree: RTree<Entry>,
 }
 

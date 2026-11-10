@@ -37,7 +37,7 @@ mod pads;
 mod registry;
 #[cfg(test)]
 mod tests;
-mod union_find;
+pub(crate) mod union_find;
 
 pub use node::NetNode;
 

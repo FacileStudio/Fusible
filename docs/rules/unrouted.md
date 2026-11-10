@@ -1,6 +1,6 @@
 # `unrouted`
 
-Blows the fuse when a board has nets but no routed trace, or a source_trace has no pcb_trace.
+Blows the fuse when a board has nets but no routed trace, or copper does not reach every port of a net.
 
 | Field | Value |
 | --- | --- |

@@ -34,7 +34,7 @@ It also renames old rule ids. The rewrite must load to the same configuration as
 
 `autoroute` used to report every tscircuit `*_error` element under one id. In 2.0:
 
-- `unrouted` blows the fuse when a board has nets but no routed trace, or a `source_trace` has no `pcb_trace`.
+- `unrouted` blows the fuse when a board has nets but no routed trace, or routed copper does not reach every port of a net (judged per net, whatever the `pcb_trace` ids).
 - Each tscircuit error kind has its own id: `footprint_overlap`, `courtyard_overlap`, `placement`, `off_board`, `trace_error`, `trace_missing`, `port_not_connected`, `via_clearance`, `pad_trace_clearance`, `via_trace_clearance`, `pad_pad_clearance`, `autorouting`, `connector_accessibility`.
 - Any other `*_error` still blows the fuse, as `upstream_error`.
 - tscircuit warnings print as `upstream_warning`. Unnamed traces print as `unnamed_trace`, at info level.

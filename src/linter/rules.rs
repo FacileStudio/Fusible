@@ -39,9 +39,9 @@ mod shorted_nets;
 mod tests;
 mod trace_clearance;
 mod trace_current;
+mod trace_net;
 mod unconnected_net;
 mod unrouted;
-mod unrouted_scan;
 mod upstream;
 mod voltage_clearance;
 

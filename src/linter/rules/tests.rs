@@ -19,6 +19,7 @@ mod references;
 mod schematic;
 mod trace_current;
 mod unrouted;
+mod unrouted_nets;
 mod upstream;
 mod voltage_clearance;
 
