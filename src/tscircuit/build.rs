@@ -11,11 +11,13 @@ use super::{command, output, resolve_hardware_context, Runner, RunnerError};
 
 const CACHE_KIND: &str = "build";
 
-/// A spawned build process with its display string and launch time.
+/// A spawned build process with its display string, its launch time, and the
+/// modification time of the Circuit JSON that was on disk before it ran.
 struct SpawnedBuild {
     child: Child,
     command: String,
     started: SystemTime,
+    before: Option<SystemTime>,
 }
 
 impl Runner {
@@ -34,7 +36,7 @@ impl Runner {
             spawned = self.spawn_build(file, false)?;
             out = collect_output(&mut spawned.child, &spawned.command)?;
         }
-        let produced = fresh_circuit_json(file, &out, spawned.started);
+        let produced = fresh_circuit_json(file, &out, &spawned);
 
         if !out.status.success() && produced.is_err() {
             let details = extract_output_details(&out);
@@ -67,6 +69,9 @@ impl Runner {
 
         let command = format_command(&cmd);
         let started = SystemTime::now() - Duration::from_secs(2);
+        let before = output::resolve_circuit_json(file, "")
+            .ok()
+            .and_then(|path| std::fs::metadata(path).ok()?.modified().ok());
         let child = cmd.spawn().map_err(|source| RunnerError::Io {
             command: command.clone(),
             source,
@@ -75,6 +80,7 @@ impl Runner {
             child,
             command,
             started,
+            before,
         })
     }
 }
@@ -136,17 +142,18 @@ fn timeout_error(command: &str, timeout: Duration) -> RunnerError {
     }
 }
 
-/// Locates the produced Circuit JSON and rejects it if it predates `started`.
+/// Locates the produced Circuit JSON and rejects it if it predates the build or is
+/// the untouched file that was there before it.
 fn fresh_circuit_json(
     file: &Path,
     out: &Output,
-    started: SystemTime,
+    build: &SpawnedBuild,
 ) -> Result<PathBuf, RunnerError> {
     let stdout_str = String::from_utf8_lossy(&out.stdout);
     let path = output::resolve_circuit_json(file, &stdout_str)?;
     let fresh = std::fs::metadata(&path)
         .and_then(|m| m.modified())
-        .is_ok_and(|modified| modified >= started);
+        .is_ok_and(|modified| modified >= build.started && Some(modified) != build.before);
     if fresh {
         Ok(path)
     } else {

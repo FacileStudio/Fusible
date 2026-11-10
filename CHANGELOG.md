@@ -5,7 +5,7 @@ All notable changes to this project are documented here. The format is
 follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 `0.x`, a breaking change bumps the minor.
 
-## [Unreleased]
+## [2.1.0] - 2026-11-10
 
 ### Added
 
@@ -70,6 +70,9 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 - Zephyr overlay: a bus without a known controller instance, or a SoC without a GPIO table,
   is a `FUSIBLE TODO` instead of a reference to a node that does not exist.
 - STM32 ADC inputs in the Zephyr overlay get their `adcN_inM_pX` pinctrl (`inp` on H7).
+- A failed tscircuit build no longer passes off the `circuit.json` that was on disk before it:
+  the file must have changed during the build, not only be recent. A fresh project whose
+  compile failed within two seconds of an install was checked against the stale circuit.
 
 ## [2.0.0] - 2026-11-10
 

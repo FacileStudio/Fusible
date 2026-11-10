@@ -5,3 +5,5 @@ mod bun;
 mod cache;
 mod command;
 mod detect;
+#[cfg(unix)]
+mod stale;
