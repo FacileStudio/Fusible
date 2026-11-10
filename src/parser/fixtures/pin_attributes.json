@@ -1,0 +1,8 @@
+[
+  {"type":"source_component","source_component_id":"source_component_0","ftype":"simple_chip","name":"U1","manufacturer_part_number":"ESP32-S3R8","supplier_part_numbers":{"jlcpcb":[]}},
+  {"type":"source_port","source_port_id":"source_port_0","name":"VCC","pin_number":1,"port_hints":["VCC","pin1","1"],"source_component_id":"source_component_0","subcircuit_id":"subcircuit_source_group_0","requires_power":true,"requires_voltage":"3.3V","required_voltage_tolerance":0.05,"should_have_decoupling_capacitor":true,"recommended_decoupling_capacitor_capacitance":"100nF","subcircuit_connectivity_map_key":"net0"},
+  {"type":"source_port","source_port_id":"source_port_1","name":"GND","pin_number":2,"port_hints":["GND","pin2","2"],"source_component_id":"source_component_0","subcircuit_id":"subcircuit_source_group_0","requires_ground":true},
+  {"type":"source_port","source_port_id":"source_port_2","name":"NC","pin_number":3,"port_hints":["NC","pin3","3"],"source_component_id":"source_component_0","subcircuit_id":"subcircuit_source_group_0","do_not_connect":true},
+  {"type":"source_port","sourcePortId":"source_port_3","portName":"SDA","pinNumber":4,"source_component_id":"source_component_0","is_gpio":true,"is_using_open_drain":true,"needs_external_pullup":true,"provides_voltage":1.8},
+  {"type":"source_port","source_port_id":"source_port_4","name":"EN","pin_number":5,"source_component_id":"source_component_0","must_be_connected":"yes"}
+]

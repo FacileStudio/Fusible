@@ -66,11 +66,22 @@ mod elements;
 pub mod geometry;
 #[cfg(test)]
 mod geometry_tests;
+pub mod model;
+#[cfg(test)]
+mod model_tests;
+mod pin;
+#[cfg(test)]
+mod pin_tests;
+mod props;
 #[cfg(test)]
 mod tests;
+pub mod units;
 
 pub use diagnostic::JsonDiagnostic;
 pub use elements::{Component, Net, Pad, PadPoint, PcbPort, Port, Trace};
+pub use model::Model;
+pub use pin::PinAttributes;
+pub use props::ComponentProps;
 
 use std::path::Path;
 
@@ -157,6 +168,13 @@ impl Circuit {
             CircuitElement::Trace(t) => Some(t),
             _ => None,
         })
+    }
+
+    /// The typed board, placement, copper, silkscreen, part and upstream
+    /// issue model. It reads every raw element, so build it once per check
+    /// and pass it down rather than calling this per rule.
+    pub fn model(&self) -> Model {
+        Model::build(self)
     }
 }
 

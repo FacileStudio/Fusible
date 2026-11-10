@@ -1,0 +1,7 @@
+[
+  {"type":"pcb_trace_error","pcb_trace_error_id":"pcb_trace_error_0","error_type":"pcb_trace_error","message":"Trace too close to pad","pcb_trace_id":"pcb_trace_3","source_trace_id":"source_trace_3","pcb_component_ids":["pcb_component_1","pcb_component_2"],"pcb_port_ids":["pcb_port_7"],"subcircuit_id":"subcircuit_source_group_0"},
+  {"type":"source_unnamed_trace_warning","source_unnamed_trace_warning_id":"source_unnamed_trace_warning_0","warning_type":"source_unnamed_trace_warning","message":"Trace has no name","source_trace_id":"source_trace_0","subcircuit_id":"subcircuit_source_group_0"},
+  {"type":"source_refdes_convention_warning","source_refdes_convention_warning_id":"source_refdes_convention_warning_0","warning_type":"source_refdes_convention_warning","message":"The \"C\" prefix is being used with a <chip />, try using it with a <capacitor />","source_component_id":"source_component_5","refdes":"CAM1","source_component_ftype":"simple_chip","expected_prefixes":["U","IC"],"actual_prefix":"CAM"},
+  {"type":"pcb_autorouting_error","pcb_error_id":"pcb_autorouting_error_0","error_type":"pcb_autorouting_error"},
+  {"type":"source_trace","source_trace_id":"source_trace_0","connected_source_port_ids":[]}
+]

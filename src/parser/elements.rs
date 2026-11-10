@@ -2,6 +2,8 @@
 
 use serde::Deserialize;
 
+use super::pin::PinAttributes;
+
 /// A component.
 #[derive(Debug, Clone, Deserialize, Default)]
 pub struct Component {
@@ -48,10 +50,13 @@ pub struct Port {
     /// Alternative pin hints or labels.
     #[serde(default, alias = "port_hints", alias = "portHints")]
     pub port_hints: Option<Vec<String>>,
+    /// Declared electrical intent (`requires_power`, `do_not_connect`, ...).
+    #[serde(flatten, deserialize_with = "super::pin::lenient")]
+    pub attributes: PinAttributes,
 }
 
 /// One vertex of a polygon pad outline.
-#[derive(Debug, Clone, Copy, Deserialize, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Deserialize, Default)]
 pub struct PadPoint {
     pub x: f64,
     pub y: f64,
