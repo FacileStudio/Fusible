@@ -1,42 +1,13 @@
-//! `fusible new`: every template checks offline, builds, and needs no migration.
+//! `fusible new`: every template checks offline and needs no migration.
 
 mod common;
 
-use std::ffi::OsString;
-use std::path::{Path, PathBuf};
-use std::process::Output;
+use std::path::Path;
 
-use common::{copy_dir, fusible, TestDir};
+use common::scaffold::{create, offline};
+use common::{copy_dir, TestDir};
 
 const TEMPLATES: [&str; 4] = ["esp32-s3", "stm32g4", "rp2040", "blank"];
-
-fn offline_path() -> OsString {
-    let cargo = PathBuf::from(env!("CARGO"));
-    let toolchain = cargo.parent().map(Path::to_path_buf).unwrap_or_default();
-    let dirs = [toolchain, PathBuf::from("/usr/bin"), PathBuf::from("/bin")];
-    std::env::join_paths(dirs).expect("PATH should join")
-}
-
-fn offline(dir: &Path, args: &[&str]) -> Output {
-    fusible()
-        .current_dir(dir)
-        .env("PATH", offline_path())
-        .env_remove("FUSIBLE_BUN")
-        .env("CARGO_TARGET_DIR", dir.join("target"))
-        .args(args)
-        .output()
-        .expect("binary should run")
-}
-
-fn create(parent: &TestDir, template: &str) -> PathBuf {
-    let name = format!("demo-{template}");
-    let out = offline(
-        &parent.path,
-        &["new", &name, "--template", template, "--no-install"],
-    );
-    assert_eq!(out.status.code(), Some(0), "{out:?}");
-    parent.path.join(name)
-}
 
 #[test]
 fn every_template_passes_check_offline_and_needs_no_migration() {
@@ -64,19 +35,6 @@ fn mcu_templates_declare_pin_attributes_and_firmware() {
         let manifest = std::fs::read_to_string(root.join("fusible.yml")).unwrap();
         assert!(manifest.contains("generate: enclosure"), "{template}");
     }
-}
-
-#[test]
-#[cfg(unix)]
-fn the_esp32_template_builds_its_firmware() {
-    let parent = TestDir::new("new_build");
-    let root = create(&parent, "esp32-s3");
-
-    let out = offline(&root, &["build"]);
-
-    assert_eq!(out.status.code(), Some(0), "{out:?}");
-    let pins = std::fs::read_to_string(root.join("firmware/src/pins.rs")).unwrap();
-    assert!(pins.contains("pub const GPIO0"), "{pins}");
 }
 
 #[test]

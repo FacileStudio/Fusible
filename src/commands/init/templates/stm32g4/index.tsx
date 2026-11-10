@@ -93,7 +93,8 @@ export default () => (
     <trace from=".J2 > .SWCLK" to=".U1 > .PA14" />
     <trace from=".J2 > .SWDIO" to=".U1 > .PA13" />
     <trace from=".R2 > .pin2" to=".D1 > .anode" />
-    <trace from=".U1 > .PA5" to=".R2 > .pin1" />
+    <trace from=".U1 > .PA5" to="net.LED" />
+    <trace from=".R2 > .pin1" to="net.LED" />
     <trace from=".R1 > .pin1" to=".U1 > .PB8" />
     <trace from=".U1 > .VDDA" to=".C4 > .pin1" />
     <trace from=".U1 > .VDDA" to=".U1 > .VDD2" />

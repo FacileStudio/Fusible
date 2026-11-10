@@ -146,7 +146,8 @@ export default () => (
     <trace from=".C6 > .pin1" to=".U1 > .DVDD1" />
     <trace from=".U1 > .DVDD2" to=".U1 > .DVDD1" />
     <trace from=".R1 > .pin2" to=".U1 > .RUN" />
-    <trace from=".U1 > .GPIO16" to=".R2 > .pin1" />
+    <trace from=".U1 > .GPIO16" to="net.LED" />
+    <trace from=".R2 > .pin1" to="net.LED" />
     <trace from=".R2 > .pin2" to=".D1 > .anode" />
     <trace from=".J2 > .SWDIO" to=".U1 > .SWDIO" />
     <trace from=".J2 > .SWCLK" to=".U1 > .SWCLK" />

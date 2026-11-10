@@ -11,7 +11,7 @@ use crate::commands::source::load_circuit_source;
 use crate::commands::target::BoardTarget;
 use crate::config::OutputKind;
 use crate::netlist::Netlist;
-use crate::parser;
+use crate::parser::{self, Circuit};
 use crate::project::Project;
 
 /// One file to generate.
@@ -64,19 +64,24 @@ fn jobs(project: &Project, board: &BoardTarget, path: Option<PathBuf>) -> Vec<Jo
 fn write_board(board: &BoardTarget, jobs: &[Job]) -> Result<(), CheckError> {
     let (json_path, source) = load_circuit_source(&board.entry)?;
     let circuit = parser::parse(&source, &json_path)?;
-    let netlist = Netlist::from_circuit(&circuit);
     let mcu = board.mcu.as_deref();
-    let Some(info) = extract_mcu_pins(&circuit, &netlist, mcu) else {
+    let Some(bindings) = model(&circuit, mcu, &board.title) else {
         if let Some(hint) = mcu_hint(&circuit, mcu) {
             eprintln!("{hint}");
         }
         return Ok(());
     };
-    let bindings = board_bindings(&board.title, info, &circuit, &netlist);
     for (path, code) in jobs.iter().flat_map(|job| render(job, &bindings)) {
         save(&path, &code)?;
     }
     Ok(())
+}
+
+/// The bindings model of the `mcu` of `circuit`, titled `title`, or `None` without an MCU.
+pub fn model(circuit: &Circuit, mcu: Option<&str>, title: &str) -> Option<BoardBindings> {
+    let netlist = Netlist::from_circuit(circuit);
+    let info = extract_mcu_pins(circuit, &netlist, mcu)?;
+    Some(board_bindings(title, info, circuit, &netlist))
 }
 
 fn render(job: &Job, b: &BoardBindings) -> Vec<(PathBuf, String)> {

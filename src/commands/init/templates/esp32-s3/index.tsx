@@ -81,7 +81,8 @@ export default () => (
     <trace from=".U1 > .3V3" to=".C3 > .pin1" />
     <trace from=".U1 > .3V3" to=".R1 > .pin1" />
     <trace from=".R1 > .pin2" to=".U1 > .EN" />
-    <trace from=".U1 > .GPIO48" to=".R2 > .pin1" />
+    <trace from=".U1 > .GPIO48" to="net.LED" />
+    <trace from=".R2 > .pin1" to="net.LED" />
     <trace from=".R2 > .pin2" to=".D1 > .anode" />
     <trace from=".D1 > .cathode" to=".U1 > .GND" />
   </board>

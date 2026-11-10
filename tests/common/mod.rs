@@ -2,6 +2,8 @@
 
 #![allow(dead_code)]
 
+pub mod scaffold;
+
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::sync::atomic::{AtomicUsize, Ordering};
