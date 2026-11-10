@@ -13,6 +13,29 @@ fn c_package_variants_add_their_extra_gpios() {
     assert!(find_target("stm32g431cbx").is_none());
 }
 
+/// RP2040 datasheet Table 279: GPIO26-29 keep F1 SPI1 and F2/F3 next to the ADC.
+#[test]
+fn rp2040_adc_pins_keep_their_spi_uart_and_i2c_functions() {
+    use PeripheralSignal::*;
+    let chip = find_target("rp2040").unwrap();
+    let rows = [
+        ("GPIO26", [SpiSck(1), UartCts(1), I2cSda(1), Pwm(5, 'A')]),
+        ("GPIO27", [SpiMosi(1), UartRts(1), I2cScl(1), Pwm(5, 'B')]),
+        ("GPIO28", [SpiMiso(1), UartTx(0), I2cSda(0), Pwm(6, 'A')]),
+        ("GPIO29", [SpiCs(1, 0), UartRx(0), I2cScl(0), Pwm(6, 'B')]),
+    ];
+    for (name, signals) in rows {
+        let pin = chip.find_pin(name).unwrap();
+        for (af, signal) in (1..).zip(signals) {
+            assert_eq!(
+                pin.get_af(&signal).map(|f| f.af_number),
+                Some(af),
+                "{name} {signal:?}"
+            );
+        }
+    }
+}
+
 #[test]
 fn rp2350_follows_the_rp2040_matrix_with_uart_aux() {
     let chip = find_target("RP2350A").unwrap();

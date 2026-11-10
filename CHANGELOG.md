@@ -22,6 +22,9 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 
 ### Fixed
 
+- RP2040 pin table: GPIO26-29 now list SPI1 (F1), UART1 CTS/RTS on GPIO26/27 (F2) and I2C0
+  on GPIO28/29 (F3), as in datasheet Table 279 and pico-sdk `io_bank0.h`. `pin_mux` no longer
+  reports those valid assignments as conflicts.
 - Zephyr overlay on RP2040/RP2350: SPI pinmux uses Zephyr's `SPIn_TX`/`SPIn_RX` names (was
   `MOSI`/`MISO`, undefined), UART RX and SPI MISO groups get `input-enable`, and the ADC node
   is `&adc` (was `&adc0`). Pinctrl states are named `<bus>_fusible`, so they no longer merge
