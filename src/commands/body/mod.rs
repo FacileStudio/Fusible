@@ -83,7 +83,7 @@ pub(crate) use generator::{generator_dir, run_capture, run_script};
 use jobs::{select_jobs, Job};
 pub use kit::kit;
 pub(crate) use kit_data::{build_kit, Kit, KitOpening};
-pub use mech_check::verify_mech;
+pub use mech_check::{mech_findings, verify_mech};
 pub use new::new;
 pub(crate) use part::{code_glb, code_step, read_report};
 use settings::{preview_settings, resolve_settings, Settings};

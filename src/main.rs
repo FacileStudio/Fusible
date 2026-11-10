@@ -6,6 +6,7 @@
 //! * `2` — tool error (unreadable/malformed input, runner failure, usage error).
 
 pub mod bom;
+pub mod check;
 pub mod cli;
 pub mod codegen;
 pub mod commands;

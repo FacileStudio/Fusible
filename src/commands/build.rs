@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 use miette::Diagnostic;
 use thiserror::Error;
 
+use crate::commands::bindings;
 use crate::commands::check::{self, CheckError};
 use crate::commands::target::{resolve_board, resolve_boards, BoardTarget};
 use crate::config::FirmwareConfig;
@@ -32,14 +33,15 @@ pub enum BuildError {
     ExecutionFailed(String),
 }
 
-/// Checks the target boards, then builds the firmware bound to them.
+/// Checks the target boards, writes their pin bindings, then builds the firmware bound to them.
 ///
 /// `target` names a firmware, a board, or a circuit file; without it every board and
-/// firmware of the manifest is built. No firmware builds unless every board keeps the
-/// fuse intact.
+/// firmware of the manifest is built. No binding is written and no firmware builds unless
+/// every board keeps the fuse intact.
 pub fn run(project: &Project, target: Option<PathBuf>) -> Result<(), BuildError> {
     let (boards, firmware) = select(project, target)?;
-    check::run_boards(project, &boards, None, None)?;
+    check::run_boards(project, &boards)?;
+    bindings::write(&boards, None)?;
     for (name, fw) in firmware {
         build_firmware(name, fw)?;
     }

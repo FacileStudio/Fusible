@@ -1,12 +1,29 @@
-//! `check --json` exit-code mapping.
+//! `check --json`: the v2 report as one JSON document, and its exit code.
 
 use std::path::PathBuf;
 use std::process::ExitCode;
 
-use crate::project::Project;
-use crate::{commands, EXIT_TOOL_ERROR};
+use serde_json::json;
 
-/// Runs the electrical linter and prints its verdict as one JSON document.
+use crate::check::{self, CheckError, Fuse, Scope};
+use crate::commands::check::with_mcu;
+use crate::commands::target::resolve_boards;
+use crate::project::Project;
+use crate::{EXIT_TOOL_ERROR, EXIT_VIOLATIONS};
+
+fn verdict(
+    project: &Project,
+    file: Option<PathBuf>,
+    mcu: Option<String>,
+) -> Result<(String, Fuse), CheckError> {
+    let boards = with_mcu(resolve_boards(project, file)?, mcu);
+    let report = check::run(project, Scope::Boards(boards))?;
+    let fuse = report.fuse;
+    let document = serde_json::to_string(&report).unwrap_or_default();
+    Ok((document, fuse))
+}
+
+/// Checks the boards and prints the report as one JSON document on stdout.
 ///
 /// A tool error prints `{"fuse":"error","error":"..."}` and exits 2.
 pub(super) fn check_json(
@@ -14,17 +31,14 @@ pub(super) fn check_json(
     file: Option<PathBuf>,
     mcu: Option<String>,
 ) -> ExitCode {
-    match commands::check_json::run(project, file, mcu) {
-        Ok((document, blown)) => {
-            println!("{document}");
-            ExitCode::from(u8::from(blown))
-        }
-        Err(err) => {
-            println!(
-                "{}",
-                serde_json::json!({"fuse": "error", "error": err.to_string()})
-            );
-            ExitCode::from(EXIT_TOOL_ERROR)
-        }
-    }
+    let (document, code) = match verdict(project, file, mcu) {
+        Ok((document, Fuse::Intact)) => (document, ExitCode::SUCCESS),
+        Ok((document, Fuse::Blown)) => (document, ExitCode::from(EXIT_VIOLATIONS)),
+        Err(err) => (
+            json!({"fuse": "error", "error": err.to_string()}).to_string(),
+            ExitCode::from(EXIT_TOOL_ERROR),
+        ),
+    };
+    println!("{document}");
+    code
 }

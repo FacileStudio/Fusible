@@ -1,15 +1,17 @@
-//! Tool `check`: lint one board or all of them and report the fuse.
+//! Tool `check`: lint one board or all of them and return the v2 check report.
 
 use serde_json::{json, Value};
 
 use super::args::{object, optional_str, string};
 use super::outcome::Outcome;
+use crate::check::{self, Scope};
 use crate::commands::mcp::report;
 use crate::commands::mcp::session::Session;
 
 pub const DESCRIPTION: &str =
-    "Run the electrical rules. Returns the fuse (intact or blown) and every violation \
-with its message and help. Call after every edit.";
+    "Run the electrical rules. Returns the check report: the fuse (intact or blown), every \
+board's diagnostics with message and help, the links and assembly diagnostics, and the waived \
+ones. Call after every edit.";
 
 /// Input schema: an optional board name.
 pub fn schema() -> Value {
@@ -19,20 +21,15 @@ pub fn schema() -> Value {
     )
 }
 
-/// Lints the selected boards.
+/// Checks the selected boards; a tool error is a failed call with `fuse: "error"`.
 pub fn run(session: &mut Session, args: &Value) -> Outcome {
     let project = session.project();
     let targets = match report::select(&project, optional_str(args, "board")) {
         Ok(targets) => targets,
         Err(message) => return Outcome::fail(message),
     };
-    let reports: Vec<report::BoardReport> = targets
-        .iter()
-        .map(|t| report::lint_board(&project, t))
-        .collect();
-    let boards: Vec<Value> = reports
-        .iter()
-        .map(|r| json!({"name": r.name, "diagnostics": report::diagnostics_json(r)}))
-        .collect();
-    Outcome::ok(json!({"fuse": report::fuse(&reports), "boards": boards}))
+    match check::run(&project, Scope::Boards(targets)) {
+        Ok(report) => Outcome::ok(serde_json::to_value(&report).unwrap_or(Value::Null)),
+        Err(err) => Outcome::fail_with(json!({"fuse": "error", "error": err.to_string()})),
+    }
 }

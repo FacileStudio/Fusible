@@ -68,7 +68,7 @@ pub fn run(
     allow_warnings: bool,
 ) -> Result<(), ReleaseError> {
     let boards = resolve_boards(project, file).map_err(CheckError::from)?;
-    check::run_boards(project, &boards, None, None)?;
+    check::run_boards(project, &boards)?;
     let staged = boards
         .iter()
         .map(|board| stage(project, board, allow_warnings))

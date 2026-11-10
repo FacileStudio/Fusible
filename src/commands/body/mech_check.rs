@@ -10,15 +10,14 @@ use crate::commands::check::CheckError;
 use crate::config::{BodyConfig, FusibleConfig};
 use crate::linter::{Diagnostic, FuseBlown, Severity};
 
-fn warn(rule: &str, message: String) {
-    let diagnostic = Diagnostic {
+fn warning(rule: &str, message: String) -> Diagnostic {
+    Diagnostic {
         rule: rule.to_string(),
         message,
         help: None,
         severity: Severity::Warning,
         ..Default::default()
-    };
-    eprintln!("{:?}", miette::Report::new(diagnostic));
+    }
 }
 
 fn newer(source: &Path, cache: &Path) -> bool {
@@ -26,19 +25,19 @@ fn newer(source: &Path, cache: &Path) -> bool {
     matches!((time(source), time(cache)), (Some(s), Some(c)) if s > c)
 }
 
-fn cached(root: &Path, name: &str, body: &BodyConfig) -> Option<PartReport> {
+fn cached(root: &Path, name: &str, body: &BodyConfig) -> (Option<PartReport>, Vec<Diagnostic>) {
     let path = features_path(root, name, body);
-    let report = serde_json::from_str(&std::fs::read_to_string(&path).ok()?).ok();
+    let report = std::fs::read_to_string(&path)
+        .ok()
+        .and_then(|text| serde_json::from_str(&text).ok());
     let source = body.source.as_ref().map(|s| root.join(s));
-    if source.is_some_and(|s| newer(&s, &path)) {
-        warn(
-            "mech.stale",
-            format!(
-                "{name} changed since its last build; run fusible body {name} to check it again"
-            ),
+    let stale = source.is_some_and(|s| newer(&s, &path)).then(|| {
+        let text = format!(
+            "{name} changed since its last build; run fusible body {name} to check it again"
         );
-    }
-    report
+        warning("mech.stale", text)
+    });
+    (report, stale.into_iter().collect())
 }
 
 fn findings(name: &str, body: &BodyConfig, report: &PartReport) -> Vec<Diagnostic> {
@@ -47,29 +46,36 @@ fn findings(name: &str, body: &BodyConfig, report: &PartReport) -> Vec<Diagnosti
     found.iter().map(|f| f.diagnostic()).collect()
 }
 
+/// Every mechanical finding of the bodies that were built, plus a warning per code part that was not.
+pub fn mech_findings(cfg: &FusibleConfig, root: &Path) -> Vec<Diagnostic> {
+    let mut found = Vec::new();
+    for (name, body) in &cfg.bodies {
+        let (report, warnings) = cached(root, name, body);
+        found.extend(warnings);
+        match report {
+            Some(report) => found.extend(findings(name, body, &report)),
+            None if body.is_code() => found.push(warning(
+                "mech.not_built",
+                format!("{name} was not built yet; run fusible body {name} to check it"),
+            )),
+            None => {}
+        }
+    }
+    found
+}
+
 /// Runs the mechanical rules on every body that was built, and warns about code parts that were not.
 ///
-/// Warnings print; any error blows the fuse.
+/// Warnings print on stderr; any error blows the fuse.
 pub fn verify_mech(cfg: &FusibleConfig, root: &Path) -> Result<(), CheckError> {
-    let mut errors = Vec::new();
-    for (name, body) in &cfg.bodies {
-        let Some(report) = cached(root, name, body) else {
-            if body.is_code() {
-                let text = format!("{name} was not built yet; run fusible body {name} to check it");
-                warn("mech.not_built", text);
-            }
-            continue;
-        };
-        let (warnings, blown): (Vec<_>, Vec<_>) = findings(name, body, &report)
-            .into_iter()
-            .partition(|d| d.severity != Severity::Error);
-        warnings
-            .into_iter()
-            .for_each(|d| eprintln!("{:?}", miette::Report::new(d)));
-        errors.extend(blown);
-    }
-    match errors.is_empty() {
+    let (blown, warnings): (Vec<_>, Vec<_>) = mech_findings(cfg, root)
+        .into_iter()
+        .partition(|d| d.severity == Severity::Error);
+    warnings
+        .into_iter()
+        .for_each(|d| eprintln!("{:?}", miette::Report::new(d)));
+    match blown.is_empty() {
         true => Ok(()),
-        false => Err(FuseBlown::new(errors).into()),
+        false => Err(FuseBlown::new(blown).into()),
     }
 }

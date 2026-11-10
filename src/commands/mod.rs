@@ -2,13 +2,11 @@
 
 pub mod add;
 pub mod assembly;
+pub mod bindings;
 pub mod body;
 pub mod bom;
 pub mod build;
 pub mod check;
-pub mod check_json;
-mod check_lint;
-mod check_merge;
 pub mod dev;
 pub mod diff;
 pub mod doctor;
@@ -28,8 +26,6 @@ pub mod source;
 pub mod sync;
 pub mod target;
 
-#[cfg(test)]
-mod check_merge_tests;
 #[cfg(test)]
 mod links_tests;
 #[cfg(test)]

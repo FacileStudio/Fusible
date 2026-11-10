@@ -1,63 +1,17 @@
-//! Subcommand: `fusible check` / `lint` — run the electrical linter.
+//! Subcommand: `fusible check` / `lint` — run the electrical linter and render its report.
 
 use std::path::{Path, PathBuf};
 
-use miette::Diagnostic;
-use thiserror::Error;
-
-use crate::commands::assembly::{self, AssemblyError};
-use crate::commands::body;
-use crate::commands::check_lint::lint_board;
-use crate::commands::check_merge::{label, merge};
-use crate::commands::links::check_links;
+use crate::check::{self, Report, Scope};
+pub use crate::check::{CheckError, ReadError};
+use crate::commands::bindings;
 pub use crate::commands::source::{find_fallback_circuit_json, load_circuit_source};
-use crate::commands::target::{resolve_boards, BoardTarget, TargetError};
-use crate::config::FusibleConfig;
-use crate::linter::{FuseBlown, LintContext, Severity};
-use crate::netlist::Netlist;
-use crate::parser;
+use crate::commands::target::{resolve_boards, BoardTarget};
+use crate::linter::{Diagnostic, FuseBlown, Severity};
 use crate::project::Project;
-use crate::tscircuit::RunnerError;
 
-/// The input file could not be read.
-#[derive(Debug, Error, Diagnostic)]
-#[error("cannot read the Circuit JSON at \"{path}\"")]
-#[diagnostic(help("check that the file exists and is readable"))]
-pub struct ReadError {
-    pub path: String,
-    #[source]
-    pub source: std::io::Error,
-}
-
-/// Unified error enum for the check pipeline.
-#[derive(Debug, Error, Diagnostic)]
-pub enum CheckError {
-    #[error(transparent)]
-    #[diagnostic(transparent)]
-    Target(#[from] TargetError),
-
-    #[error(transparent)]
-    #[diagnostic(transparent)]
-    Runner(#[from] RunnerError),
-
-    #[error(transparent)]
-    #[diagnostic(transparent)]
-    Read(#[from] ReadError),
-
-    #[error(transparent)]
-    #[diagnostic(transparent)]
-    Parse(#[from] parser::JsonDiagnostic),
-
-    #[error(transparent)]
-    #[diagnostic(transparent)]
-    FuseBlown(#[from] FuseBlown),
-
-    #[error(transparent)]
-    #[diagnostic(transparent)]
-    Assembly(Box<AssemblyError>),
-}
-
-/// Loads, parses and lints the circuit at `entry` without writing any file.
+/// Loads, lints and renders the circuit at `entry` without writing any file: the fuse gate
+/// of exports, bodies and assemblies.
 ///
 /// Returns the path and text of the Circuit JSON that passed the fuse check.
 pub fn lint_source(
@@ -65,130 +19,90 @@ pub fn lint_source(
     entry: &Path,
     target_mcu: Option<String>,
 ) -> Result<(PathBuf, String), CheckError> {
-    let (json_path, source, diagnostics) = lint_board(project, entry, target_mcu.as_deref())?;
-    let (warnings, violations): (Vec<_>, Vec<_>) = diagnostics
-        .into_iter()
-        .partition(|d| d.severity != Severity::Error);
-
-    for warning in warnings {
-        eprintln!("{:?}", miette::Report::new(warning));
+    let (json_path, source, checked) = check::check_entry(project, entry, target_mcu.as_deref())?;
+    let errors = print_warnings(checked.diagnostics);
+    if !errors.is_empty() {
+        return Err(FuseBlown::new(errors).into());
     }
-    if !violations.is_empty() {
-        return Err(CheckError::FuseBlown(FuseBlown::new(violations)));
-    }
-
-    println!("✅ Circuit validated (fuse intact)");
-    if let Some(mcu) = target_mcu {
-        println!("   silicon target: {mcu}");
-    }
+    print_intact(target_mcu.as_deref());
     Ok((json_path, source))
 }
 
 /// Runs the electrical linter on the target board, or on every board of the manifest.
+///
+/// `mcu` overrides the manifest MCU of each board. Once the fuse is intact, pin bindings
+/// are written to `pins_rs`, else to the manifest's firmware paths.
 pub fn run(
     project: &Project,
     file: Option<PathBuf>,
     mcu: Option<String>,
     pins_rs: Option<PathBuf>,
 ) -> Result<(), CheckError> {
-    run_boards(project, &resolve_boards(project, file)?, mcu, pins_rs)
+    let boards = with_mcu(resolve_boards(project, file)?, mcu);
+    run_boards(project, &boards)?;
+    bindings::write(&boards, pins_rs)
 }
 
-/// Checks every board, then returns the merged violations or the first tool error.
+/// Sets `mcu`, when given, as the target of every board.
+pub fn with_mcu(boards: Vec<BoardTarget>, mcu: Option<String>) -> Vec<BoardTarget> {
+    let set = |board: BoardTarget| BoardTarget {
+        mcu: mcu.clone().or(board.mcu.clone()),
+        ..board
+    };
+    boards.into_iter().map(set).collect()
+}
+
+/// Checks `boards` and renders the report; a blown fuse is `Err(FuseBlown)` with every error.
+pub fn run_boards(project: &Project, boards: &[BoardTarget]) -> Result<(), CheckError> {
+    let report = check::run(project, Scope::Boards(boards.to_vec()))?;
+    render(report, boards)
+}
+
+fn print_warnings(diagnostics: Vec<Diagnostic>) -> Vec<Diagnostic> {
+    let (warnings, errors): (Vec<_>, Vec<_>) = diagnostics
+        .into_iter()
+        .partition(|d| d.severity != Severity::Error);
+    for warning in warnings {
+        eprintln!("{:?}", miette::Report::new(warning));
+    }
+    errors
+}
+
+fn print_intact(mcu: Option<&str>) {
+    println!("✅ Circuit validated (fuse intact)");
+    if let Some(mcu) = mcu {
+        println!("   silicon target: {mcu}");
+    }
+}
+
+/// Prints each board's warnings and verdict, then returns every error as one blown fuse.
 ///
-/// CLI `mcu` and `pins_rs` override the manifest values of each board.
-pub fn run_boards(
-    project: &Project,
-    boards: &[BoardTarget],
-    mcu: Option<String>,
-    pins_rs: Option<PathBuf>,
-) -> Result<(), CheckError> {
-    let mut failure = None;
-    let mut report = |blown| eprintln!("Error: {:?}", miette::Report::new(blown));
-    for board in boards {
-        let name = board.name.as_deref().filter(|_| boards.len() > 1);
-        if let Some(name) = name {
-            println!("\n▸ board {name}");
+/// With several boards, each error message is prefixed with its board name.
+fn render(mut report: Report, boards: &[BoardTarget]) -> Result<(), CheckError> {
+    let several = report.boards.len() > 1;
+    let mut errors = Vec::new();
+    for (board, target) in std::mem::take(&mut report.boards).into_iter().zip(boards) {
+        if several {
+            println!("\n▸ board {}", board.name);
         }
-        let next = check_board(project, board, mcu.clone(), pins_rs.clone())
-            .err()
-            .map(|error| label(error, name));
-        failure = merge(failure, next, &mut report);
+        let found = print_warnings(board.diagnostics);
+        if found.is_empty() {
+            print_intact(target.mcu.as_deref());
+        }
+        let label = |mut d: Diagnostic| {
+            d.message = format!("[{}] {}", board.name, d.message);
+            d
+        };
+        errors.extend(
+            found
+                .into_iter()
+                .map(|d| if several { label(d) } else { d }),
+        );
     }
-    let links = check_manifest_links(project, boards).err();
-    failure = merge(failure, links, &mut report);
-    if failure.is_none() {
-        failure = check_manifest_assembly(project, boards).err();
+    errors.extend(print_warnings(std::mem::take(&mut report.links)));
+    errors.extend(print_warnings(std::mem::take(&mut report.assembly)));
+    match errors.is_empty() {
+        true => Ok(()),
+        false => Err(FuseBlown::new(errors).into()),
     }
-    failure.map_or(Ok(()), Err)
-}
-
-fn checked_every_board(cfg: &FusibleConfig, boards: &[BoardTarget]) -> bool {
-    !cfg.boards.is_empty() && cfg.boards.len() == boards.len()
-}
-
-fn check_manifest_links(project: &Project, boards: &[BoardTarget]) -> Result<(), CheckError> {
-    let Some((_, cfg)) = project.found() else {
-        return Ok(());
-    };
-    if cfg.links.is_empty() || !checked_every_board(cfg, boards) {
-        return Ok(());
-    }
-    check_links(cfg)
-}
-
-fn check_manifest_assembly(project: &Project, boards: &[BoardTarget]) -> Result<(), CheckError> {
-    let Some((manifest, cfg)) = project.found() else {
-        return Ok(());
-    };
-    if !checked_every_board(cfg, boards) {
-        return Ok(());
-    }
-    let root = manifest.parent().unwrap_or(Path::new("."));
-    if cfg.assembly.is_some() {
-        assembly::verify(project, root).map_err(|error| match error {
-            AssemblyError::Check(inner) => inner,
-            other => CheckError::Assembly(Box::new(other)),
-        })?;
-    }
-    body::verify_mech(cfg, root)
-}
-
-fn check_board(
-    project: &Project,
-    board: &BoardTarget,
-    mcu: Option<String>,
-    pins_rs: Option<PathBuf>,
-) -> Result<(), CheckError> {
-    let target_mcu = mcu.or_else(|| board.mcu.clone());
-    let (json_path, source) = lint_source(project, &board.entry, target_mcu.clone())?;
-    let pins = pins_rs.map_or_else(|| board.pins_rs.clone(), |path| vec![path]);
-    if pins.is_empty() {
-        return Ok(());
-    }
-    let circuit = parser::parse(&source, &json_path)?;
-    let netlist = Netlist::from_circuit(&circuit);
-    let ctx = LintContext::new(&circuit, &netlist).with_mcu(target_mcu.as_deref());
-    pins.iter()
-        .try_for_each(|path| write_pins_rs(&ctx, path, &board.title))
-}
-
-/// Generates firmware pin bindings for the circuit's MCU into `pins_path`.
-fn write_pins_rs(ctx: &LintContext, pins_path: &Path, title: &str) -> Result<(), CheckError> {
-    let Some(mcu_info) = crate::codegen::extract_mcu_pins(ctx.circuit, ctx.netlist, ctx.mcu) else {
-        return Ok(());
-    };
-    let code = crate::codegen::generate_pins_rs(&mcu_info, title);
-    if let Some(parent) = pins_path.parent() {
-        std::fs::create_dir_all(parent).ok();
-    }
-    std::fs::write(pins_path, code).map_err(|source| ReadError {
-        path: pins_path.display().to_string(),
-        source,
-    })?;
-    println!(
-        "🦀 Generated firmware pin bindings -> {}",
-        pins_path.display()
-    );
-    Ok(())
 }

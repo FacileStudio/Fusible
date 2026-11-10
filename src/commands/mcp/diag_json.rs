@@ -1,31 +1,13 @@
 //! Diagnostics as JSON values.
 
-use serde_json::{json, Value};
+use serde_json::Value;
 
 use super::report::BoardReport;
-use crate::linter::{Diagnostic, FuseBlown, Severity};
+use crate::linter::{Diagnostic, FuseBlown};
 
-/// One diagnostic as the JSON object tools return.
+/// One diagnostic as the JSON object tools return: the same shape as the check report.
 pub fn diagnostic_json(d: &Diagnostic) -> Value {
-    let severity = match d.severity {
-        Severity::Error => "error",
-        Severity::Warning => "warning",
-        Severity::Info => "info",
-    };
-    let mut value =
-        json!({"rule": d.rule, "message": d.message, "help": d.help, "severity": severity});
-    let extra = [
-        ("standard", json!(d.standard)),
-        ("source_url", json!(d.source_url)),
-        ("fix", json!(d.fix)),
-    ];
-    for (key, field) in extra.into_iter().filter(|(_, f)| !f.is_null()) {
-        value[key] = field;
-    }
-    if !d.elements.is_empty() {
-        value["elements"] = json!(d.elements);
-    }
-    value
+    serde_json::to_value(d).unwrap_or(Value::Null)
 }
 
 /// The diagnostics of a report as a JSON array.

@@ -7,6 +7,14 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 
 ## [Unreleased]
 
+### Changed
+
+- **Breaking:** `fusible check --json` and the MCP `check` tool return the version 2 report:
+  `version`, `fuse`, `boards[]`, `links[]` and `assembly[]`. Each diagnostic carries every
+  field, `null` when unknown, plus `location`, `source` and `fixes`.
+- The CLI, `--json`, the studio and MCP share one check pipeline (`src/check/`), which parses
+  each board once.
+
 ## [1.1.2] - 2026-11-09
 
 ### Fixed
