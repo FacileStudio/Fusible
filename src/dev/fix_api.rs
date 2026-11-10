@@ -12,7 +12,7 @@ use serde_json::Value;
 use tiny_http::Request;
 
 use super::api::{error_body, respond_json};
-use super::run_api::forbidden;
+use super::run::api::forbidden;
 use super::state::State;
 use crate::commands::mcp::tsx_prop::set_prop;
 use crate::commands::target::is_tsx_target;

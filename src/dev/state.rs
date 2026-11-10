@@ -3,7 +3,7 @@
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
-use super::body::BodyCache;
+use super::bodies::body::BodyCache;
 use crate::commands::target::BoardTarget;
 
 pub(super) use super::shared::State;

@@ -6,7 +6,7 @@ use super::bind::bind;
 use super::desktop::{announce_ready, exit_on_stdin_eof};
 use super::guard::admit;
 use super::hub::stream_events;
-use super::kicad_watch::start_kicad_watchers;
+use super::kicad::watch::start_kicad_watchers;
 use super::limiter::handlers;
 use super::pair::{enable_sharing, lan_ip};
 use super::refresh::{load_bundle, rebuild_trigger, refresh, warn_if_bundle_missing, watch_dir};

@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use super::project::project_json;
-use super::run_request::parse;
+use super::run::request::parse;
 use super::server::query_param;
 use super::state::State;
 use crate::commands::target::BoardTarget;

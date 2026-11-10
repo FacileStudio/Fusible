@@ -6,7 +6,7 @@ use std::sync::Arc;
 use std::thread;
 
 use super::assets::load_studio_bundle;
-use super::kicad_sync::evaluate;
+use super::kicad::sync::evaluate;
 use super::pipeline::execute_pipeline;
 use super::state::{Health, Slot, State};
 use crate::project::Project;

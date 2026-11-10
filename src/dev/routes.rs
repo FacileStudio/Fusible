@@ -8,10 +8,10 @@ use super::bodies;
 use super::bom;
 use super::firmware;
 use super::fix_api;
-use super::git_api;
+use super::git;
 use super::pair;
 use super::rules_api;
-use super::run_api;
+use super::run;
 use super::serve::serve_static;
 use super::state::State;
 use crate::project::Project;
@@ -32,9 +32,9 @@ pub(super) fn api_route(request: Request, state: &State, port: u16, path: &str, 
         p if p.starts_with("/api/bodies/") => bodies::serve(request, p, project),
         "/api/kicad" => api::kicad(request, state),
         "/api/firmware" => firmware::serve(request, state, project),
-        "/api/run" => run_api::start_run(request, state, port, project),
+        "/api/run" => run::api::start_run(request, state, port, project),
         "/api/fix" => fix_api::serve(request, state, port),
-        p if git_api::owns(p) => git_api::serve(request, state, port, project),
+        p if git::api::owns(p) => git::api::serve(request, state, port, project),
         _ => serve_static(request, state, path),
     }
 }
