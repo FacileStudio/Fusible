@@ -7,10 +7,6 @@ use serde_yaml::Value;
 use crate::commands::body::yaml_lines::{block_end, indent_of, is_skippable, key_value};
 use crate::config::{FirmwareConfig, LEGACY_BOARD};
 
-/// Rule ids renamed in 2.0, old to new.
-pub(super) const RENAMED_RULES: &[(&str, &str)] =
-    &[("E_SCHEMATIC_SCALE_EXCESSIVE", "schematic_scale")];
-
 const LEGACY_FIRMWARE: &str = "firmware";
 const LEGACY_BODY: &str = "enclosure";
 const LEGACY_BODY_DIR: &str = "dist/mechanical";
@@ -35,9 +31,7 @@ pub(super) fn migrate(text: &str) -> Result<String, String> {
     if text.ends_with('\n') {
         migrated.push('\n');
     }
-    Ok(RENAMED_RULES
-        .iter()
-        .fold(migrated, |acc, (old, new)| acc.replace(old, new)))
+    Ok(super::rule_ids::rename(&migrated))
 }
 
 fn top_block(lines: &[String], key: &str) -> Option<Range<usize>> {
