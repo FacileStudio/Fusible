@@ -17,7 +17,17 @@ fn enabled(list: &[Value], id: &str) -> bool {
 #[test]
 fn every_registered_rule_is_listed_with_a_summary() {
     let list = rules(None);
-    assert_eq!(list.len(), 55);
+    assert_eq!(list.len(), 68);
+    let category = |id: &str| list.iter().find(|r| r["id"] == id).unwrap()["category"].clone();
+    assert_eq!(category("harness_mismatch"), "erc");
+    for id in [
+        "body_interference",
+        "hole_misaligned",
+        "connector_blocked",
+        "mech.boss",
+    ] {
+        assert_eq!(category(id), "mechanical", "{id}");
+    }
     for rule in &list {
         assert!(!rule["summary"].as_str().unwrap().is_empty(), "{rule}");
         assert!(["error", "warning", "info"].contains(&rule["severity"].as_str().unwrap()));

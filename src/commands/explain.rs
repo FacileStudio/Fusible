@@ -8,7 +8,7 @@ use serde_json::{json, Value};
 use thiserror::Error;
 
 use crate::config::{is_netlist_rule, RuleLevel};
-use crate::linter::{Linter, RuleInfo};
+use crate::linter::{catalog, RuleInfo};
 use crate::project::Project;
 
 /// A rule id the registry does not know; a tool error (exit 2).
@@ -24,7 +24,7 @@ pub struct UnknownRule {
 
 /// Every registered rule, with whether the project's manifest feeds it.
 pub fn registry(project: &Project) -> Vec<RuleInfo> {
-    Linter::default().describe(project.design_rules())
+    catalog(project.design_rules())
 }
 
 /// The registered rule named `id`.

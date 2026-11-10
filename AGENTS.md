@@ -8,7 +8,7 @@
 
 1. **The Fuse Contract (Exit Codes)**:
    - `0` — **Fuse intact**: circuit is electrically sound, rules pass, command succeeded.
-   - `1` — **Fuse blown**: at least one error-level diagnostic is left after `rules:` levels and `waivers:` (board rules, `harness_mismatch`, `body_interference`, `hole_misaligned`, `connector_blocked`, `mech.*`; `fusible rules` lists the board rules). Artifact exports, pin bindings, firmware builds and `fusible flash` are blocked.
+   - `1` — **Fuse blown**: at least one error-level diagnostic is left after `rules:` levels and `waivers:` (board rules, `harness_mismatch`, `body_interference`, `hole_misaligned`, `connector_blocked`, `mech.*`; `fusible rules` lists them all). Artifact exports, pin bindings, firmware builds and `fusible flash` are blocked.
    - `2` — **Tool error**: IO failure, unreadable/malformed JSON, runner missing, CLI syntax error, or an unknown rule id in `rules:` or `waivers:`.
    - Severities: `error` blows the fuse, `warning` and `info` print. A manifest may lower a rule (`rules: { id: off|info|warning|error }`) or waive one case with a reason; netlist rules (`unconnected_net`, `malformed_element`, `ghost_net`, `dangling_reference`, `shorted_nets`) stay errors and are never waived. A waived diagnostic moves to the report's `waived` list, it never vanishes.
 2. **Fail-Closed Rule Design**: If a net or component cannot be definitively proven connected, report it. Never assume floating traces or unlinked ports are valid without explicit net aliases. Electrical intent comes from tscircuit `pinAttributes` and `noConnect` in the TSX; name heuristics are a warning-level fallback only.
