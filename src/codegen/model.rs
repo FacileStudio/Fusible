@@ -149,6 +149,7 @@ pub fn board_bindings(
     };
     let (i2c, spi, uart) = super::buses::buses(&ctx, &mcu.pins);
     let adc = super::adc::inputs(&ctx, &mcu.pins);
+    let matrix = ctx.silicon.is_some_and(|t| t.family == "Espressif");
     let mut bindings = BoardBindings {
         board: board.to_string(),
         i2c,
@@ -166,10 +167,32 @@ pub fn board_bindings(
         .filter(|p| !claimed.contains(&p.signal_name))
         .map(BusPin::of)
         .collect();
+    if matrix {
+        bindings.fill_matrix();
+    }
     bindings
 }
 
+/// Gives each empty slot the lowest instance from `base` that no other slot uses.
+fn fill(mut slots: Vec<&mut Option<u8>>, base: u8) {
+    let mut used: Vec<u8> = slots.iter().filter_map(|s| **s).collect();
+    for slot in slots.iter_mut().filter(|s| s.is_none()) {
+        let n = (base..=u8::MAX).find(|n| !used.contains(n)).unwrap_or(base);
+        used.push(n);
+        **slot = Some(n);
+    }
+}
+
 impl BoardBindings {
+    /// The ESP32 GPIO matrix routes any bus to any pin: a bus the IO MUX did not place
+    /// takes the lowest free instance (I2C from 0, SPI from 2 as SPI0/1 drive the flash,
+    /// UART from 0).
+    fn fill_matrix(&mut self) {
+        fill(self.i2c.iter_mut().map(|b| &mut b.instance).collect(), 0);
+        fill(self.spi.iter_mut().map(|b| &mut b.instance).collect(), 2);
+        fill(self.uart.iter_mut().map(|u| &mut u.instance).collect(), 0);
+    }
+
     /// Signal names of every pin a bus or ADC input claims.
     fn claimed(&self) -> BTreeSet<String> {
         let i2c = self.i2c.iter().flat_map(|b| [&b.scl, &b.sda]);

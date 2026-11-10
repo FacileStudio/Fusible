@@ -21,8 +21,8 @@ pub enum BusRole {
 }
 
 const TOKENS: &[(&[&str], BusRole)] = &[
-    (&["SCL"], BusRole::Scl),
-    (&["SDA"], BusRole::Sda),
+    (&["SCL", "SIOC"], BusRole::Scl),
+    (&["SDA", "SIOD"], BusRole::Sda),
     (&["SCK", "SCLK"], BusRole::Sck),
     (&["MOSI", "COPI"], BusRole::Mosi),
     (&["MISO", "CIPO"], BusRole::Miso),

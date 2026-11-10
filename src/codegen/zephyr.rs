@@ -58,12 +58,18 @@ fn pinctrl_group(out: &mut String, bus: &Bus, family: Family) {
         .lines
         .iter()
         .map(|(role, p)| {
-            format!(
-                "<{}_{}_{}>",
-                bus.name,
-                role.to_ascii_uppercase(),
-                pin_suffix(p, family)
-            )
+            let role = role.to_ascii_uppercase();
+            match (family, bus.kind, bus.instance) {
+                (Family::Esp, Kind::Spi, Some(n)) => {
+                    let role = if role == "SCK" {
+                        "SCLK".to_string()
+                    } else {
+                        role
+                    };
+                    format!("<SPIM{n}_{role}_{}>", pin_suffix(p, family))
+                }
+                _ => format!("<{}_{role}_{}>", bus.name, pin_suffix(p, family)),
+            }
         })
         .collect();
     let input = if bus.kind == Kind::I2c {
