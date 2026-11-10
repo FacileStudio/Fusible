@@ -1,223 +1,138 @@
-# Plan: Fusible 0.18.0
+# Plan: Fusible 2.0
 
-Current version: `0.17.0`. Target: `0.18.0` (new rules, new studio view, desktop shell redesign).
+Written 2026-11-10 against `main` at `583f353` (version 1.1.2). Cold-start handoff: a reader needs nothing but this file, `AGENTS.md`, and the report "Fusible 2.0 research and project review".
 
-Five workstreams, A to E, each run by one agent in its own git worktree. They touch disjoint files, so they run in parallel. The contracts between them are fixed below; do not change a contract without updating this file.
+Decisions taken by the owner on 2026-11-10:
+- Version 2.0, break cleanly. Rule ids, the JSON verdict and the manifest may change, with one migration command.
+- Declared electrical intent comes from tscircuit `pinAttributes` and `noConnect` in the TSX. Name heuristics stay only as a warning-level fallback.
+- All four areas are in scope: ERC, DFM/DFA, firmware bridge, architecture and agent UX.
+- Firmware targets: deeper Rust, C header, Zephyr devicetree, flash and bring-up.
 
-Verified against `32b2ac8` on 2026-10-25. Paths were read, not recalled.
+Checked against: `[filet]` (`filet.yml` at the root: 250 lines per file, 8 functions per file, 30 lines per function, complexity 10) and `[muse]` (studio, desktop, mobile and site pin one `@facile/muse` tag). Not applicable and not consulted: migrations, auth/porte, module-path, events. Fusible has no Go API, no database and no login.
 
-## Rules for every agent
+## Goal
 
-- Conventional Commits (`type(scope): summary`), no gitmoji (the hook adds it), no co-author lines. Merge commits use `chore:`.
-- No inline comments, no comments inside function bodies. Doc comments on public items match the file around them.
-- Branch names never start with `claude` or `codex`. Use `feat/cross-rules`, `feat/studio-assembly`, `test/assembly-success`, `feat/desktop-shell`.
-- Before any commit, all four pass and filet prints nothing:
-  ```sh
-  cargo fmt --all -- --check
-  cargo clippy --all-targets -- -D warnings
-  cargo test --locked
-  filet check .
-  ```
-- Desktop changes also pass `cd desktop/ui && bun test && bun run build` and `cd desktop/src-tauri && cargo clippy --all-targets -- -D warnings && cargo test --locked`.
-- Studio TS changes rebuild the committed bundle: `cd studio && bun run build` (writes `src/assets/studio.bundle.js`).
-- Acceptance project: `/home/yann/Code/Kono/FieldCam`. `fusible check` and `fusible assembly` there must exit 0 with its real generated enclosure. A false positive on FieldCam is a bug in the rule, not in FieldCam.
-- Never `pkill -f "fusible studio"`; use `fuser -k <port>/tcp`.
+Make `fusible check` a real design review: rules that work from declared pin roles and typed data, cover fabrication and assembly, and report located, waivable, machine-fixable diagnostics through one pipeline shared by the CLI, the studio and MCP; then carry the verified netlist into firmware for Rust, C and Zephyr.
 
-## Decision taken: missing bun or geometry
+## Why (evidence)
 
-- No `assembly:` in `fusible.yml`: the three cross-world rules are skipped. Nothing changes for current users.
-- `assembly:` declared, and bun or a body model cannot be loaded: exit 2 (tool error), never 1. This reuses `BodyError::BunMissing` and the existing `AssemblyError` variants.
-- `fusible check <one board>` skips the cross-world rules, the same way `check_manifest_links` skips links when not every board was checked.
-- `--skip-lint` on `fusible assembly` skips them too.
+`src/linter/rules/bypass_cap.rs` decides a pin is a power pin when its name contains `5V` or `VIN`, while tscircuit already writes `requires_power`, `provides_power`, `must_be_connected` and `do_not_connect` on every `source_port`; `src/parser/elements.rs` reads none of them, and 17 files dig through untyped `raw_elements` for everything the six-type parser does not model.
 
-## Contract shared by A and B
+## Approach
 
-`fusible assembly` writes two diagnostic files into `<out_dir>/assembly/` (the parts directory it already creates) on every run that reaches the measurement step, intact or blown:
+Phase 0 rebuilds the base that every rule stands on: a typed Circuit JSON model, one check pipeline, a rule registry with stable ids, located diagnostics, and waivers. It reuses what exists: the `Rule` trait, `LintContext`, the union-find netlist, `parser/geometry.rs`, the YAML fab profiles, and the `RuleInfo` served at `/api/rules`. Phases A to D then run in parallel worktrees on disjoint files, the way `PLAN.md` ran 0.18.0. Phase E integrates and ships. No new runtime dependency is needed before Phase C.
 
-- `check.json`:
-  ```json
-  {
-    "version": 1,
-    "fuse": "intact",
-    "violations": [
-      {
-        "rule": "body_interference",
-        "message": "body `case` overlaps board `main` by 3.20 mm³",
-        "parts": ["case", "main"],
-        "volume": 3.2,
-        "at": [12.0, -4.5, 1.6],
-        "collision": "collision:0"
-      }
-    ]
-  }
-  ```
-  `fuse` is `"intact"` or `"blown"`. `volume` (mm³), `at` (assembly frame, mm, centre of the overlap bounding box) and `collision` are optional per violation. `collision` names a node in `preview.glb`.
-- `preview.glb`: every part in the assembly frame (same colours as `assembly.ts` uses now), plus one node per overlap solid, named `collision:<n>`. Written even when the fuse blows. It is a diagnostic, not a fabrication export.
+## Steps (ordered)
 
-`assembly.glb` and `assembly.step` stay fuse-gated: they are written only when `fuse` is `"intact"`.
+Every step ends with the four gates of `AGENTS.md` section 3. `[filet]` applies to every Rust and TS step; plan files under the limits, never raise them.
 
-## A. Cross-world fuse rules (`feat/cross-rules`)
+### Phase 0: foundations (one agent, blocks everything else)
 
-Goal: `body_interference`, `hole_misaligned`, `connector_blocked` blow the fuse. This finishes Milestone 16.
+1. `src/parser/elements.rs`, new `src/parser/pin.rs` — add `PinAttributes` (serde, every field optional, `deny` nothing) flattened into `Port`; add `do_not_connect`, `must_be_connected`, `provides_power`, `requires_power`, `provides_ground`, `requires_ground`, pull-up, output-mode and `should_have_decoupling_capacitor` fields with the exact snake_case names of `source_pin_attributes.ts`. Exit: a fixture built from `<chip pinAttributes>` round-trips in a unit test.
+2. `src/parser/elements.rs`, new `src/parser/props.rs` — extend `Component` with `manufacturer_part_number`, `supplier_part_numbers`, and typed values (`resistance`, `capacitance`, `max_voltage_rating`, `display_value`). First run `rg -o '"type":"source_component"[^}]*' /home/yann/Code/Kono/FieldCam/dist/circuit.json | head` and name fields from real output, not from memory.
+3. New `src/parser/model/` (`board.rs`, `pcb.rs`, `silk.rs`, `issues.rs`) — typed structs for `pcb_board`, `pcb_component`, `pcb_trace`, `pcb_via`, `pcb_plated_hole`, `pcb_hole`, `pcb_copper_pour`, `pcb_silkscreen_text`, `pcb_silkscreen_path`, `pcb_courtyard_rect`, `pcb_courtyard_outline`, `source_component_internal_connection`, and a generic `UpstreamIssue { kind, message, element_ids }` for every `*_error` and `*_warning`. `src/parser/geometry.rs` becomes a view over these.
+4. Migrate the 17 `raw_elements` readers (`rg -l raw_elements src --glob '!*test*'`) to the typed model, one commit per module (`linter/rules`, `gerber`, `svg`, `commands/body`, `commands/assembly`, `bom`). Then make `raw_elements` `pub(crate)` to the parser only. Exit: `rg raw_elements src` hits only `src/parser/`.
+5. `src/netlist/builder.rs`, `src/netlist/joins.rs` — join pins listed in `source_component_internal_connection` into one node. Check first whether this is already done: `rg internal_connection src/netlist`. Add a merge test in `src/netlist/merge_tests.rs`.
+6. New `src/project/` (`mod.rs`, `context.rs`) — `Project { root, config, design }` loaded once in `src/main.rs` and passed down. Replace the 20 calls to `FusibleConfig::nearest()` and `DesignRules::nearest()` (`rg 'nearest\(\)' src`). Exit: no `nearest()` call outside `src/project/` and `src/main.rs`.
+7. New `src/check/` (`mod.rs`, `report.rs`, `board.rs`, `cross.rs`) — one `check::run(&Project, Scope) -> Report`. `Report { version: 2, fuse, boards[], links[], assembly[], waived[] }`. It returns data and prints nothing. `src/commands/check.rs` renders it with miette; `src/commands/check_json.rs` serialises it; `src/dev/pipeline.rs` and `src/commands/mcp/tools/check.rs` call it. Delete `DevDiagnostic` (the `Report` diagnostic type replaces it) and the second parse in `check_board`. Pin generation moves out of check into `build` (step 31).
+8. `src/linter/diagnostics.rs` — add `location: Option<Location { board, x, y, layer }>`, `source: Option<SourceRef { file, line }>` and `fixes: Vec<Fix>` where `Fix` is `SetProp { selector, prop, value }`, `AddElement { tsx }` or `Note(String)`. Keep `help`. Add `Severity::Info`.
+9. `src/linter/rule.rs`, `src/linter/rules.rs`, delete `src/linter/summaries.rs` — each rule carries `id`, `category` (`netlist`, `erc`, `drc`, `dfm`, `dfa`, `firmware`, `mechanical`, `upstream`), `summary`, `standard`, `default_severity` and `needs` as one `const META: RuleMeta`. New ids: `decoupling_capacitor` stays, `E_SCHEMATIC_SCALE_EXCESSIVE` becomes `schematic_scale`, `autoroute` splits into `unrouted` plus one id per upstream kind (step 10). Rename `bypass_cap.rs` to `decoupling_capacitor.rs`. A test asserts every id is snake_case, unique, and has a non-empty summary.
+10. New `src/linter/rules/upstream.rs` — map each tscircuit `*_error` type to its own rule id (`footprint_overlap`, `off_board`, `via_clearance`, `pad_trace_clearance`, `copper_over_keepout`, ...) and each `*_warning` to a warning. An unknown `*_error` type still blows the fuse as `upstream_error` (fail closed).
+11. `src/config/` (new `waivers.rs`, `rules.rs`; edit `raw.rs`, `validate.rs`) — manifest keys:
+    ```yaml
+    rules:
+      test_point_coverage: off      # off | info | warning | error
+    waivers:
+      - rule: decoupling_capacitor
+        match: "U3.VDD"             # element id or refdes.pin, exact
+        reason: "bulk cap C12 shared, checked on rev A"
+        until: 2027-03-01           # optional
+    ```
+    A waiver without `reason`, with an unknown rule id, or that matches nothing is a config error (exit 2). An expired waiver stops applying. Waived diagnostics appear in `Report.waived`, never vanish. Netlist-category rules (`shorted_nets`, `ghost_net`, `malformed_element`, `dangling_reference`) cannot be turned off or waived.
+12. New `src/commands/migrate.rs`, `src/cli.rs` — `fusible migrate` rewrites a 1.x `fusible.yml` (legacy `hardware:` form, old rule ids) to 2.0 and prints a diff. `--check` exits 1 when a rewrite is needed.
+13. Library output — replace `println!`/`eprintln!` outside `src/main.rs`, `src/dispatch/` and `src/commands/*` render functions with returned values or a `Reporter` trait passed in (`rg -c 'println!|eprintln!' src`). Exit: `fusible check --json` and `fusible mcp` write nothing but JSON on stdout, asserted in `tests/exit_code.rs` and `tests/mcp.rs`.
 
-### Design
+Phase 0 exit: FieldCam (`/home/yann/Code/Kono/FieldCam`) gives the same fuse verdict as 1.1.2 on the old rules; `fusible check --json` there contains links and assembly.
 
-The board side of every rule comes from the Circuit JSON, in pure Rust, through the kit that `fusible body kit` already builds (`build_kit` in `src/commands/body/kit_data.rs:185`: outline, thickness, holes, components with `z`/`height`, `keep_out`, `openings`). No board STEP and no tscircuit runner are needed for the rules. Only body geometry needs occt-wasm.
+### Phase A: electrical rules (`feat/erc`, owns `src/linter/rules/erc/`, `examples/erc-*.json`)
 
-Rust builds probe solids, places them with the existing `place.rs` matrices, and sends them with the bodies to bun. The script only measures: for each `(probe, body)` pair it returns `getVolume(common(probe, body))`. Rust turns the numbers into `Diagnostic`s. All thresholds and rule logic stay in Rust, where they are unit-tested.
+Each rule is one file, one fixture in `examples/`, one test in `tests/erc_rules.rs`. A rule whose input attribute is absent on every pin of the board reports once at `info` level ("no pin on U1 declares its role") and falls back to the name heuristic at `warning` level; it never passes silently.
 
-Probe kinds (serde-tagged enum, `kind` field):
+14. New `src/linter/rules/erc/roles.rs` — the one place that classifies a pin: `Role { PowerIn, PowerOut, GroundIn, GroundOut, Output, OpenDrain, Input, Bidirectional, Passive, NoConnect, Unknown }` from `PinAttributes`, with the heuristic fallback moved here from `bypass_cap.rs` and `codegen/select.rs` (delete both copies).
+15. `erc/pin_conflict.rs` — per net, error on two push-pull outputs, output against power output, two power outputs. Matrix as a `const` table, cells cite the KiCad defaults.
+16. `erc/power_undriven.rs` — a net with a `PowerIn` and no `PowerOut`. A connector pin, a battery, or a `nets:` entry with `source: external` counts as a driver (add `source` to `NetSpec` in `src/config/design.rs`).
+17. `erc/pin_unconnected.rs` and `erc/nc_connected.rs` — `must_be_connected` pin without a net; `do_not_connect` pin on a net with another endpoint.
+18. `erc/missing_pullup.rs` — a net with an open-drain driver or a `needs_external_pullup` pin and no resistor from that net to a rail; same for pull-down. An `is_using_internal_pullup` pin satisfies it.
+19. `erc/voltage_domain.rs` — a pin's required voltage against its net's `nets:` voltage with `required_voltage_tolerance`; an output on a higher-voltage domain driving an input on a lower one. Enabled only when the voltages are declared.
+20. `erc/rail_budget.rs` and `erc/derating.rs` — sum of `nets:` loads against the declared source limit; capacitor `max_voltage_rating` below 1.25 times the rail voltage (factor in `src/linter/rules/data/derating.yml`, with its source).
+21. `decoupling_capacitor.rs` — drive from `should_have_decoupling_capacitor` and `Role::PowerIn`; keep the 3 mm distance check.
+22. `erc/led_series_resistor.rs`, `erc/bring_up.rs` — LED on a rail with no series resistance; warnings for a rail without a test point, an MCU without a debug or programming connector, an external connector signal without a clamp. All three default to `warning`.
 
-| kind | fields | built in TS with |
-|---|---|---|
-| `prism` | `points: [[x,y]]`, `z0`, `z1`, `matrix` | `makeLineEdge` + `makeWire` + `makeFace` + `extrude`, then `transform` |
-| `box` | `min: [x,y,z]`, `max: [x,y,z]`, `matrix` | `makeBoxFromCorners`, then `transform` |
-| `cylinder` | `center: [x,y]`, `r`, `z0`, `z1`, `matrix` | `makeCylinder`, `translate`, `transform` |
-| `ring` | `center`, `r0`, `r1`, `z0`, `z1`, `quadrant: 0..3`, `matrix` | outer cylinder `cut` inner cylinder, `common` with a quadrant box |
+### Phase B: fabrication and assembly (`feat/dfm`, owns `src/linter/rules/dfm/`, `src/gerber/`, `src/commands/export/`)
 
-Each probe carries an `id: String` that the response echoes.
+23. `src/config/fab.rs`, `src/linter/rules/data/fab/*.yml` — add `min_edge_clearance`, `min_drill_to_copper`, `min_hole_spacing`, `max_aspect_ratio`, `min_mask_dam`, `min_silk_height`, `min_silk_stroke`, `min_silk_to_pad`. Fill each built-in profile from the fab's current capability page and record the page URL and date in the file's `source:`; a missing number leaves the rule disabled for that profile with an `info` line.
+24. `dfm/` — one file each: `annular_ring.rs`, `drill_to_copper.rs`, `hole_spacing.rs`, `via_aspect_ratio.rs`, `edge_clearance.rs`, `silk_over_pad.rs`, `silk_text_size.rs`, `mask_sliver.rs`, `acid_trap.rs` (angle under 90 degrees between consecutive segments or at a pad entry; `warning`). Reuse `geom2d.rs` and the `rstar` index already used by `trace_clearance.rs`.
+25. `dfa/` — `courtyard_overlap.rs` (rotation-aware; upstream ignores `pcbRotation`, see the wiki page `tools/fusible.md`), `component_edge_clearance.rs`, `fiducials.rs` (only when `assembly_service: true` in the fab block), `bom_incomplete.rs` (placed part without an MPN in the component or `bom.yml`).
+26. `src/gerber/excellon.rs` — check whether non-plated holes reach a drill file (`rg -n 'pcb_hole|npth' src/gerber`); if not, write `drill-NPTH.drl` beside the plated file. Add the case to `src/gerber/tests/`.
+27. New `src/fab/ipc356.rs`, `src/fab/centroid.rs` — IPC-D-356 netlist and pick-and-place CSV (refdes, x, y, side, rotation; units and rotation convention in the header). `--preset fab` writes both plus a `README.txt` layer map with board name, version and date.
+28. `.github/workflows/ci.yml` — extend the gerbv job to render the NPTH file and fail on an empty layer.
 
-Rules, with constants in one place (`src/commands/assembly/rules.rs`):
+### Phase C: firmware bridge (`feat/firmware`, owns `src/silicon/`, `src/codegen/`, `src/commands/flash.rs`)
 
-- `EPS_VOLUME = 0.01` mm³: any common volume above it counts as contact.
-- `INSET = 0.1` mm: every probe shrinks by this on each face, so parts that only touch do not fire.
-- **`body_interference`**: probes are the board slab (`prism` from `outline`, `z0 = -thickness/2`, `z1 = +thickness/2`, board frame, because tscircuit's board model is centred on Z = 0) and one `box` per `keep_out` volume. Fires when a probe overlaps a body. Also fires for each pair of bodies whose solids overlap: for body pairs the script computes `common(bodyA, bodyB)` directly (request field `pairs: [[a,b]]`).
-- **`hole_misaligned`**: for each kit hole and each side of the board (below the bottom face, above the top face), four `ring` quadrant probes (`r0 = d/2`, `r1 = d/2 + 0.8`, 2 mm tall) and one `cylinder` near-probe (`r = d/2 + 4`, same height). Aligned: all four quadrants hit. No boss: the near-probe misses, and the rule says nothing. Misaligned: the near-probe hits and at least one quadrant misses. The message names the hole position, the side, and the body.
-- **`connector_blocked`**: for each kit `opening`, one `box` spanning `from..to` along the edge, the component's `z..z+height` vertically, extruded outward along `normal` by 3 mm from the board edge. Fires when it overlaps a body. The message names the component (`opening.component`) and the side.
+29. New `scripts/silicon-gen.ts`, `src/silicon/data/` — generate pin tables from the `stm32-data-generated` JSON into compact files embedded with `include_str!`, for the STM32 families G0, G4, F4, L4, H7 first. Read that repo's licence and JSON layout before designing the format (it was not read during research). Keep `rp2040.rs` and `esp32s3.rs` hand-written; add ESP32-C3 and RP2350 the same way. A test compares the generated STM32G431 table with today's `src/silicon/database/stm32/` before that directory is deleted.
+30. `src/codegen/` (new `model.rs`, `rust.rs`, `c.rs`, `zephyr.rs`) — one `BoardBindings` model from netlist plus silicon: pins, buses (I2C with the devices on it, SPI with chip selects, UART pairs), ADC inputs with their divider ratio when two resistors form one. Three renderers: `pins.rs` plus `board.rs` (Embassy `init`), `pins.h`, and a Zephyr overlay (`pinctrl` nodes, bus nodes with child devices). Snapshot tests in `src/codegen/tests/`.
+31. `src/config/types.rs`, `src/commands/build.rs` — `firmware.<name>.outputs: [rust, c, zephyr]` with paths; `framework` gains `zephyr` and `esp-idf-c`. Generation runs in `build` and `check --write-bindings`, never as a side effect of a plain `check`.
+32. New `src/commands/flash.rs`, `src/cli.rs` — `fusible flash [FIRMWARE]`: fuse-gated, then runs the firmware's `flash_cmd`, defaulting to `probe-rs run --chip <chip>` or `espflash flash` by framework. Fusible shells out; it links neither tool. `fusible doctor` reports both.
+33. New `src/commands/bringup.rs` — `fusible bringup [BOARD]` writes `dist/bringup.md`: rails in power order with expected voltage and the test point to probe, strap pin states, debug connector pinout. Data comes from `nets:`, roles and the netlist.
 
-STL bodies: `importStl` gives a shell, and `common` with a shell has no volume. The script runs `sewAndSolidify` (fallback `makeSolid(sew(...))`) on STL imports before measuring, and `isValid` must hold; otherwise it reports a load error, which Rust maps to exit 2 (fail closed, never a silent pass).
+### Phase D: agent and human experience (`feat/ux`, owns `src/commands/mcp/`, `src/commands/init/`, `studio/`, `docs/`, `site/`)
 
-### Files
+34. New `src/commands/explain.rs` — `fusible explain <rule>` and `fusible rules [--json]` from the registry (the MCP `explain_rule` tool calls the same code). `docs/rules/` is generated from it by `scripts/rules-doc.ts`; CI fails when the generated files differ.
+35. `src/commands/mcp/tools/` — `check` returns `Report` v2; new `apply_fix` tool applies a `Fix::SetProp` through the existing `edit_board` path; new `waive` tool appends a waiver and requires a reason.
+36. New `src/commands/new.rs`, `src/commands/init/templates/` — `fusible new <name> --template esp32-s3|stm32g4|rp2040|blank`: a board with `pinAttributes` set on the MCU and regulator, a firmware crate that builds, a generated enclosure, a passing `fusible check`. Each template is a CI fixture.
+37. `studio/src/` `[muse]` — Checks panel: group by category, click a diagnostic to zoom to `location`, show waived items with their reason, an "Apply fix" button for `SetProp` fixes. Rebuild `src/assets/studio.bundle.js`.
+38. Docs — delete `HANDOFF.md` and `PLAN.md`, rewrite `ROADMAP.md` for the 2.0 manifest, update `AGENTS.md` sections 1, 2 and 4, `README.md`, `docs/agents.md`, the `fusible` agent skill, `Cargo.toml` description, and both locales of `site/` content. Write `docs/migrate-2.0.md`.
 
-- `src/commands/body/kit_data.rs`, `kit_levels.rs`, `kit.rs`, `mod.rs`: widen `build_kit` and the `Kit*` types from `pub(super)` to `pub(crate)`, re-export from `commands::body`. No behaviour change.
-- New `src/commands/assembly/probe.rs` (+ `probe_tests.rs`): probe types and builders from a `Kit` and a frame `Matrix`. Pure, no IO.
-- New `src/commands/assembly/rules.rs` (+ `rules_tests.rs`): `fn violations(kits, response) -> Vec<Diagnostic>`, the constants, and the `check.json` writer. Pure except the writer.
-- New `src/commands/assembly/measure.rs`: builds the measure job, runs `run_script("assembly.ts", ...)`, reads the response file. The job gains `mode: "measure" | "merge"`, `probes`, `pairs`, `report` (path of the response JSON), `preview` (path of `preview.glb`). `run_script` sends stdout to null, so the response goes through a file, not stdout.
-- `src/commands/assembly/parts.rs`: split board STEP export out of `collect_parts`, so measuring needs only bodies. Merge still exports boards.
-- `src/commands/assembly/mod.rs`: order becomes gate, collect bodies, measure, write `check.json`, blow the fuse if any violation (`CheckError::FuseBlown(FuseBlown::new(..))` wrapped in `AssemblyError::Check`, exit 1, no `assembly.*` written), then export boards and merge. Two bun runs: measure, then merge. Do not merge both into one run: the script would have to decide the fuse.
-- `src/assets/assembly.ts`: add the measure mode. Keep the merge mode output byte-identical in behaviour.
-- `src/commands/check.rs`: next to `check_manifest_links` (line 115), add `check_manifest_assembly` with the same guard (manifest found, every board checked, `assembly:` present). It runs gate-free measurement (the boards were just linted) and writes no preview. Merge its failure the same way as links at line 111.
-- `src/commands/assembly/error.rs`: add a variant for a body that loaded but could not be solidified (`fusible::assembly::body_not_solid`, exit 2).
-- Docs: `AGENTS.md` (fuse contract list in section 1, `assembly` entry in section 4), `README.md` rule list, `GLOSSARY.md` if it lists rules, `ROADMAP.md` (tick Milestone 16), `CHANGELOG.md` `[Unreleased]` entry.
+### Phase E: integrate and ship (one agent, after A to D)
 
-### Tests
+39. Workspace split — `crates/fusible-core` (parser, netlist, linter, silicon, check; no IO, no process spawn), `crates/fusible-fab` (gerber, svg, fab, router), root `fusible` binary (commands, dev, tscircuit). Move only; no behaviour change in this commit. Exit: `cargo build -p fusible-core --target wasm32-unknown-unknown` succeeds in CI.
+40. `src/dev/` — group the 80 flat files into `git/`, `kicad/`, `assembly/`, `run/`, `bodies/` sub-modules. Move only.
+41. Acceptance — FieldCam: add `pinAttributes` to its MCU, modem and regulators in a FieldCam branch; `fusible check` must report the known faults listed in `HANDOFF.md` before its deletion (modem on a 600 mA LDO as `rail_budget`, 1.8 V UART on a 3.3 V MCU as `voltage_domain`). A false positive on FieldCam is a bug in the rule.
+42. `CHANGELOG.md` 2.0.0 section with a "Breaking" list, then `/ship`.
 
-- `probe_tests.rs`: a square board with one hole and one edge connector gives the expected probe count and corners after a 90 degree placement.
-- `rules_tests.rs`: hand-written measurement responses produce exactly the expected diagnostics: four quadrant hits = no violation; near hit with two quadrant misses = `hole_misaligned`; near miss = nothing; a volume of `EPS_VOLUME / 2` = nothing.
-- `tests/assembly_rules.rs` (new file, not `tests/assembly.rs`, which belongs to C): skip unless bun is found (same helper C writes, see C). An ASCII STL box written by the test, placed through the board: exit 1, `body_interference` in stderr, no `dist/assembly.glb`, `dist/assembly/check.json` says `blown`. Same box moved 50 mm away: exit 0.
-- FieldCam: `fusible check` and `fusible assembly` exit 0. If the generated enclosure fires a rule, fix the probe, not the threshold.
+## Files to Modify / New
 
-## B. Studio assembly view (`feat/studio-assembly`)
+- New: `src/parser/pin.rs`, `src/parser/props.rs`, `src/parser/model/`, `src/project/`, `src/check/`, `src/config/waivers.rs`, `src/config/rules.rs`, `src/linter/rules/{upstream.rs,erc/,dfm/,dfa/}`, `src/fab/`, `src/silicon/data/`, `src/codegen/{model,rust,c,zephyr}.rs`, `src/commands/{migrate,flash,bringup,explain,new}.rs`, `scripts/{silicon-gen,rules-doc}.ts`, `docs/rules/`, `docs/migrate-2.0.md`, `tests/{erc_rules,dfm_rules,waivers,migrate}.rs`.
+- Modified: `src/parser/elements.rs`, `src/parser/geometry.rs`, `src/netlist/{builder,joins}.rs`, `src/linter/{rule,rules,diagnostics,info}.rs`, `src/config/{raw,validate,design,fab,types}.rs`, `src/commands/{check,check_json,build}.rs`, `src/dev/pipeline.rs`, `src/commands/mcp/tools/*.rs`, `src/gerber/excellon.rs`, `src/cli.rs`, `src/cli/args.rs`, `src/dispatch/`, `studio/src/`, `.github/workflows/ci.yml`.
+- Deleted: `src/linter/summaries.rs`, `src/linter/rules/autoroute.rs` (split), `src/silicon/database/stm32/`, `HANDOFF.md`, `PLAN.md`.
 
-Goal: the studio shows `preview.glb` with collisions in red, and can rebuild it.
+## Exit criteria
 
-### Files
+- `cargo fmt --all -- --check`, `cargo clippy --all-targets -- -D warnings`, `cargo test --locked`, and `filet check .` printing nothing, on every merge.
+- `rg raw_elements src` hits only the parser; `rg 'nearest\(\)' src` hits only `src/project/` and `src/main.rs`.
+- `fusible rules --json` lists at least 40 rules, each with id, category, summary and default severity.
+- A board fixture with two push-pull outputs on one net, an undriven `requires_power` pin, and a wired `do_not_connect` pin blows the fuse with three distinct rule ids; adding a reasoned waiver for one moves it to `waived` and the exit code follows the other two.
+- `fusible check --json` on FieldCam reports links and assembly, and step 41's two known faults.
+- `fusible new demo --template esp32-s3 && cd demo && fusible check && fusible build` exits 0 in CI.
+- `fusible migrate --check` exits 0 on every example and template.
 
-- New `src/dev/assembly.rs`: `GET /api/assembly` returns `{"declared": bool, "report": <check.json or null>, "model": "/api/assembly/model?rev=<mtime>" or null}`. `GET /api/assembly/model` streams `<out_dir>/assembly/preview.glb` (`out_dir` from `assembly.out_dir`, default `dist` beside the manifest, same as `src/commands/assembly/mod.rs`). 404 with a JSON error when missing. Read-only, no path from the query string.
-- `src/dev/server.rs:68-77`: route both paths. They fall under the existing `/api/` guard at line 62.
-- `src/dev/run_request.rs:20`: `known_targets` accepts `"assembly"` with no target (or the sentinel `"assembly"`), mapped to `fusible assembly`. Test in `src/dev/api_tests.rs`.
-- `src/dev/api.rs` `project`: add `"assembly": bool` to the `/api/project` payload.
-- Reload: when the run finishes, the existing `run` SSE event fires; the view refetches `/api/assembly` on a `run` event whose action is `assembly`. No new watcher.
-- New `studio/src/assembly/` (`index.ts`, `view.ts`): mount a Three.js stage. Reuse `studio/src/mechanical/stage.ts`, `gltf.ts` (`parseMeshes`, `readError`) and `orbit.ts`; do not copy them. Nodes named `collision:*` get an unlit red material (`#C55454`, the studio's blown-fuse red) drawn on top (`depthTest: false`, 0.6 opacity); other parts keep their GLB colours. A side list shows each violation; clicking one frames its `collision` node.
-- `studio/src/index.ts`: register the view.
-- `src/assets/viewer.html` line 1394: add a fifth tab after BODIES, `ASSEMBLY`, icon `pixelarticons:layers`, key `5`, shown only when `/api/project` says `assembly: true`. Empty state when there is no preview: one line and a `BUILD ASSEMBLY` button that posts `{"action":"assembly"}` to `/api/run`. Same button in the view toolbar.
-- Rebuild `src/assets/studio.bundle.js`.
+## Risks / unknown unknowns
 
-### Tests
+- Field names in step 2 and element shapes in step 3 are taken from circuit-json sources and one real board, not from a schema guarantee. tscircuit moves fast; pin the tested `tscircuit` version in `fusible doctor` and warn outside it.
+- Few existing boards set `pinAttributes`. On day one most ERC rules run on the heuristic fallback and produce warnings. The templates (step 36) and FieldCam (step 41) are what make the rules bite; without them 2.0 looks like more noise.
+- `stm32-data-generated` size and licence are unread. If embedding is too heavy, ship tables per family behind cargo features or download on `doctor --install`.
+- Fab capability numbers change and the JLCPCB page did not extract cleanly. Step 23 needs a person reading the page, not a scrape.
+- Step 4 touches Gerber and SVG output. The gerbv CI job and SVG snapshot tests are the guard; run them before and after each module migration.
+- Step 39 moves about 500 files. Do it last, in one commit, with no other branch open.
+- Zephyr overlay correctness cannot be tested without a Zephyr toolchain. First release marks it experimental and tests only the text snapshot.
 
-- Rust: `src/dev/assembly_tests.rs` builds a temp project with and without `dist/assembly/preview.glb` and `check.json`, and checks both endpoints (status, JSON shape, 404).
-- Headless check against FieldCam (see the wiki recipe: `fusible studio -p 3077`, Playwright with `executablePath` to `~/.cache/ms-playwright/chromium-1223/chrome-linux64/chrome`, `--no-sandbox`): the tab appears, BUILD ASSEMBLY runs, the model renders. Screenshot to the scratchpad, not the repo.
+## Skip (YAGNI)
 
-## C. Assembly success test and CI (`test/assembly-success`)
-
-Goal: a successful `fusible assembly` is tested automatically, on the CI job that has bun.
-
-No CI job installs bun today. `ci.yml` has none; only `desktop.yml` does (`oven-sh/setup-bun@v2`, line 73), and it runs on tags only.
-
-### Files
-
-- `tests/common/mod.rs`: add `pub fn bun() -> Option<PathBuf>` (honours `FUSIBLE_BUN`, then `PATH`) and `pub fn require_bun() -> Option<PathBuf>`: returns `None` to skip when bun is missing, except it panics when `FUSIBLE_REQUIRE_BUN=1`, so CI cannot skip silently. A plain `eprintln!` names the skip.
-- `tests/assembly.rs`: one new test. Project: `boards: main: { entry: circuit.json }`, `bodies: case: { generate: enclosure, board: main }`, `assembly: { parts: { case: {} } }`. No board part, so no tscircuit runner is needed; only bun and occt-wasm. Run `fusible assembly -f all` with the real `PATH`. Assert exit 0, `dist/assembly.glb` starts with `glTF`, `dist/assembly.step` contains `ISO-10303-21`, both non-empty. Once A lands, also assert `dist/assembly/check.json` has `"fuse": "intact"` (C adds this assertion during the merge, see the merge order).
-- `.github/workflows/ci.yml` job `check`: add `- uses: oven-sh/setup-bun@v2` before `Test`, and `env: FUSIBLE_REQUIRE_BUN: "1"` on the `Test` step. The Windows job keeps skipping.
-- The generator's first run installs occt-wasm into `~/.cache/fusible/body-occt-*` from the network. Cache it in CI with `actions/cache@v4` keyed on `src/commands/body/generator_setup.rs` if the first run is slow.
-
-## D. Desktop shell redesign (`feat/desktop-shell`)
-
-Goal: real logo, no native title bar, controls inside the app, borderless top nav, a sidebar home page.
-
-### D1. Logo and app icon
-
-- Logo: the pixelarticons `cpu` glyph, the `"cpu"` entry in `desktop/ui/assets/icons.json`, in Fusible green on a black square.
-- Green: `#88A888`, decided by the user (the old `#86A881` is retired). Gray surfaces: `#111111`. Both come from the theme file of workstream T; the icon SVG is the one place that must hardcode the green, because it is a build input.
-- New `desktop/src-tauri/icons/icon.svg` (source of truth): 1024x1024, `#000000` background filling the square, the glyph scaled to about 68% and centred, `fill` the green.
-- Generate: `magick -background none -density 384 icons/icon.svg -resize 1024x1024 <scratch>/icon-1024.png` (ImageMagick is installed through mise), then `bunx @tauri-apps/cli@2 icon <png> -o desktop/src-tauri/icons`. Keep only what `tauri.conf.json` lists plus `icon.png`; delete the extra `Square*`, `StoreLogo`, `android/`, `ios/` outputs.
-- In-app brand: `brand()` in `desktop/ui/src/projects.ts:9` uses `icon("cpu", ...)` instead of `"fuse"`. Favicons in `desktop/ui/index.html:7`, `src/assets/viewer.html:7` and `src/dev/assets.rs:18` switch to the same `cpu` path, same green. Drop the `"fuse"` entry from `icons.json` if nothing else uses it (`graft grep "\"fuse\""`).
-
-### D2. No title bar, controls in the app
-
-- `desktop/src-tauri/tauri.conf.json` window `main`: `"titleBarStyle": "Overlay"`, `"hiddenTitle": true`, `"trafficLightPosition": {"x": 16, "y": 20}`. On macOS this keeps the native traffic lights, drawn over the app.
-- Windows and Linux: in `desktop/src-tauri/src/setup.rs` startup hook, `#[cfg(not(target_os = "macos"))]` call `set_decorations(false)` on the main window. Do not set `decorations: false` in the config, it would remove the macOS lights.
-- Native menu: on macOS keep `menu::build` (it lives in the system menu bar). On Windows and Linux do not attach the menu to the window, or a menu bar stays where the title bar was. Its accelerators (`Ctrl+Shift+O`, `Ctrl+O`, `Ctrl+N`, `Ctrl+,`, `Ctrl+Q`) must keep working: check `desktop/ui/src/keys.ts`, add the missing ones there, and add the studio side in `src/assets/desktop.js`.
-- Window controls on Windows and Linux: three 12 px circles, top-left, macOS order and colours (close `#FF5F57`, minimise `#FEBC2E`, maximise `#28C840`), glyph on hover, `aria-label` on each. One small module `desktop/ui/src/windowControls.ts`, calling `getCurrentWindow()` equivalents through `window.__TAURI_INTERNALS__.invoke` (the UI has no `@tauri-apps/api` dependency; keep it that way): `plugin:window|close`, `plugin:window|minimize`, `plugin:window|toggle_maximize`. On macOS render nothing and leave 80 px of space for the native lights.
-- Drag region: the top strip of the sidebar and of the main area carry `data-tauri-drag-region`.
-- Capabilities: `default.json` and `studio.json` gain `core:window:allow-start-dragging`, `core:window:allow-close`, `core:window:allow-minimize`, `core:window:allow-toggle-maximize`.
-- Studio (remote page on `localhost`, same window): `src/assets/desktop.js` already runs only under `window.FUSIBLE_DESKTOP`. It injects a 36 px drag strip across the top, the same controls on Windows and Linux, and a `body.desktop-chrome` class whose CSS (injected by `desktop.js`, so B owns `viewer.html` alone) pushes `#project` and `.floating-views` down by the strip height. Platform comes from `navigator.userAgent`.
-- Linux check: with decorations off, resizing from the window edges must still work under GNOME. If it does not, add edge handles calling `plugin:window|start_resize_dragging`.
-- `window::title_for` stays: the taskbar and window switcher still show the title.
-
-### D3. Borderless top nav
-
-- `desktop/ui/styles.css:101` `.header` drops `border-bottom`; `.title` drops `border-left`. The glass background and blur stay.
-- The studio's `.floating-views` has no border today (`viewer.html:80-96`, shadow only). Leave it.
-
-### D4. Sidebar home page
-
-Replace the header plus grid with a two-column layout.
-
-- Sidebar (fixed 260 px, full height, `var(--surface)`, no border, a 1 px `var(--border-subtle)` divider at most):
-  1. Window-controls and drag strip (D2).
-  2. Brand: cpu logo + `FUSIBLE`.
-  3. `New project` (primary) and `Open folder` buttons.
-  4. Search field filtering the list by name and path.
-  5. Project list, most recent first: name, short path, check status dot. Click selects, double-click or Enter opens. Up and Down move the selection. Right-click opens the existing project menu (`desktop/ui/src/menu.ts`).
-  6. Bottom: toolchain status (from `toolchain.ts`) and `Settings`.
-- Main area: the selected project. Name, path, boards, last check, last opened, `Open` (primary), `Reveal`, `Forget`. Reuse `card.ts` internals; delete what the sidebar makes redundant (`strip.ts` and its use in `projects.ts`, if nothing else imports it).
-- Settings renders in the main area with the sidebar kept and `Settings` marked active. `#settings` routing in `main.ts` stays.
-- Empty states: no projects shows the current `emptyState()` in the main area; load error and failure panels stay in the main area.
-- State: `store.ts` gains `selected: string | null`. Default to the most recent project. Remember the last selection in `localStorage`, every access in `try/catch`.
-- No drawer: the window's minimum width is 960 px, which fits the sidebar.
-- Fonts: the Undefined font is never bold. No `font-weight` above 400 anywhere in the new CSS.
-- `desktop/ui/src/helpers.test.ts`: add a test for the selection logic (default pick, keyboard move, filter keeps or clears the selection).
-
-### D5. Verify
-
-- `cd desktop/ui && bun run dev` with the mock (`mock.ts`) in a browser: screenshot sidebar, selection, settings, empty state at 1440x900 and 960x600, both themes.
-- `cd desktop && bunx @tauri-apps/cli@2 dev` on Linux: no title bar, controls work, drag works, resize works, keyboard shortcuts work, opening a project shows the studio with the strip and controls.
-- macOS cannot be tested here. Say so in the PR; the `desktop.yml` macOS bundle job must still pass.
-
-## E. Integration, review, ship
-
-1. Merge order into `main`: T and C first (start together with A), then A, then B and D (both start after T is merged). After A, C adds the `check.json` assertion to its test. B rebases on A to read the real `check.json` and to run the headless check on FieldCam.
-2. After each merge: the four gates, plus the desktop gates after D.
-3. Review: three parallel read-only review agents, one per area (A+C Rust, B studio, D desktop), using `/review`. Then fix agents per area, merged the same way.
-4. `CHANGELOG.md`: one `## [0.18.0] - 2026-10-25` section (copy the file's own heading style) with Added (three rules, studio assembly view, sidebar home, in-app window controls, new icon), Changed (no native title bar, borderless header).
-5. `/ship` 0.18.0. Five version strings: `Cargo.toml`, `Cargo.lock`, `desktop/src-tauri/Cargo.toml`, `desktop/src-tauri/Cargo.lock`, `desktop/src-tauri/tauri.conf.json`. The `desktop.yml` version check fails if they disagree. Then confirm the GitHub release has all desktop installers attached and crates.io has 0.18.0.
-6. Wiki end gate: add the 0.18 facts to `projects/fusible.md` (rule probes and thresholds, `check.json`/`preview.glb` contract, `FUSIBLE_REQUIRE_BUN`, the macOS-only `titleBarStyle` and `set_decorations(false)` split).
-
-## T. Global theme (`feat/theme`), runs first, merged before B and D
-
-Goal: one file defines every colour. Green `#88A888`, gray surface `#111111`.
-
-- Single source: `src/assets/theme.css`, a `:root` block of custom properties (`--bg`, `--surface`, `--surface-hover`, `--border`, `--border-subtle`, `--text`, `--text-subtle`, `--green`, `--on-green`, `--red`, `--glass`, `--shadow`, plus the light-theme overrides the desktop UI already has). Keep the current values except green becomes `#88A888` and the gray surface becomes `#111111`.
-- Consumers read it, none redefine it:
-  - Studio: `src/dev` serves it at `/theme.css`; `viewer.html` links it and drops its own `:root` colour block (line ~49).
-  - Desktop UI: `desktop/ui/scripts/build.ts` and `dev.ts` copy it from `../../src/assets/theme.css` into `dist/`; `styles.css` drops its own colour block and `index.html` links it first.
-  - Studio TS (`studio/src/schematic.ts`, `mechanical/boardOutline.ts`, `mechanical/display.ts`, and any other hex literal found with `graft grep "#86"` and `grep -rn "0x86a881"`): one `studio/src/theme.ts` that reads the CSS variables with `getComputedStyle(document.documentElement)` at first use. No hex colour literal outside `theme.css` and the icon SVG afterwards.
-  - Rust: `src/dev/assets.rs:18` favicon and the `index.html` favicons use `#88A888`.
-- A test (Rust, `tests/`) fails if `#86A881`/`#86a881` or `0x86a881` appears anywhere in `src/`, `studio/src/` or `desktop/ui/src`, and if `theme.css` lacks `#88A888` or `#111111`.
-- Rebuild `studio.bundle.js`. Update `CHANGELOG.md` `[Unreleased]`.
-
-## Open questions for the user
-
-1. (answered: `#88A888` and `#111111`.)
-2. `hole_misaligned` ignores a hole with no body material within 4 mm. That is not fail-closed: a boss placed far off is silent. Accept, or make every non-plated hole require a boss when a generated or authored body is fitted to that board?
+- A Fusible parts library. The owner chose `pinAttributes` in TSX; templates carry the examples.
+- A constraint solver or automatic part picking in the atopile style. `nets:` declarations and assertions are enough for 2.0.
+- SPICE simulation, signal integrity, impedance and length-matching rules. They need a stack-up model that does not exist yet.
+- Crystal load capacitor calculation, power sequencing, I2C address conflicts. Each needs per-part data; projects can write them today with tscircuit's `<drccheck>`, which step 10 already surfaces.
+- A plugin system for third-party rules. `<drccheck>` covers project rules.
+- Panelisation, ODB++, IPC-2581, fab drawings as PDF.
+- Arduino and PlatformIO generators. `pins.h` serves both.
+- Rewriting the router, the git Sync panel, the desktop updater or the mobile app.
