@@ -89,3 +89,8 @@ jobs:
           name: gerber-renders
           path: viewer-out/*.png
           if-no-files-found: warn
+
+      - name: Rule docs match the registry
+        run: bun scripts/rules-doc.ts --check
+        env:
+          FUSIBLE_BIN: ./target/release/fusible
