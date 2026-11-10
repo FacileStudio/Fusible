@@ -1,10 +1,19 @@
 import React, { useState, useEffect, useRef } from "react";
-import { PCBViewer } from "@tscircuit/pcb-viewer";
+import { PCBViewer, usePcbViewerController } from "@tscircuit/pcb-viewer";
 import { rootSlot, renderIntoSlot } from "./roots";
 import { useContextMenuIntercept } from "./contextMenu";
 import { resolveComponentRefdes } from "./refdes";
 
 const pcbSlot = rootSlot();
+
+let focusHandler: ((pcbComponentId: string) => void) | null = null;
+let pendingFocus: string | null = null;
+
+/** Zooms the PCB viewer onto a component; a request made before the viewer mounts waits for it. */
+export function focusPcbComponent(pcbComponentId: string) {
+  if (focusHandler) focusHandler(pcbComponentId);
+  else pendingFocus = pcbComponentId;
+}
 
 function ResponsivePcbViewer({
   circuitJson,
@@ -15,6 +24,16 @@ function ResponsivePcbViewer({
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [viewerHeight, setViewerHeight] = useState(600);
+  const { controller, focusPcbComponent: focus } = usePcbViewerController();
+  focusHandler = focus;
+
+  useEffect(() => {
+    if (pendingFocus) focus(pendingFocus);
+    pendingFocus = null;
+    return () => {
+      focusHandler = null;
+    };
+  }, []);
 
   useEffect(() => {
     try {
@@ -51,6 +70,7 @@ function ResponsivePcbViewer({
       height: viewerHeight,
       renderer: "canvas",
       allowEditing: false,
+      controller,
       onViewSchematicComponent: (event: any) => {
         const refdes = event?.refdes || event?.source_component_id;
         if (refdes && onSelectComponent) {

@@ -7,7 +7,7 @@ import { Mechanical } from "./mechanical";
 import { animateCadCameraPreset, setCadController, type CadCameraController } from "./cadCamera";
 import { installRenderCapture, mainCapturedCanvas } from "./capture";
 import { useContextMenuIntercept } from "./contextMenu";
-import { renderPcbViewer } from "./pcbViewer";
+import { focusPcbComponent, renderPcbViewer } from "./pcbViewer";
 import { renderSchematicViewer } from "./schematicViewer";
 import { determineRefdesFrom3dObject, resolveComponentRefdes } from "./refdes";
 
@@ -133,6 +133,7 @@ export function render3dViewer(
 export const Tscircuit = {
   render3dViewer,
   renderPcbViewer,
+  focusPcbComponent,
   renderSchematicViewer,
   animateCadCameraPreset,
   ...Mechanical,

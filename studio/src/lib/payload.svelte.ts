@@ -10,13 +10,14 @@ export function resendRevision(): void {
   if (studio.revision !== null) Tscircuit.setMechanicalRevision(studio.revision, lastBoard);
 }
 
-/** Applies a dev payload to the studio: board name, revision, circuit index, fuse state and diagnostics. */
+/** Applies a dev payload to the studio: board name, revision, circuit index, fuse state, diagnostics and waivers. */
 export function applyPayload(data: DevPayload | null): void {
   if (!data) return;
   if (data.board_name) studio.boardName = data.board_name;
   if (typeof data.revision === "string") {
     studio.revision = data.revision;
     lastBoard = data.board || "";
+    studio.board = lastBoard;
     resendRevision();
   }
   if (data.circuit_json) {
@@ -25,4 +26,5 @@ export function applyPayload(data: DevPayload | null): void {
   }
   studio.fuseBlown = Boolean(data.fuse_blown);
   studio.diagnostics = data.diagnostics || [];
+  studio.waived = data.waived || [];
 }

@@ -2,6 +2,21 @@ export type ViewName = "schematic" | "pcb" | "3d" | "mechanical" | "assembly" | 
 
 export type PaneName = "inspector" | "components" | "nets" | "checks" | "rules" | "bodies" | "runs" | "pins";
 
+export interface Location {
+  board?: string | null;
+  x: number;
+  y: number;
+  layer?: string | null;
+}
+
+export interface SetProp {
+  selector: string;
+  prop: string;
+  value: unknown;
+}
+
+export type Fix = { set_prop: SetProp } | { add_element: { tsx: string } } | { note: string };
+
 export interface Diagnostic {
   rule?: string;
   message?: string;
@@ -11,6 +26,15 @@ export interface Diagnostic {
   source_url?: string;
   elements?: string[];
   fix?: string;
+  location?: Location | null;
+  fixes?: Fix[];
+}
+
+export interface WaivedDiagnostic {
+  board?: string | null;
+  diagnostic: Diagnostic;
+  reason: string;
+  until?: string | null;
 }
 
 export interface DevPayload {
@@ -18,6 +42,7 @@ export interface DevPayload {
   board?: string;
   fuse_blown?: boolean;
   diagnostics?: Diagnostic[];
+  waived?: WaivedDiagnostic[];
   circuit_json?: unknown;
   revision?: string;
 }
@@ -48,6 +73,7 @@ export interface Run {
 
 export interface Rule {
   id: string;
+  category?: string;
   standard: string;
   source_url: string;
   severity: string;
