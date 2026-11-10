@@ -19,11 +19,11 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 
 - **Breaking:** `fusible check` no longer writes `pins.rs`. Run `fusible build`, or pass
   `--write-bindings` (`--pins-rs PATH` implies it).
-
 - **Breaking:** `fusible check --json` and the MCP `check` tool return the version 2 report:
   `version`, `fuse`, `boards[]`, `links[]`, `assembly[]`, `waived[]`, `unused_waivers[]` and
   `expired_waivers[]`. Each diagnostic carries every field, `null` when unknown, plus
   `location`, `source` and `fixes`.
+- `fusible check --json` writes nothing but that JSON document on stdout.
 - The CLI, `--json`, the studio and MCP share one check pipeline (`src/check/`), which parses
   each board once.
 

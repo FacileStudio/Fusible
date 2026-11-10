@@ -12,6 +12,8 @@ mod session;
 mod stdio;
 mod tools;
 
+pub(crate) use stdio::protocol_out;
+
 use miette::Diagnostic;
 use thiserror::Error;
 

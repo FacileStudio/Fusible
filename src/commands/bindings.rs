@@ -3,7 +3,7 @@
 use std::path::{Path, PathBuf};
 
 use crate::check::{CheckError, ReadError};
-use crate::codegen::{extract_mcu_pins, generate_pins_rs};
+use crate::codegen::{extract_mcu_pins, generate_pins_rs, mcu_hint};
 use crate::commands::source::load_circuit_source;
 use crate::commands::target::BoardTarget;
 use crate::netlist::Netlist;
@@ -29,6 +29,9 @@ fn write_board(board: &BoardTarget, targets: &[PathBuf]) -> Result<(), CheckErro
     let netlist = Netlist::from_circuit(&circuit);
     let mcu = board.mcu.as_deref();
     let Some(info) = extract_mcu_pins(&circuit, &netlist, mcu) else {
+        if let Some(hint) = mcu_hint(&circuit, mcu) {
+            eprintln!("{hint}");
+        }
         return Ok(());
     };
     let code = generate_pins_rs(&info, &board.title);

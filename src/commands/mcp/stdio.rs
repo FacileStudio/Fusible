@@ -8,7 +8,9 @@ use super::rpc;
 use super::session::Session;
 
 #[cfg(unix)]
-fn protocol_out() -> Box<dyn Write> {
+/// Points stdout at stderr for the rest of the process and returns a writer on the
+/// original stdout, so stray prints of reused commands never mix with the protocol.
+pub(crate) fn protocol_out() -> Box<dyn Write> {
     use std::os::fd::AsFd;
 
     extern "C" {
@@ -24,7 +26,9 @@ fn protocol_out() -> Box<dyn Write> {
 }
 
 #[cfg(windows)]
-fn protocol_out() -> Box<dyn Write> {
+/// Points stdout at stderr for the rest of the process and returns a writer on the
+/// original stdout, so stray prints of reused commands never mix with the protocol.
+pub(crate) fn protocol_out() -> Box<dyn Write> {
     use std::os::windows::io::{AsHandle, AsRawHandle};
 
     extern "system" {
@@ -41,7 +45,9 @@ fn protocol_out() -> Box<dyn Write> {
 }
 
 #[cfg(not(any(unix, windows)))]
-fn protocol_out() -> Box<dyn Write> {
+/// Points stdout at stderr for the rest of the process and returns a writer on the
+/// original stdout, so stray prints of reused commands never mix with the protocol.
+pub(crate) fn protocol_out() -> Box<dyn Write> {
     Box::new(std::io::stdout())
 }
 

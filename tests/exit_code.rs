@@ -110,3 +110,21 @@ fn schematic_scale_next_to_a_real_violation_still_blows_the_fuse() {
     assert!(stderr.contains("unconnected_net"), "got: {stderr}");
     assert!(stderr.contains("schematic_scale"), "got: {stderr}");
 }
+
+#[test]
+fn check_json_writes_one_json_document_and_nothing_else_on_stdout() {
+    for (example, code) in [("circuit.json", 0), ("circuit-pinmux-violation.json", 1)] {
+        let out = fusible()
+            .args(["check", "--json", "--mcu", "stm32g431"])
+            .arg(format!("examples/{example}"))
+            .output()
+            .expect("the binary must run");
+
+        assert_eq!(out.status.code(), Some(code), "{example}");
+        let stdout = String::from_utf8_lossy(&out.stdout);
+        let document: serde_json::Value = serde_json::from_str(&stdout)
+            .unwrap_or_else(|e| panic!("stdout must be one JSON document: {e}: {stdout}"));
+        assert_eq!(document["version"], 2, "{stdout}");
+        assert!(document["links"].is_array() && document["assembly"].is_array());
+    }
+}

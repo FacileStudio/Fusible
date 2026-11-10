@@ -72,6 +72,14 @@ fn check_reports_the_fuse_for_both_verdicts() {
     let ok = session(&intact.path, &[call(1, "check", json!({}))]);
     let bad = session(&blown.path, &[call(1, "check", json!({"board": "main"}))]);
 
+    assert_eq!(
+        ok.len(),
+        1,
+        "stdout must carry the one reply and nothing else"
+    );
+    assert_eq!(structured(&ok[0])["version"], 2);
+    assert!(structured(&ok[0])["links"].is_array());
+    assert!(structured(&ok[0])["assembly"].is_array());
     assert_eq!(structured(&ok[0])["fuse"], "intact");
     assert_eq!(structured(&bad[0])["fuse"], "blown");
     let first = &structured(&bad[0])["boards"][0]["diagnostics"][0];

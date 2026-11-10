@@ -18,7 +18,7 @@ pub(crate) fn select_mcu_component<'a>(
 ) -> Option<&'a Component> {
     let chips: Vec<&Component> = circuit.components().filter(|c| is_chip(c)).collect();
     let fields = |c: &Component| descriptors(circuit, c);
-    let picked = target_chip
+    target_chip
         .and_then(|target| {
             chips
                 .iter()
@@ -33,11 +33,14 @@ pub(crate) fn select_mcu_component<'a>(
                     .filter(|c| fields(c).iter().any(|f| names_database_part(f))),
             )
         })
-        .or_else(|| only(chips.iter().copied()));
-    if picked.is_none() && chips.len() > 1 {
-        eprintln!("{}", hint_message(circuit, &chips));
-    }
-    picked
+        .or_else(|| only(chips.iter().copied()))
+}
+
+/// Why no MCU was picked when several chips compete, for the caller to print.
+pub(crate) fn mcu_hint(circuit: &Circuit, target_chip: Option<&str>) -> Option<String> {
+    let chips: Vec<&Component> = circuit.components().filter(|c| is_chip(c)).collect();
+    let ambiguous = chips.len() > 1 && select_mcu_component(circuit, target_chip).is_none();
+    ambiguous.then(|| hint_message(circuit, &chips))
 }
 
 fn is_chip(component: &Component) -> bool {
