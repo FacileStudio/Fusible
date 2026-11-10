@@ -14,6 +14,7 @@ fn rail_with(name: &str, ftype: &str) -> String {
           "name": "{name}", "ftype": "{ftype}"}},
         {{"type": "source_net", "source_net_id": "source_net_0", "name": "V3_3"}},
         {{"type": "source_port", "source_port_id": "source_port_0", "name": "VDD",
+          "should_have_decoupling_capacitor": true,
           "source_component_id": "source_component_0"}},
         {{"type": "source_port", "source_port_id": "source_port_1", "name": "pin1",
           "source_component_id": "source_component_1"}},
@@ -85,12 +86,18 @@ fn bypass_cap_within_three_millimetres_or_unplaced_is_silent() {
 }
 
 #[test]
-fn only_supply_pins_are_measured_for_bypass_distance() {
-    use crate::linter::rules::bypass_distance::is_supply_pin;
+fn supply_pin_and_rail_names_are_told_from_signals() {
+    use crate::linter::roles::{is_rail_name, is_supply_name};
     for name in ["VDD", "VIN", "vbat", "AVDD", "VOUT", "BAT"] {
-        assert!(is_supply_pin(name), "{name}");
+        assert!(is_supply_name(name), "{name}");
     }
     for name in ["EN", "CE", "G", "LEDA", "D", "SCL"] {
-        assert!(!is_supply_pin(name), "{name}");
+        assert!(!is_supply_name(name), "{name}");
+    }
+    for net in ["VDD3V3", "VSYS", "+3V3", "VBAT", "V3_3"] {
+        assert!(is_rail_name(net), "{net}");
+    }
+    for net in ["BATT_SENSE", "GND", ".R1 > .pin2 to .U1 > .VDD", "SDA"] {
+        assert!(!is_rail_name(net), "{net}");
     }
 }

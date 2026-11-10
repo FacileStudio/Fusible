@@ -20,6 +20,7 @@ mod copper;
 mod copper_drill;
 mod dangling_reference;
 mod decoupling_capacitor;
+mod erc;
 mod fab_profile;
 mod geom2d;
 mod ghost_net;
@@ -44,6 +45,11 @@ mod voltage_clearance;
 
 pub use dangling_reference::DanglingReferenceRule;
 pub use decoupling_capacitor::DecouplingCapacitorRule;
+pub use erc::roles;
+pub use erc::{
+    BringUpRule, DeratingRule, LedSeriesResistorRule, MissingPullupRule, NcConnectedRule,
+    PinConflictRule, PinUnconnectedRule, PowerUndrivenRule, RailBudgetRule, VoltageDomainRule,
+};
 pub use fab_profile::FabProfileRule;
 pub use ghost_net::GhostNetRule;
 pub use malformed_element::MalformedElementRule;

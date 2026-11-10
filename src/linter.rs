@@ -26,11 +26,13 @@ pub use cross::{cross_world_ids, CROSS_WORLD};
 pub use diagnostics::{Diagnostic, Fix, FuseBlown, Location, Severity, SourceRef};
 pub use info::RuleInfo;
 pub use rule::{Category, Rule, RuleMeta};
+pub use rules::roles;
 pub use rules::{
-    DanglingReferenceRule, DecouplingCapacitorRule, FabProfileRule, GhostNetRule,
-    MalformedElementRule, PinMuxRule, QfnFootprintSpanRule, SchematicScaleRule, ShortedNetsRule,
-    TraceClearanceRule, TraceCurrentRule, UnconnectedNetRule, UnroutedRule, UpstreamRule,
-    VoltageClearanceRule,
+    BringUpRule, DanglingReferenceRule, DecouplingCapacitorRule, DeratingRule, FabProfileRule,
+    GhostNetRule, LedSeriesResistorRule, MalformedElementRule, MissingPullupRule, NcConnectedRule,
+    PinConflictRule, PinMuxRule, PinUnconnectedRule, PowerUndrivenRule, QfnFootprintSpanRule,
+    RailBudgetRule, SchematicScaleRule, ShortedNetsRule, TraceClearanceRule, TraceCurrentRule,
+    UnconnectedNetRule, UnroutedRule, UpstreamRule, VoltageClearanceRule, VoltageDomainRule,
 };
 
 /// The fuse: runs every pass and aggregates their violations.
@@ -95,5 +97,15 @@ impl Default for Linter {
             .with_rule(TraceCurrentRule)
             .with_rule(VoltageClearanceRule)
             .with_rule(FabProfileRule)
+            .with_rule(PinConflictRule)
+            .with_rule(PowerUndrivenRule)
+            .with_rule(PinUnconnectedRule)
+            .with_rule(NcConnectedRule)
+            .with_rule(MissingPullupRule)
+            .with_rule(VoltageDomainRule)
+            .with_rule(RailBudgetRule)
+            .with_rule(DeratingRule)
+            .with_rule(LedSeriesResistorRule)
+            .with_rule(BringUpRule)
     }
 }

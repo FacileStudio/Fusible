@@ -102,15 +102,4 @@ pub(super) fn parse_gpio_number(label: &str, explicit_pin: Option<u32>) -> Optio
     clean.parse::<u32>().ok().or(explicit_pin)
 }
 
-pub(super) fn is_power_rail(name: &str) -> bool {
-    let upper = name.to_ascii_uppercase();
-    upper == "GND"
-        || upper == "VSS"
-        || upper == "VCC"
-        || upper == "VDD"
-        || upper == "+3V3"
-        || upper == "3V3"
-        || upper == "+5V"
-        || upper == "5V"
-        || upper == "VBUS"
-}
+pub(super) use crate::linter::roles::is_rail_net as is_power_rail;

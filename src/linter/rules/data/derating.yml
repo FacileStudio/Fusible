@@ -1,0 +1,7 @@
+source: https://industrialmonitordirect.com/blogs/knowledgebase/electrolytic-capacitor-voltage-rating-selection-guide
+checked: 2026-11-10
+note: >-
+  Derating table, commercial electronics row: operate at 80 % of the rated voltage at most,
+  which is a rating of at least 1.25 times the working voltage. Tantalum, film and class II
+  ceramic parts are usually derated harder (around 50 %); the factor is a floor, not a target.
+capacitor_voltage_factor: 1.25

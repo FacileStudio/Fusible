@@ -8,6 +8,7 @@
 use miette::Diagnostic as _;
 
 use super::*;
+use crate::linter::Severity;
 use crate::parser::{Circuit, CircuitElement, Net, Port};
 
 /// One net wired to a single port: `unconnected_net` must fire on it.
@@ -83,7 +84,8 @@ fn rules_run_in_registration_order() {
     ]);
 
     let violations = Linter::default().run(&circuit);
-    let rules: Vec<&str> = violations.iter().map(|v| v.rule.as_str()).collect();
+    let errors = violations.iter().filter(|v| v.severity == Severity::Error);
+    let rules: Vec<&str> = errors.map(|v| v.rule.as_str()).collect();
 
     assert_eq!(rules, ["unconnected_net", "malformed_element", "ghost_net"]);
 }
