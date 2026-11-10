@@ -74,7 +74,7 @@ STEP, install tscircuit and check the toolchain:
 
 ```sh
 bun add -g tscircuit
-fusible doctor            # reports bun, node, and tsci
+fusible doctor            # reports bun, node, tsci, flash tools and firmware toolchains
 fusible doctor --install  # installs what is missing
 ```
 
@@ -95,6 +95,13 @@ fusible studio
 `new` writes a board with `pinAttributes` on its MCU and regulator, a firmware crate, a
 generated enclosure and a `fusible.yml`. Templates are `esp32-s3`, `stm32g4`, `rp2040` and
 `blank`. Each ships a pre-built Circuit JSON, so `fusible check` passes before any install.
+
+The firmware is real embedded Rust that blinks the board LED through the generated bindings:
+Embassy (`embassy-stm32`, `embassy-rp`) for `stm32g4` and `rp2040`, `esp-hal` with
+`esp-rtos` for `esp32-s3`. `fusible build` compiles it and `fusible flash` flashes it with
+`probe-rs` or `espflash`. rustup fetches the Cortex-M target on the first build; the ESP32-S3
+needs the `esp` toolchain from [espup](https://github.com/esp-rs/espup). `fusible doctor`
+says what is missing.
 Upgrading a 1.x project? Run `fusible migrate`; see [docs/migrate-2.0.md](docs/migrate-2.0.md).
 
 To add Fusible to an existing folder, `fusible init --name sensor-node` writes a `fusible.yml`:

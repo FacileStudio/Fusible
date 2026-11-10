@@ -7,6 +7,27 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 
 ## [Unreleased]
 
+### Added
+
+- `fusible new --template stm32g4|rp2040|esp32-s3` writes real embedded firmware that blinks
+  the board LED: `embassy-stm32` 0.6 and `embassy-rp` 0.10 read the generated `board.rs`,
+  `esp-hal` 1.2 with `esp-rtos` 0.4 takes the pin from `pins.rs`. Each crate pins its
+  dependencies and ships `.cargo/config.toml` (target, `probe-rs` or `espflash` runner) and
+  `rust-toolchain.toml`; the RP2040 one also has `memory.x` and `build.rs`. The manifest sets
+  `outputs: [rust]`, `build_cmd: cargo build --release` and `flash_cmd: cargo run --release`.
+- `fusible new` writes `pins.rs` and `board.rs` from the pre-built circuit, so the firmware
+  compiles before the first `fusible build`.
+- `fusible doctor` lists the toolchain each firmware pins in `rust-toolchain.toml`, and warns
+  when the `esp` toolchain is missing or `RUSTUP_TOOLCHAIN` overrides the file.
+
+### Changed
+
+- The MCU templates route the LED through a net named `LED`, so the bindings name it `LED`
+  instead of the resistor pad (`R_PIN1`).
+- The ESP32-S3 template declares `framework: esp-hal` instead of `esp-idf`; `fusible flash`
+  still runs `espflash`.
+- A failed firmware build points to `fusible doctor`.
+
 ## [2.0.0] - 2026-11-10
 
 ### Added

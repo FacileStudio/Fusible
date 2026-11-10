@@ -252,6 +252,12 @@ fusible doctor --json      # {"bun","node","tsci"}, exit 0
 `FUSIBLE_BUN` names the bun binary for every command. Without a `tsci`, Fusible runs
 `bun x --bun --package tscircuit tsci`.
 
+`fusible doctor` also lists the Rust toolchain each firmware pins in its
+`rust-toolchain.toml`. rustup installs an official channel and its targets on the first
+build. The `esp` toolchain of the ESP32-S3 template comes from `espup install`. A
+`RUSTUP_TOOLCHAIN` variable, which some version managers set, overrides every
+`rust-toolchain.toml`; doctor warns about it.
+
 ## Mechanical parts
 
 Beyond the generated enclosure, a body can be a TypeScript module on the same OpenCascade
