@@ -23,6 +23,48 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
   `info`, which never blows the fuse.
 - `/api/rules` lists each rule's category.
 
+- Electrical rules: `pin_conflict` (KiCad default pin map), `power_undriven`, `pin_unconnected`,
+  `nc_connected` (pins tied inside a part are exempt), `missing_pullup`, `voltage_domain`,
+  `rail_budget`, `derating` (factor 1.25 in `data/derating.yml`), and the warnings
+  `led_series_resistor`, `rail_test_point`, `debug_connector` and `connector_clamp`. Roles come from
+  tscircuit `pinAttributes`. Without declarations a rule says so once at info level and falls back
+  to pin names at warning level.
+- `nets:` entries take `source: external`, `limit` (amps) and `loads` (amps per designator).
+- Fabrication rules: `annular_ring`, `drill_to_copper`, `hole_spacing`, `via_aspect_ratio`,
+  `edge_clearance`, `silk_over_pad`, `silk_text_size`, `mask_sliver` and `acid_trap`.
+- Assembly rules: `courtyard_clearance` (turns each courtyard with its part and keeps the notches
+  of a concave outline), `component_edge_clearance`, `fiducials` (with `assembly_service: true`)
+  and `bom_incomplete`.
+- Fab profiles gain `min_via_annular`, `min_edge_clearance`, `min_drill_to_copper`,
+  `min_hole_spacing`, `max_aspect_ratio`, `min_mask_dam`, `min_silk_height`, `min_silk_stroke`,
+  `min_silk_to_pad`, `min_component_to_edge` and `assembly_service`. A missing number turns its
+  rule off with one `info` line. `fab: { profile: <name>, assembly_service: true }` extends a
+  built-in profile.
+- `fusible export --preset fab` also writes `netlist.ipc` (IPC-D-356A), `centroid.csv` and
+  `README.txt`.
+- Generated STM32 pin tables for the G0, G4, F4, L4 and H7 families, from stm32-data-generated
+  (`scripts/silicon-gen.ts`, MIT notice in `src/silicon/data/`). ESP32-C3 and RP2350A tables.
+- `firmware.<name>.outputs: [rust, c, zephyr]` (or a map of kind to path) writes `pins.rs` plus an
+  Embassy `board.rs`, `pins.h`, and an experimental Zephyr overlay, with I2C, SPI, UART and ADC
+  divider bindings. `framework` accepts `zephyr` and `esp-idf-c`.
+- `fusible flash [FIRMWARE]` checks the board, then runs `flash_cmd` or the framework default
+  (probe-rs, espflash, `idf.py flash`, `west flash`). A blown fuse flashes nothing.
+- `fusible bringup [BOARD]` writes `dist/bringup.md`: rails in power order, strap pins and debug
+  connector pinouts.
+- `fusible doctor` reports probe-rs and espflash.
+- `fusible rules [--json]` and `fusible explain <rule> [--json]` describe the rule registry.
+  `docs/rules/` holds one generated page per rule, and CI fails when it is stale.
+- `fusible new <name> --template esp32-s3|stm32g4|rp2040|blank` writes a board with
+  `pinAttributes`, a firmware crate, an enclosure and a manifest that passes `fusible check`
+  offline.
+- MCP `apply_fix` applies a `set_prop` fix, `waive` adds a waiver and requires a reason, and
+  `explain_rule` describes a rule.
+- Studio Checks groups diagnostics by category, zooms to a diagnostic, lists waived items with
+  their reason and applies `set_prop` fixes (`POST /api/fix`).
+- Cross-world rule ids (`harness_mismatch`, the assembly rules and `mech.*`) are in the rule
+  registry, so `rules:` and `waivers:` accept them without a hand-kept list.
+- `docs/migrate-2.0.md`.
+
 ### Changed
 
 - **Breaking:** `autoroute` is split. `unrouted` blows the fuse on nets with no routed trace.
@@ -41,6 +83,25 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 - `fusible check --json` writes nothing but that JSON document on stdout.
 - The CLI, `--json`, the studio and MCP share one check pipeline (`src/check/`), which parses
   each board once.
+- **Breaking:** a missing decoupling capacitor is an error only on a pin that declares
+  `should_have_decoupling_capacitor`. On an undeclared power input it is a warning.
+  `decoupling_capacitor` lists port ids, so a waiver matches `U1.VDD` exactly.
+- **Breaking:** `malformed_element` reports every element the typed model cannot read, including
+  one missing its `<type>_id`.
+- **Breaking:** annular rings are reported by `annular_ring`, no longer by `fab_profile`. The
+  JLCPCB profiles were read again on 2026-11-10 and the 2-layer `min_annular` is 0.18 mm.
+- **Breaking:** `export --preset fab` writes `centroid.csv` instead of `pnp.csv`.
+- STM32G431 tables list USB on PA11 and PA12, and drop USART3 and UART4 on the 32-pin package.
+- `fusible migrate` renames rule ids only in `rules:` keys and `waivers[].rule`.
+- CI fails when the board outline or a needed drill file is missing or empty.
+
+### Fixed
+
+- Studio: info diagnostics no longer show in the error colour.
+
+### Removed
+
+- `HANDOFF.md` and the hand-written `src/silicon/database/stm32/` tables.
 
 ## [1.1.2] - 2026-11-09
 
