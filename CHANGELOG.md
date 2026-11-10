@@ -10,23 +10,40 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 ### Added
 
 - `fusible new --template stm32g4|rp2040|esp32-s3` writes real embedded firmware that blinks
-  the board LED: `embassy-stm32` 0.6 and `embassy-rp` 0.10 read the generated `board.rs`,
-  `esp-hal` 1.2 with `esp-rtos` 0.4 takes the pin from `pins.rs`. Each crate pins its
-  dependencies and ships `.cargo/config.toml` (target, `probe-rs` or `espflash` runner) and
-  `rust-toolchain.toml`; the RP2040 one also has `memory.x` and `build.rs`. The manifest sets
-  `outputs: [rust]`, `build_cmd: cargo build --release` and `flash_cmd: cargo run --release`.
+  the board LED through the generated `board.rs`: `embassy-stm32` 0.6, `embassy-rp` 0.10, and
+  `esp-hal` 1.2 with `esp-rtos` 0.4. Each crate pins its dependencies and ships
+  `.cargo/config.toml` (target, `probe-rs` or `espflash` runner) and `rust-toolchain.toml`;
+  the RP2040 one also has `memory.x` and `build.rs`. The manifest sets `outputs: [rust]`,
+  `build_cmd: cargo build --release` and `flash_cmd: cargo run --release`.
 - `fusible new` writes `pins.rs` and `board.rs` from the pre-built circuit, so the firmware
   compiles before the first `fusible build`.
+- The generated `board.rs` has a `take!(p)` macro that moves the board's buses and pins out of
+  the HAL `Peripherals` and leaves the rest (timers, DMA, ADC, other buses) with the caller.
+  `init(config)` stays as the shortcut.
+- `board.rs` for the ESP32 family on `framework: esp-hal`, with `GPIOn<'static>` fields.
 - `fusible doctor` lists the toolchain each firmware pins in `rust-toolchain.toml`, and warns
   when the `esp` toolchain is missing or `RUSTUP_TOOLCHAIN` overrides the file.
 
 ### Changed
 
-- The MCU templates route the LED through a net named `LED`, so the bindings name it `LED`
-  instead of the resistor pad (`R_PIN1`).
-- The ESP32-S3 template declares `framework: esp-hal` instead of `esp-idf`; `fusible flash`
-  still runs `espflash`.
+- The template boards now boot as drawn. RP2040: QSPI flash (W25Q16JV), 12 MHz crystal with
+  load capacitors and the 1 kΩ XOUT resistor, decoupling per "Hardware design with RP2040".
+  STM32G431: 1 µF on VDDA and 100 nF on NRST per AN5093. ESP32-S3: the real WROOM-1 land
+  pattern instead of an 8-pin stand-in, EN RC delay, 22 µF on 3V3, micro-USB on GPIO19/20 for
+  flashing and a BOOT jumper on GPIO0.
+- The template nets the firmware reads are named (`LED`, `BOOT0`, `SWDIO`, `USB_DP`, ...), so
+  the bindings no longer use pad names like `R_PIN1`.
+- `framework: esp-hal` is its own framework: it gets `board.rs`, and `fusible flash` still
+  runs `espflash`. The ESP32-S3 template uses it instead of `esp-idf`.
+- `fusible flash` checks that the flash command and its cargo runner are on `PATH` before it
+  runs, and names the missing tool with its install command.
 - A failed firmware build points to `fusible doctor`.
+
+### Fixed
+
+- The `hardware/tsconfig.json` that `fusible new` and `fusible init` write no longer sets
+  `jsxImportSource: @tscircuit/core`, which made `tsci build` fail on
+  `@tscircuit/core/jsx-dev-runtime` in every fresh project with tscircuit installed.
 
 ## [2.0.0] - 2026-11-10
 

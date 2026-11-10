@@ -117,6 +117,29 @@ fusible build main-fw   # one firmware and its board
 Checks the boards and links, then, only if the fuse is intact, writes `pins.rs` and builds
 the firmware.
 
+### `board.rs`
+
+A firmware with `outputs: [rust]` and `framework: embassy` (STM32, RP2040) or
+`framework: esp-hal` (ESP32 family) also gets `board.rs` beside `pins.rs`. It holds one
+`Board` struct with a typed peripheral for every bus and free pin of the board
+(`Peri<'static, hal::PA5>` on Embassy, `hal::GPIO48<'static>` on esp-hal), and two ways to
+fill it:
+
+```rust
+mod board;
+
+let p = embassy_stm32::init(Default::default());
+let board = board::take!(p);                    // moves the board's pins out of `p`
+let mut led = Output::new(board.led, Level::Low, Speed::Low);
+let adc = Adc::new(p.ADC1, Default::default()); // everything else stays in `p`
+```
+
+`take!(p)` moves only the fields the board uses, so timers, DMA channels, ADCs and unused
+buses stay with the caller, and the borrow checker rejects a second use of a pin the board
+already took. `board::init(config)` runs the HAL init and returns the `Board` alone, for
+firmware that needs nothing else. The macro expects the file to be the crate's `board`
+module (`mod board;` at the crate root).
+
 ## `export`: fuse-gated deliverables
 
 ```sh

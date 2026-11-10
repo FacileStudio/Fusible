@@ -17,7 +17,7 @@ my-project/
     ├── Cargo.toml                 # embassy-stm32, embassy-rp or esp-hal, pinned
     ├── .cargo/config.toml         # target and probe-rs or espflash runner
     ├── rust-toolchain.toml
-    └── src/{main.rs,pins.rs,board.rs}  # generated bindings; board.rs for Embassy only
+    └── src/{main.rs,pins.rs,board.rs}  # generated bindings; main.rs calls board::take!(p)
 ```
 
 The manifest:
