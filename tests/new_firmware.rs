@@ -16,7 +16,7 @@ use common::{fusible, TestDir};
 const FIRMWARE: [(&str, &str, &str, bool); 3] = [
     ("stm32g4", "thumbv7em-none-eabihf", "embassy-stm32", true),
     ("rp2040", "thumbv6m-none-eabi", "embassy-rp", true),
-    ("esp32-s3", "xtensa-esp32s3-none-elf", "esp-hal", false),
+    ("esp32-s3", "xtensa-esp32s3-none-elf", "esp-hal", true),
 ];
 
 fn read(root: &Path, file: &str) -> String {

@@ -14,7 +14,8 @@ use {defmt_rtt as _, panic_probe as _};
 
 #[embassy_executor::main]
 async fn main(_spawner: Spawner) {
-    let board = board::init(Default::default());
+    let p = embassy_rp::init(Default::default());
+    let board = board::take!(p);
     let mut led = Output::new(board.led, Level::Low);
     defmt::info!("blinking the LED on GPIO{}", pins::gpio::LED);
     loop {

@@ -6,6 +6,7 @@ on:
     paths:
       - "src/commands/init/**"
       - "src/commands/new.rs"
+      - "src/commands/init.rs"
       - "src/codegen/**"
       - "tests/new_firmware.rs"
       - ".github/workflows/templates.yml"
@@ -28,5 +29,10 @@ jobs:
           ldproxy: false
           buildtargets: esp32s3
 
+      - uses: oven-sh/setup-bun@v2
+
       - name: Build every template firmware for its target
         run: cargo test --locked --test new_firmware -- --ignored
+
+      - name: Rebuild a fresh project's circuit with its own tscircuit
+        run: cargo test --locked --test new_project -- --ignored
