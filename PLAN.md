@@ -16,7 +16,7 @@ Make `fusible check` a real design review: rules that work from declared pin rol
 
 ## Why (evidence)
 
-`src/linter/rules/bypass_cap.rs` decides a pin is a power pin when its name contains `5V` or `VIN`, while tscircuit already writes `requires_power`, `provides_power`, `must_be_connected` and `do_not_connect` on every `source_port`; `src/parser/elements.rs` reads none of them, and 17 files dig through untyped `raw_elements` for everything the six-type parser does not model.
+`src/linter/rules/bypass_cap.rs` decides a pin is a power pin when its name contains `5V` or `VIN`, while tscircuit already writes `requires_power`, `provides_power`, `must_be_connected` and `do_not_connect` on every `source_port`; `src/parser/elements.rs` reads none of them, and 9 non-test files dig through untyped `raw_elements` for everything the six-type parser does not model.
 
 ## Approach
 
