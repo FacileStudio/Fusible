@@ -4,7 +4,7 @@ use crate::netlist::NetNode;
 use crate::parser::Component;
 use crate::silicon::PeripheralSignal;
 
-use super::model::{AdcInput, BusPin, Ctx};
+use super::model::{AdcInput, BusPin, Ctx, Divider};
 use super::pins::PinMapping;
 use super::role::{role_of, BusRole};
 
@@ -32,8 +32,8 @@ fn channel(ctx: &Ctx, label: &str) -> Option<(u8, u8)> {
     })
 }
 
-/// `(top + bottom) / bottom` when exactly two resistors touch `net` and one goes to ground.
-fn divider(ctx: &Ctx, net: &str) -> Option<f64> {
+/// The divider when exactly two resistors touch `net` and one goes to ground.
+fn divider(ctx: &Ctx, net: &str) -> Option<Divider> {
     let resistors: Vec<&Component> = ctx
         .components_on(net)
         .into_iter()
@@ -48,7 +48,7 @@ fn divider(ctx: &Ctx, net: &str) -> Option<f64> {
         _ => return None,
     };
     let (top, bottom) = (top.props.resistance?, bottom.props.resistance?);
-    (bottom > 0.0).then(|| (top + bottom) / bottom)
+    (bottom > 0.0).then_some(Divider { top, bottom })
 }
 
 /// True when the other end of `resistor` sits on a ground net.

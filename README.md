@@ -55,7 +55,7 @@ server that lets agents work on the same project through the same checks.
 | Physics rules | Trace current (IPC-2152), voltage clearance (IPC-2221B), fab capability (JLCPCB), each citing its source. |
 | Studio | Live PCB, schematic, 3D, parts, firmware pins, bodies and checks in the browser. |
 | Mechanical | Enclosure generation and parts written in TypeScript on OpenCascade, with materials and processes. |
-| Firmware | Typed Rust pin bindings (`pins.rs`) for STM32, RP2040, RP2350A, RP2350B, ESP32-S3 and ESP32-C3. |
+| Firmware | Typed Rust pin bindings (`pins.rs`) for STM32, RP2040, RP2350A, RP2350B, ESP32-S3 and ESP32-C3, plus `pins.h` and an experimental Zephyr overlay. |
 | Fabrication | Gerbers with copper pours, drills, BOM, pick and place, KiCad, STEP, GLB, SVG, PDF, then a release gate. |
 | BOM | Prices, picks, material mass and print cost. |
 | Agents | `fusible mcp` serves checks and fuse-gated edits to Bulle, Claude Code, Codex and others. |

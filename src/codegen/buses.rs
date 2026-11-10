@@ -45,6 +45,7 @@ fn uart_port(ctx: &Ctx, (tx, rx): (&PinMapping, &PinMapping)) -> UartPort {
     );
     UartPort {
         instance,
+        devices: devices(ctx, &tx.1),
         tx: tx.0,
         rx: rx.0,
     }

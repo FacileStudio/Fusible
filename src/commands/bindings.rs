@@ -19,6 +19,7 @@ struct Job {
     kind: OutputKind,
     path: PathBuf,
     board_rs: bool,
+    zephyr: zephyr::Overrides,
 }
 
 /// Writes the bindings of every board into the `outputs:` of the firmware bound to it,
@@ -43,6 +44,7 @@ fn jobs(project: &Project, board: &BoardTarget, path: Option<PathBuf>) -> Vec<Jo
             kind: OutputKind::Rust,
             path,
             board_rs: false,
+            zephyr: zephyr::Overrides::new(),
         }];
     }
     let firmware = board
@@ -56,6 +58,7 @@ fn jobs(project: &Project, board: &BoardTarget, path: Option<PathBuf>) -> Vec<Jo
                 board_rs: board_rs && kind == OutputKind::Rust,
                 kind,
                 path,
+                zephyr: fw.zephyr.clone(),
             })
         })
         .collect()
@@ -83,13 +86,22 @@ fn render(job: &Job, b: &BoardBindings) -> Vec<(PathBuf, String)> {
     let mut files = vec![match job.kind {
         OutputKind::Rust => (job.path.clone(), generate_pins_rs(&b.mcu, &b.board)),
         OutputKind::C => (job.path.clone(), c::pins_h(b)),
-        OutputKind::Zephyr => (job.path.clone(), zephyr::overlay(b)),
+        OutputKind::Zephyr => (job.path.clone(), overlay(job, b)),
     }];
     if job.board_rs {
         let board_rs = rust::board_rs(b);
         files.extend(board_rs.map(|code| (job.path.with_file_name("board.rs"), code)));
     }
     files
+}
+
+/// The overlay text; each part it could not describe is a warning naming the file.
+fn overlay(job: &Job, b: &BoardBindings) -> String {
+    let overlay = zephyr::overlay(b, &job.zephyr);
+    for todo in &overlay.todo {
+        eprintln!("warning: {}: {todo}", job.path.display());
+    }
+    overlay.text
 }
 
 fn save(path: &Path, code: &str) -> Result<(), CheckError> {

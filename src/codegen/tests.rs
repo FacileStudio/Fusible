@@ -4,6 +4,7 @@ mod fixtures;
 mod select;
 mod select_hint;
 mod snapshots;
+mod zephyr;
 
 use super::*;
 use crate::netlist::Netlist;

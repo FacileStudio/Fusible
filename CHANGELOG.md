@@ -12,6 +12,23 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 - RP2350B (QFN-80, GPIO0-47, ADC0-7 on GPIO40-47) pin table from the RP2350 datasheet, Table 677,
   checked against pico-sdk `io_bank0.h`: `mcu: rp2350b`, `--mcu`, `pin_mux` and pin bindings.
   `RP2354A`/`RP2354B` and marked part numbers such as `RP2350B0A2` resolve to the same tables.
+- Zephyr overlay device nodes: one child per chip on each I2C, SPI and UART bus (`reg` is the
+  I2C address or the chip-select index), ADC channel nodes, `voltage-divider` for divided
+  inputs, and `gpio-leds`/`gpio-keys` for LEDs and buttons whose polarity the netlist shows.
+- `firmware.<name>.zephyr.<designator>: { compatible, reg, spi-max-frequency }` names a part
+  for the overlay. Without it, a table of known parts (BME280, SHT3x, MPU-6050, BH1750,
+  VL53L0X, PCF8563, u-blox M8/M10) supplies them; any other chip gets a disabled
+  `FUSIBLE TODO` node and a `warning:` line instead of a guess.
+
+### Fixed
+
+- Zephyr overlay on RP2040/RP2350: SPI pinmux uses Zephyr's `SPIn_TX`/`SPIn_RX` names (was
+  `MOSI`/`MISO`, undefined), UART RX and SPI MISO groups get `input-enable`, and the ADC node
+  is `&adc` (was `&adc0`). Pinctrl states are named `<bus>_fusible`, so they no longer merge
+  into a board's own `<bus>_default` state.
+- Zephyr overlay: a bus without a known controller instance, or a SoC without a GPIO table,
+  is a `FUSIBLE TODO` instead of a reference to a node that does not exist.
+- STM32 ADC inputs in the Zephyr overlay get their `adcN_inM_pX` pinctrl (`inp` on H7).
 
 ## [2.0.0] - 2026-11-10
 

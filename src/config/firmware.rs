@@ -27,6 +27,24 @@ pub struct FirmwareConfig {
     /// Board the firmware runs on; optional when the project has a single board.
     #[serde(default)]
     pub board: Option<String>,
+    /// Devicetree facts of parts the Zephyr overlay cannot name, by designator.
+    #[serde(default)]
+    pub zephyr: BTreeMap<String, ZephyrDevice>,
+}
+
+/// What the Zephyr overlay needs to emit one part's node: its binding and address.
+#[derive(Debug, Clone, Deserialize, Default, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+pub struct ZephyrDevice {
+    /// Binding name, such as `bosch,bme280`.
+    #[serde(default)]
+    pub compatible: Option<String>,
+    /// I2C address; the chip-select index gives an SPI device's.
+    #[serde(default)]
+    pub reg: Option<u16>,
+    /// Hertz, required on an SPI device.
+    #[serde(default, rename = "spi-max-frequency", alias = "spi_max_frequency")]
+    pub spi_max_frequency: Option<u32>,
 }
 
 /// A generated binding file.

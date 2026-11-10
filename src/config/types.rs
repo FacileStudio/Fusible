@@ -25,7 +25,7 @@ pub struct BoardConfig {
     pub kicad: Option<PathBuf>,
 }
 
-pub use super::firmware::{FirmwareConfig, Framework, OutputKind, Outputs};
+pub use super::firmware::{FirmwareConfig, Framework, OutputKind, Outputs, ZephyrDevice};
 
 /// A physical body: either a file authored in any CAD tool or a model Fusible generates.
 #[derive(Debug, Clone, Deserialize, Default, PartialEq)]

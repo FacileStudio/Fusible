@@ -2,12 +2,17 @@
  * EXPERIMENTAL: no Zephyr build checked this overlay. DO NOT EDIT. */
 
 #include <zephyr/dt-bindings/gpio/gpio.h>
+#include <zephyr/dt-bindings/adc/adc.h>
 
 &i2c1 {
 	pinctrl-0 = <&i2c1_scl_pb8 &i2c1_sda_pb9>;
 	pinctrl-names = "default";
 	status = "okay";
-	/* device: U2 (add its node with compatible and reg) */
+	u2: bme280@76 {
+		compatible = "bosch,bme280";
+		reg = <0x76>;
+		status = "okay";
+	};
 };
 
 &spi1 {
@@ -15,18 +20,65 @@
 	pinctrl-names = "default";
 	status = "okay";
 	cs-gpios = <&gpioa 4 GPIO_ACTIVE_LOW>;
-	/* device: U3 (add its node with compatible and reg) */
+	/* FUSIBLE TODO U3 (W25Q32JVSS) on spi1: no Zephyr binding is known for this part; set `compatible` and `spi-max-frequency` in `firmware.<name>.zephyr.U3` of fusible.yml */
+	u3: u3@0 {
+		reg = <0>;
+		status = "disabled";
+	};
 };
 
 &usart1 {
 	pinctrl-0 = <&usart1_tx_pa9 &usart1_rx_pa10>;
 	pinctrl-names = "default";
 	status = "okay";
+	u4: gnss {
+		compatible = "u-blox,m10";
+		status = "okay";
+	};
+};
+
+&adc1 {
+	pinctrl-0 = <&adc1_in1_pa0>;
+	pinctrl-names = "default";
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "okay";
+
+	channel@1 {
+		/* VBAT_SENSE */
+		reg = <1>;
+		zephyr,gain = "ADC_GAIN_1";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		zephyr,resolution = <12>;
+	};
 };
 
 / {
 	zephyr,user {
 		io-channels = <&adc1 1>;
-		led-gpios = <&gpiob 0 GPIO_ACTIVE_HIGH>;
+	};
+
+	vbat_sense: vbat-sense {
+		compatible = "voltage-divider";
+		io-channels = <&adc1 1>;
+		output-ohms = <47000>;
+		full-ohms = <147000>;
+	};
+
+	fusible-leds {
+		compatible = "gpio-leds";
+		d1: d1 {
+			gpios = <&gpiob 0 GPIO_ACTIVE_HIGH>;
+			label = "LED";
+		};
+	};
+
+	fusible-keys {
+		compatible = "gpio-keys";
+		sw1: sw1 {
+			gpios = <&gpioc 13 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+			label = "BUTTON";
+		};
 	};
 };

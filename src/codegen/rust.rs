@@ -43,8 +43,8 @@ fn header(b: &BoardBindings, hal: &str) -> String {
     );
     out.push_str("#![allow(dead_code)]\n\n");
     let _ = writeln!(out, "use {hal}::{{peripherals as hal, Peri}};\n");
-    for input in b.adc.iter().filter(|a| a.divider.is_some()) {
-        let ratio = input.divider.unwrap_or(1.0);
+    for (input, divider) in b.adc.iter().filter_map(|a| Some((a, a.divider?))) {
+        let ratio = divider.ratio();
         let _ = writeln!(
             out,
             "/// Volts at the divider input per volt at `{}`.",
