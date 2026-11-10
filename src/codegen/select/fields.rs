@@ -19,16 +19,10 @@ pub(super) fn descriptors(circuit: &Circuit, component: &Component) -> Vec<Strin
 
 pub(super) fn manufacturer_part_number(circuit: &Circuit, component: &Component) -> Option<String> {
     let id = component.component_id.as_deref()?;
-    circuit.raw_elements.iter().find_map(|raw| {
-        let is_match = raw.get("type").and_then(|t| t.as_str()) == Some("source_component")
-            && raw.get("source_component_id").and_then(|v| v.as_str()) == Some(id);
-        if !is_match {
-            return None;
-        }
-        raw.get("manufacturer_part_number")
-            .and_then(|v| v.as_str())
-            .map(str::to_string)
-    })
+    let parts = circuit.model().parts.iter();
+    parts
+        .filter(|part| part.source_component_id.as_deref() == Some(id))
+        .find_map(|part| part.manufacturer_part_number.clone())
 }
 
 fn normalize(text: &str) -> String {

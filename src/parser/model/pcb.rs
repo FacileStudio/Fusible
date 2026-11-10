@@ -46,6 +46,9 @@ pub struct PcbTrace {
 pub struct PcbVia {
     pub pcb_via_id: String,
     pub pcb_trace_id: Option<String>,
+    /// Net of a hand-written file; tscircuit leaves it out.
+    #[serde(alias = "net_id")]
+    pub source_net_id: Option<String>,
     pub x: f64,
     pub y: f64,
     pub outer_diameter: f64,
@@ -63,6 +66,9 @@ pub struct PcbPlatedHole {
     pub pcb_plated_hole_id: String,
     pub pcb_component_id: Option<String>,
     pub pcb_port_id: Option<String>,
+    /// Net of a hand-written file; tscircuit links through `pcb_port_id`.
+    #[serde(alias = "net_id")]
+    pub source_net_id: Option<String>,
     pub shape: Option<String>,
     pub x: f64,
     pub y: f64,

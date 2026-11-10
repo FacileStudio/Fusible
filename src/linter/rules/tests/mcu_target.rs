@@ -6,22 +6,19 @@ use crate::netlist::Netlist;
 use crate::parser::{Circuit, CircuitElement, Component, Port};
 
 fn esp_circuit(pin: &str) -> Circuit {
-    Circuit {
-        elements: vec![
-            CircuitElement::Component(Component {
-                component_id: Some("U1".to_string()),
-                kind: Some("chip".to_string()),
-                name: Some("ESP32-S3".to_string()),
-            }),
-            CircuitElement::Port(Port {
-                port_id: Some(format!("U1.{pin}")),
-                source_component_id: Some("U1".to_string()),
-                name: Some(pin.to_string()),
-                ..Default::default()
-            }),
-        ],
-        raw_elements: Vec::new(),
-    }
+    Circuit::from_elements(vec![
+        CircuitElement::Component(Component {
+            component_id: Some("U1".to_string()),
+            kind: Some("chip".to_string()),
+            name: Some("ESP32-S3".to_string()),
+        }),
+        CircuitElement::Port(Port {
+            port_id: Some(format!("U1.{pin}")),
+            source_component_id: Some("U1".to_string()),
+            name: Some(pin.to_string()),
+            ..Default::default()
+        }),
+    ])
 }
 
 fn violations(circuit: &Circuit, mcu: Option<&str>) -> Vec<Diagnostic> {

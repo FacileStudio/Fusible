@@ -48,10 +48,7 @@ pub(super) fn rule_violations(
     rule: impl Rule + 'static,
     elements: Vec<CircuitElement>,
 ) -> Vec<Diagnostic> {
-    let circuit = Circuit {
-        elements,
-        raw_elements: Vec::new(),
-    };
+    let circuit = Circuit::from_elements(elements);
     Linter::new().with_rule(rule).run(&circuit)
 }
 

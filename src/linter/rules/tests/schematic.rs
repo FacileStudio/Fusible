@@ -7,16 +7,14 @@ use crate::linter::Linter;
 use crate::parser::Circuit;
 
 fn schematic_component(center: serde_json::Value) -> Circuit {
-    Circuit {
-        elements: vec![],
-        raw_elements: vec![serde_json::json!({
+    Circuit::from_values(vec![serde_json::json!({
             "type": "schematic_component",
             "schematic_component_id": "schematic_component_0",
             "source_component_id": "source_component_0",
             "refdes": "U1",
             "center": center
-        })],
-    }
+    })])
+    .expect("fixture reads")
 }
 
 #[test]

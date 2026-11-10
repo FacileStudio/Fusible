@@ -3,7 +3,7 @@
 use crate::linter::{Category, Diagnostic, LintContext, Rule, RuleMeta, Severity};
 
 use super::autoroute_scan::{
-    error_help, error_message, is_unrouted, type_of, unrouted_traces, HELP, UNROUTED,
+    error_help, error_message, is_unrouted, unrouted_traces, HELP, UNROUTED,
 };
 
 /// tscircuit records a failed placement or autoroute as an `*_error` element and keeps going.
@@ -25,16 +25,15 @@ impl Rule for AutorouteRule {
     }
 
     fn check(&self, ctx: &LintContext<'_>) -> Vec<Diagnostic> {
-        let raw = &ctx.circuit.raw_elements;
-        let mut found: Vec<Diagnostic> = raw
-            .iter()
-            .filter(|el| type_of(el).is_some_and(|t| t.ends_with("_error")))
-            .map(|el| self.diagnostic(error_message(el), error_help(el)))
+        let issues = ctx.circuit.model().issues.iter();
+        let mut found: Vec<Diagnostic> = issues
+            .filter(|issue| issue.is_error)
+            .map(|issue| self.diagnostic(error_message(issue), error_help(issue)))
             .collect();
         if is_unrouted(ctx) {
             found.push(self.diagnostic(UNROUTED.to_string(), HELP.to_string()));
         }
-        let missing = unrouted_traces(raw);
+        let missing = unrouted_traces(ctx);
         if !missing.is_empty() {
             let message = format!(
                 "source_trace without a routed pcb_trace: {}",

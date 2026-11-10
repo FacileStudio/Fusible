@@ -24,10 +24,7 @@ fn board(refdes: &str, pins: &[(u32, Option<&str>)]) -> Circuit {
             ..Default::default()
         }));
     }
-    Circuit {
-        elements,
-        raw_elements: Vec::new(),
-    }
+    Circuit::from_elements(elements)
 }
 
 fn violations(yaml_wires: &str, from: &Circuit, to: &Circuit) -> Vec<String> {

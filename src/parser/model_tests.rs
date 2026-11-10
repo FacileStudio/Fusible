@@ -9,6 +9,7 @@ fn model(source: &str) -> Model {
     parse(source, Path::new("circuit.json"))
         .expect("fixture parses")
         .model()
+        .clone()
 }
 
 #[test]
@@ -139,4 +140,29 @@ fn upstream_errors_and_warnings_become_issues() {
     let autoroute = &m.issues[3];
     assert_eq!(autoroute.id.as_deref(), Some("pcb_autorouting_error_0"));
     assert!(autoroute.is_error && autoroute.message.is_none() && autoroute.element_ids.is_empty());
+}
+
+#[test]
+fn census_and_schematic_placements_cover_every_element() {
+    let circuit = Circuit::from_values(vec![
+        serde_json::json!({"type": "cad_component", "footprinter_string": "qfn32_w6_h6_p0.5"}),
+        serde_json::json!({"type": "schematic_component", "center": {"x": "NaN", "y": 2},
+            "x": 4, "refdes": 7, "schematic_sheet_id": "s1"}),
+        serde_json::json!({"type": "schematic_text", "schematic_sheet_id": "s2"}),
+    ])
+    .expect("fixture reads");
+    let m = circuit.model();
+
+    assert_eq!(m.footprints, ["qfn32_w6_h6_p0.5"]);
+    assert_eq!(
+        (m.count("schematic_component"), m.count("pcb_trace")),
+        (1, 0)
+    );
+    assert_eq!(m.schematic_sheet_ids.len(), 2);
+    let placed = &m.schematic_components[0];
+    assert!(placed.position().0.is_some_and(f64::is_nan));
+    assert_eq!(
+        (placed.position().1, placed.refdes.as_deref()),
+        (Some(2.0), None)
+    );
 }

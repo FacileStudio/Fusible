@@ -55,7 +55,7 @@ fn pour_only_board_with_no_source_trace_passes() {
 fn source_trace_without_pcb_trace_blows_even_when_others_routed() {
     let json = r#"[{"type":"source_net","source_net_id":"n"},{"type":"pcb_board"},
         {"type":"source_trace","source_trace_id":"a"},{"type":"source_trace","source_trace_id":"b"},
-        {"type":"pcb_trace","source_trace_id":"a"}]"#;
+        {"type":"pcb_trace","pcb_trace_id":"pt","source_trace_id":"a","route":[]}]"#;
     let v = lint(AutorouteRule, json);
     assert_eq!(v.len(), 1, "{v:?}");
     assert!(v[0].message.ends_with(": b"));
