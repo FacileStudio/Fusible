@@ -5,7 +5,7 @@ mod common;
 use std::path::Path;
 
 use common::scaffold::{create, offline};
-use common::{copy_dir, TestDir};
+use common::{copy_dir, fusible, TestDir};
 
 const TEMPLATES: [&str; 4] = ["esp32-s3", "stm32g4", "rp2040", "blank"];
 
@@ -35,6 +35,32 @@ fn mcu_templates_declare_pin_attributes_and_firmware() {
         let manifest = std::fs::read_to_string(root.join("fusible.yml")).unwrap();
         assert!(manifest.contains("generate: enclosure"), "{template}");
     }
+}
+
+#[test]
+#[ignore = "installs tscircuit from the npm registry"]
+fn a_fresh_project_rebuilds_its_circuit_with_its_own_tscircuit() {
+    let bun = common::bun().expect("bun on PATH");
+    let parent = TestDir::new("new_rebuild");
+    let made = fusible()
+        .current_dir(&parent.path)
+        .args(["new", "fresh", "--template", "stm32g4"])
+        .output()
+        .expect("binary should run");
+    assert_eq!(made.status.code(), Some(0), "{made:?}");
+    let root = parent.path.join("fresh");
+    std::fs::remove_file(root.join("hardware/dist/index/circuit.json")).unwrap();
+
+    let check = fusible()
+        .current_dir(&root)
+        .env("FUSIBLE_BUN", bun)
+        .env("FUSIBLE_NO_CACHE", "1")
+        .arg("check")
+        .output()
+        .expect("binary should run");
+
+    assert_eq!(check.status.code(), Some(0), "{check:?}");
+    assert!(root.join("hardware/dist/index/circuit.json").is_file());
 }
 
 #[test]
