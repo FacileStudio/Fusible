@@ -5,6 +5,7 @@ mod designator;
 pub mod model;
 pub mod mux;
 mod signal;
+mod stm32;
 
 pub use database::find_target;
 pub use model::{
