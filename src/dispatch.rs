@@ -7,7 +7,7 @@ mod release;
 
 pub use body::body;
 use json::check_json;
-pub use misc::{init, share};
+pub use misc::{init, migrate, share};
 pub use release::release;
 
 use std::path::PathBuf;

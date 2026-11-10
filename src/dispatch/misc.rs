@@ -1,9 +1,10 @@
-//! Dispatch of `fusible init` and `fusible share`.
+//! Dispatch of `fusible init`, `fusible migrate` and `fusible share`.
 
 use std::process::ExitCode;
 
 use crate::cli::{InitArgs, ShareArgs};
 use crate::commands;
+use crate::commands::migrate::Migration;
 use crate::project::Project;
 use crate::{fail, tool_exit, EXIT_TOOL_ERROR, EXIT_VIOLATIONS};
 
@@ -17,6 +18,15 @@ pub fn init(args: InitArgs) -> ExitCode {
         no_install,
     } = args;
     tool_exit(commands::init::run(path, name, mcu, currency, no_install))
+}
+
+/// Migrates the manifest; with `--check`, a manifest that needs a rewrite exits 1.
+pub fn migrate(check: bool) -> ExitCode {
+    match commands::migrate::run(check) {
+        Ok(Migration::Needed) => ExitCode::from(EXIT_VIOLATIONS),
+        Ok(Migration::Current | Migration::Written) => ExitCode::SUCCESS,
+        Err(err) => fail(err, EXIT_TOOL_ERROR),
+    }
 }
 
 /// Shares the fuse-gated export; a blown fuse exits 1.

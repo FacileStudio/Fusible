@@ -109,6 +109,13 @@ pub enum Commands {
     /// Initialize a new Fusible project and tscircuit hardware workspace
     Init(InitArgs),
 
+    /// Rewrite a 1.x fusible.yml into the 2.0 form and print the diff
+    Migrate {
+        /// Write nothing; exit 1 when the manifest needs a rewrite
+        #[arg(long)]
+        check: bool,
+    },
+
     /// Add a tscircuit component or registry package to the hardware project
     Add {
         /// Packages to install (e.g. @tsci/seveibar.smd-resistor or @tscircuit/core)

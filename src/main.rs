@@ -61,12 +61,17 @@ fn main() -> ExitCode {
 
 /// Loads the project of the working directory once, for every command.
 ///
-/// `init`, `doctor` and `mcp` run without a valid manifest, so a manifest error fails only
+/// `init`, `doctor`, `mcp` and `migrate` run without a valid manifest, so a manifest error fails only
 /// the other commands.
 fn load_project(command: Option<&Commands>) -> Result<Project, config::ConfigError> {
     let tolerant = matches!(
         command,
-        Some(Commands::Init(_) | Commands::Doctor { .. } | Commands::Mcp(_))
+        Some(
+            Commands::Init(_)
+                | Commands::Doctor { .. }
+                | Commands::Mcp(_)
+                | Commands::Migrate { .. }
+        )
     );
     match tolerant {
         true => Ok(Project::current()),
@@ -92,6 +97,7 @@ fn run_command(command: Commands, project: &Project) -> ExitCode {
         Commands::Sync(args) => dispatch::sync(project, args),
         Commands::Doctor { install, json } => tool_exit(commands::doctor::run(install, json)),
         Commands::Init(args) => dispatch::init(args),
+        Commands::Migrate { check } => dispatch::migrate(check),
         Commands::Add { packages } => tool_exit(commands::add::run(project, &packages)),
         Commands::Install { dir } => tool_exit(commands::install::run(project, dir)),
         Commands::Search { query } => tool_exit(commands::search::run(&query)),

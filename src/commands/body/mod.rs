@@ -35,7 +35,7 @@ mod part_features;
 mod settings;
 mod spec;
 mod step;
-mod yaml_lines;
+pub(crate) mod yaml_lines;
 
 #[cfg(test)]
 mod eject_comment_tests;
