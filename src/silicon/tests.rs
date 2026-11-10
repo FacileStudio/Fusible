@@ -42,6 +42,28 @@ fn resolves_rp2040_function_select() {
 }
 
 #[test]
+fn rp2040_lists_gpio22_to_gpio25() {
+    use PeripheralSignal::{I2cScl, I2cSda, Pwm, SpiCs, SpiMiso, SpiMosi, SpiSck};
+    use PeripheralSignal::{UartCts, UartRts, UartRx, UartTx};
+    let chip = find_target("rp2040").expect("rp2040 not found");
+    let table = [
+        ("GPIO22", [SpiSck(0), UartCts(1), I2cSda(1), Pwm(3, 'A')]),
+        ("GPIO23", [SpiMosi(0), UartRts(1), I2cScl(1), Pwm(3, 'B')]),
+        ("GPIO24", [SpiMiso(1), UartTx(1), I2cSda(0), Pwm(4, 'A')]),
+        ("GPIO25", [SpiCs(1, 0), UartRx(1), I2cScl(0), Pwm(4, 'B')]),
+    ];
+    for (name, signals) in table {
+        let pin = chip
+            .find_pin(name)
+            .unwrap_or_else(|| panic!("{name} not found"));
+        for signal in signals {
+            assert!(pin.supports_signal(&signal), "{name} lacks {signal:?}");
+        }
+    }
+    assert_eq!(chip.pins.len(), 30);
+}
+
+#[test]
 fn find_target_matches_exact_chip_ids_only() {
     for known in [
         "esp32-s3",
