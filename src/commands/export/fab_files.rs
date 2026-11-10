@@ -1,12 +1,16 @@
-//! Fabrication bundle: gerbers, Circuit JSON, bill of materials and pick-and-place.
+//! Fabrication bundle: gerbers, Circuit JSON, bill of materials, centroid,
+//! test netlist and README.
 
 use std::path::Path;
 
 use super::ExportError;
 use crate::bom::{self, BomFile};
+use crate::config::Date;
+use crate::netlist::Netlist;
 
-/// Writes `gerbers.zip`, `circuit.json`, `bom.csv` and `pnp.csv` into `dir`; nothing is written
-/// when gerber generation fails.
+/// Writes `gerbers.zip`, `circuit.json`, `bom.csv`, `centroid.csv`,
+/// `netlist.ipc` and `README.txt` into `dir`; nothing is written when the
+/// Circuit JSON cannot be read or gerber generation fails.
 ///
 /// `manifest` is the project's `fusible.yml`; the `bom.yml` beside it prices the BOM.
 pub fn write_fab_bundle(
@@ -16,11 +20,22 @@ pub fn write_fab_bundle(
     manifest: Option<&Path>,
 ) -> Result<(), ExportError> {
     let bom = bom_csv(circuit_json, manifest)?;
-    let pnp = super::pnp::pnp_csv(circuit_json)?;
-    crate::gerber::export_fab_bundle(circuit_json, title, dir)?;
+    let centroid = crate::fab::centroid_csv(circuit_json).map_err(invalid)?;
+    let netlist = ipc_netlist(circuit_json, title)?;
+    let layers = crate::gerber::export_fab_bundle(circuit_json, title, dir)?;
+    let readme = crate::fab::readme(title, Date::today(), layers.iter().map(String::as_str));
     std::fs::write(dir.join("bom.csv"), bom)?;
-    std::fs::write(dir.join("pnp.csv"), pnp)?;
+    std::fs::write(dir.join("centroid.csv"), centroid)?;
+    std::fs::write(dir.join("netlist.ipc"), netlist)?;
+    std::fs::write(dir.join("README.txt"), readme)?;
     Ok(())
+}
+
+fn ipc_netlist(circuit_json: &str, title: &str) -> Result<String, ExportError> {
+    let circuit = crate::parser::parse(circuit_json, Path::new("circuit.json"))
+        .map_err(|e| invalid(e.to_string()))?;
+    let netlist = Netlist::from_circuit(&circuit);
+    Ok(crate::fab::ipc356(&circuit, &netlist, title))
 }
 
 pub(super) fn invalid(message: impl ToString) -> ExportError {

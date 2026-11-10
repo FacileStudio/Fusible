@@ -7,7 +7,6 @@ mod formats;
 #[cfg(test)]
 mod formats_tests;
 mod pdf;
-mod pnp;
 mod presets;
 
 use std::path::{Path, PathBuf};
@@ -39,7 +38,7 @@ pub enum ExportError {
     #[error("unknown export preset \"{preset}\"")]
     #[diagnostic(
         code(fusible::export::unknown_preset),
-        help("valid presets: `fab` (gerbers, bom, pnp), `cad` (kicad, step), `docs` (svg, pdf), `all`")
+        help("valid presets: `fab` (gerbers, bom, centroid, netlist), `cad` (kicad, step), `docs` (svg, pdf), `all`")
     )]
     UnknownPreset { preset: String },
 }

@@ -59,7 +59,8 @@ struct Staged {
     circuit_json: String,
 }
 
-/// Checks every board, then writes `gerbers.zip`, `bom.csv`, `pnp.csv` and `RELEASE.txt` into `out`.
+/// Checks every board, then writes `gerbers.zip`, `bom.csv`, `centroid.csv`, `netlist.ipc`,
+/// `README.txt` and `RELEASE.txt` into `out`.
 /// Nothing is written unless every board passes every check.
 pub fn run(
     project: &Project,

@@ -1,18 +1,22 @@
-//! Pick-and-place CSV from the PCB components of a Circuit JSON.
+//! Pick-and-place centroid CSV from the PCB components of a Circuit JSON.
+//!
+//! One row per `pcb_component`, at its `center`. The header names the units
+//! (millimetres) and the rotation convention: degrees counter-clockwise as
+//! tscircuit places the part, seen from the top for both sides.
 
 use std::collections::HashMap;
 
 use serde_json::Value;
 
-use super::fab_files::invalid;
-use super::ExportError;
 use crate::bom;
 
-const PNP_HEADER: &str = "designator,value,package,x,y,rotation,side\n";
+/// The first line of `centroid.csv`.
+pub const HEADER: &str =
+    "Designator,Val,Package,Mid X (mm),Mid Y (mm),Rotation (deg CCW from top),Layer\n";
 
-/// Renders `pnp.csv`: one row per `pcb_component`, positioned at its `center`.
-pub(super) fn pnp_csv(circuit_json: &str) -> Result<String, ExportError> {
-    let elements: Vec<Value> = serde_json::from_str(circuit_json).map_err(invalid)?;
+/// Renders `centroid.csv`.
+pub fn centroid_csv(circuit_json: &str) -> Result<String, String> {
+    let elements: Vec<Value> = serde_json::from_str(circuit_json).map_err(|e| e.to_string())?;
     let names = index(&elements, "source_component", "source_component_id", "name");
     let packages = index(
         &elements,
@@ -21,7 +25,7 @@ pub(super) fn pnp_csv(circuit_json: &str) -> Result<String, ExportError> {
         "footprinter_string",
     );
     let values = values_by_designator(circuit_json)?;
-    let mut out = String::from(PNP_HEADER);
+    let mut out = String::from(HEADER);
     for el in elements
         .iter()
         .filter(|el| text(el, "type") == Some("pcb_component"))
@@ -68,8 +72,8 @@ fn index<'a>(elements: &'a [Value], kind: &str, key: &str, val: &str) -> HashMap
         .collect()
 }
 
-fn values_by_designator(circuit_json: &str) -> Result<HashMap<String, String>, ExportError> {
-    let parts = bom::detect(circuit_json, None).map_err(invalid)?;
+fn values_by_designator(circuit_json: &str) -> Result<HashMap<String, String>, String> {
+    let parts = bom::detect(circuit_json, None).map_err(|e| e.to_string())?;
     let mut map = HashMap::new();
     for part in parts {
         let value = part.value.or(part.mpn).unwrap_or_default();
@@ -78,7 +82,8 @@ fn values_by_designator(circuit_json: &str) -> Result<HashMap<String, String>, E
     Ok(map)
 }
 
-fn quote(cell: &str) -> String {
+/// Quotes a CSV cell that holds a comma, a quote or a newline.
+pub(super) fn quote(cell: &str) -> String {
     if cell.contains([',', '"', '\n']) {
         format!("\"{}\"", cell.replace('"', "\"\""))
     } else {

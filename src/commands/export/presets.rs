@@ -52,7 +52,8 @@ fn export_fab(job: &ExportJob, circuit_json: &str) -> Result<(), ExportError> {
         job.manifest.as_deref(),
     )?;
     println!(
-        "✅ Fabrication artifacts generated in \"{}\" (gerbers.zip, circuit.json, bom.csv, pnp.csv)",
+        "✅ Fabrication artifacts generated in \"{}\" (gerbers.zip, circuit.json, bom.csv, \
+         centroid.csv, netlist.ipc, README.txt)",
         base.display()
     );
     Ok(())

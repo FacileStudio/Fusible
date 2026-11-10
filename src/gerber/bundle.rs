@@ -64,12 +64,12 @@ pub fn create_gerber_zip(files: &GerberFiles) -> Result<Vec<u8>, std::io::Error>
 }
 
 /// Exports the complete fabrication bundle (`gerbers.zip` and `circuit.json`) to `output_dir`;
-/// nothing is written when generation fails.
+/// nothing is written when generation fails. Returns the names of the files inside the zip.
 pub fn export_fab_bundle(
     circuit_json: &str,
     board_title: &str,
     output_dir: &Path,
-) -> Result<(), std::io::Error> {
+) -> Result<Vec<String>, std::io::Error> {
     let files = generate_gerber_files(circuit_json, board_title)?;
     let zip_bytes = create_gerber_zip(&files)?;
 
@@ -77,5 +77,5 @@ pub fn export_fab_bundle(
     std::fs::write(output_dir.join("gerbers.zip"), zip_bytes)?;
     std::fs::write(output_dir.join("circuit.json"), circuit_json)?;
 
-    Ok(())
+    Ok(files.into_keys().collect())
 }
