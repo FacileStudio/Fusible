@@ -1,0 +1,20 @@
+[
+  { "type": "source_component", "source_component_id": "sc_d1", "name": "D1", "ftype": "simple_led" },
+  { "type": "source_component", "source_component_id": "sc_d2", "name": "D2", "ftype": "simple_led" },
+  { "type": "source_component", "source_component_id": "sc_r1", "name": "R1", "ftype": "simple_resistor" },
+  { "type": "source_net", "source_net_id": "n_vcc", "name": "VCC" },
+  { "type": "source_net", "source_net_id": "n_gnd", "name": "GND" },
+  { "type": "source_net", "source_net_id": "n_led", "name": "LED_K" },
+  { "type": "source_port", "source_port_id": "sp_d1_a", "name": "anode", "pin_number": 1,
+    "source_component_id": "sc_d1", "net_id": "n_vcc" },
+  { "type": "source_port", "source_port_id": "sp_d1_k", "name": "cathode", "pin_number": 2,
+    "source_component_id": "sc_d1", "net_id": "n_gnd" },
+  { "type": "source_port", "source_port_id": "sp_d2_a", "name": "anode", "pin_number": 1,
+    "source_component_id": "sc_d2", "net_id": "n_vcc" },
+  { "type": "source_port", "source_port_id": "sp_d2_k", "name": "cathode", "pin_number": 2,
+    "source_component_id": "sc_d2", "net_id": "n_led" },
+  { "type": "source_port", "source_port_id": "sp_r1_1", "name": "pin1", "pin_number": 1,
+    "source_component_id": "sc_r1", "net_id": "n_led" },
+  { "type": "source_port", "source_port_id": "sp_r1_2", "name": "pin2", "pin_number": 2,
+    "source_component_id": "sc_r1", "net_id": "n_gnd" }
+]

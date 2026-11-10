@@ -34,7 +34,7 @@ fn an_intact_circuit_prints_valid_json_and_exits_zero() {
     let (out, json) = check("circuit.json", &["--json"]);
     assert_eq!(out.status.code(), Some(0));
     assert_eq!(json["fuse"], "intact");
-    assert!(diagnostics(&json).is_empty());
+    assert!(diagnostics(&json).iter().all(|d| d["severity"] != "error"));
     assert!(
         out.stderr.is_empty(),
         "{}",

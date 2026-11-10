@@ -9,6 +9,8 @@ mod board;
 mod cross;
 mod error;
 mod levels;
+#[cfg(test)]
+mod levels_tests;
 mod report;
 #[cfg(test)]
 mod tests;

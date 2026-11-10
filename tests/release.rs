@@ -74,7 +74,8 @@ fn warnings_block_unless_allowed() {
 fn pour_on_a_layer_without_a_gerber_exits_2() {
     let dir = TestDir::new("release_pour");
     let json = r#"[{"type":"pcb_board","width":10,"height":10,"center":{"x":0,"y":0},"num_layers":2},
-        {"type":"pcb_copper_pour","shape":"rect","layer":"inner1","center":{"x":0,"y":0},"width":4,"height":4}]"#;
+        {"type":"pcb_copper_pour","pcb_copper_pour_id":"pour_0","shape":"rect","layer":"inner1",
+         "center":{"x":0,"y":0},"width":4,"height":4}]"#;
     let file = dir.path.join("c.json");
     std::fs::write(&file, json).unwrap();
     let out = dir.path.join("rel");

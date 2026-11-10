@@ -60,3 +60,19 @@ fn trace_joining_a_declared_net_to_a_bare_port_is_not_a_short() {
     );
     assert!(v.is_empty());
 }
+
+#[test]
+fn every_unreadable_model_entry_is_malformed() {
+    let v = lint(
+        MalformedElementRule,
+        r#"[
+        {"type": "source_port", "source_port_id": "sp_0", "must_be_connected": "yes"},
+        {"type": "pcb_silkscreen_text", "pcb_silkscreen_text_id": "st_0", "text": 5},
+        {"type": "pcb_courtyard_rect", "pcb_courtyard_rect_id": "cr_0", "center": "here"}
+    ]"#,
+    );
+    let ids: Vec<&str> = v.iter().map(|d| d.elements[0].as_str()).collect();
+    assert_eq!(ids, ["st_0", "cr_0", "sp_0"], "{v:?}");
+    assert!(v.iter().all(|d| d.rule == "malformed_element"));
+    assert!(v[2].message.contains("pin attributes"));
+}

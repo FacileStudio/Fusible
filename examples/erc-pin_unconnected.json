@@ -1,0 +1,11 @@
+[
+  { "type": "source_component", "source_component_id": "sc_u1", "name": "U1", "ftype": "simple_chip" },
+  { "type": "source_component", "source_component_id": "sc_r1", "name": "R1", "ftype": "simple_resistor" },
+  { "type": "source_net", "source_net_id": "n_sig", "name": "SIG" },
+  { "type": "source_port", "source_port_id": "sp_u1_a", "name": "A", "pin_number": 1,
+    "source_component_id": "sc_u1", "net_id": "n_sig", "must_be_connected": true },
+  { "type": "source_port", "source_port_id": "sp_u1_en", "name": "EN", "pin_number": 2,
+    "source_component_id": "sc_u1", "must_be_connected": true },
+  { "type": "source_port", "source_port_id": "sp_r1_1", "name": "pin1", "pin_number": 1,
+    "source_component_id": "sc_r1", "net_id": "n_sig" }
+]

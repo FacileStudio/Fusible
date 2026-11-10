@@ -71,6 +71,10 @@ fn nets(cfg: &FusibleConfig) -> Result<(), String> {
         positive(&format!("nets.{name}.voltage"), spec.voltage)?;
         positive(&format!("nets.{name}.current"), spec.current)?;
         positive(&format!("nets.{name}.max_rise"), spec.max_rise)?;
+        positive(&format!("nets.{name}.limit"), spec.limit)?;
+        for (part, amps) in &spec.loads {
+            positive(&format!("nets.{name}.loads.{part}"), Some(*amps))?;
+        }
     }
     Ok(())
 }

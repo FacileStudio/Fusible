@@ -9,6 +9,7 @@
 
 mod diff;
 mod rewrite;
+mod rule_ids;
 
 use std::path::{Path, PathBuf};
 
@@ -94,9 +95,7 @@ fn migrated(path: &Path, old: &str) -> Result<String, MigrateError> {
     };
     let crlf = old.contains("\r\n");
     let text = old.replace("\r\n", "\n");
-    let renamed = rewrite::RENAMED_RULES
-        .iter()
-        .fold(text.clone(), |acc, (from, to)| acc.replace(from, to));
+    let renamed = rule_ids::rename(&text);
     let expected = FusibleConfig::from_str(&renamed).map_err(|e| fail(e.to_string()))?;
     let new = rewrite::migrate(&text).map_err(fail)?;
     let loaded = FusibleConfig::from_str(&new).map_err(|e| fail(e.to_string()))?;

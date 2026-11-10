@@ -17,7 +17,16 @@ fn default_inner_oz() -> f64 {
     0.5
 }
 
-/// What a net must withstand: peak voltage, current and the allowed temperature rise.
+/// Where a net gets its supply when no part of the board drives it.
+#[derive(Debug, Clone, Copy, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum NetSource {
+    /// Supplied from off the board: a bench supply, a carrier board, a cable.
+    External,
+}
+
+/// What a net must withstand: peak voltage, current and the allowed temperature rise;
+/// for a rail, where its supply comes from, what the source can deliver and what draws on it.
 #[derive(Debug, Clone, Deserialize, Default, PartialEq)]
 #[serde(deny_unknown_fields)]
 pub struct NetSpec {
@@ -27,6 +36,14 @@ pub struct NetSpec {
     pub current: Option<f64>,
     #[serde(default)]
     pub max_rise: Option<f64>,
+    #[serde(default)]
+    pub source: Option<NetSource>,
+    /// Amps the rail's source can deliver.
+    #[serde(default)]
+    pub limit: Option<f64>,
+    /// Amps each part draws from the rail, by designator.
+    #[serde(default)]
+    pub loads: BTreeMap<String, f64>,
 }
 
 /// The `fab:` key: a built-in profile name or a custom profile.

@@ -3,6 +3,7 @@ use std::path::Path;
 use super::pipeline::{execute_pipeline, revision};
 use super::server::route_path;
 use super::watcher::is_relevant_change;
+use crate::linter::Severity;
 use crate::project::Project;
 
 #[test]
@@ -10,7 +11,11 @@ fn pipeline_runs_on_valid_circuit_json() {
     let (payload, source) =
         execute_pipeline(&Project::current(), Path::new("examples/circuit.json"));
     assert!(!payload.fuse_blown);
-    assert!(payload.diagnostics.is_empty());
+    let errors = payload
+        .diagnostics
+        .iter()
+        .filter(|d| d.severity == Severity::Error);
+    assert_eq!(errors.count(), 0);
     assert!(payload.circuit_json.is_some());
     assert_eq!(payload.revision, revision(&source.unwrap()));
 }

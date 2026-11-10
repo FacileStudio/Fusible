@@ -88,6 +88,9 @@ fn pin_mux_rule_on_example_file() {
     let netlist = crate::netlist::Netlist::from_circuit(&circuit);
     let ctx = crate::linter::LintContext::new(&circuit, &netlist).with_mcu(Some("stm32g431"));
     let v = crate::linter::Linter::default().run_with_context(&ctx);
-    println!("Violations on example file: {:?}", v);
-    assert_eq!(v.len(), 1);
+    let v: Vec<_> = v
+        .into_iter()
+        .filter(|d| d.severity != crate::linter::Severity::Info)
+        .collect();
+    assert_eq!(v.len(), 1, "{v:?}");
 }

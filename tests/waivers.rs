@@ -29,6 +29,7 @@ fn rules(json: &Value) -> Vec<&str> {
     let diagnostics = json["boards"][0]["diagnostics"].as_array().unwrap();
     diagnostics
         .iter()
+        .filter(|d| d["rule"] == "decoupling_capacitor" || d["severity"] == "error")
         .map(|d| d["rule"].as_str().unwrap())
         .collect()
 }
@@ -68,7 +69,11 @@ fn a_rule_turned_off_is_dropped_and_one_lowered_to_warning_keeps_the_fuse() {
 
     let (out, json) = check("rules:\n  decoupling_capacitor: warning\n");
     assert_eq!(out.status.code(), Some(0), "{json}");
-    assert_eq!(json["boards"][0]["diagnostics"][0]["severity"], "warning");
+    let diagnostics = json["boards"][0]["diagnostics"].as_array().unwrap();
+    let lowered = diagnostics
+        .iter()
+        .find(|d| d["rule"] == "decoupling_capacitor");
+    assert_eq!(lowered.unwrap()["severity"], "warning");
 }
 
 #[test]

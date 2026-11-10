@@ -60,6 +60,29 @@ fn empty_trace(index: usize) -> Diagnostic {
     }
 }
 
+/// One element of a modelled type that did not deserialize, from a
+/// `<id>: <type>: <why>` entry of [`crate::parser::model::Model::unreadable`].
+fn unreadable(entry: &str) -> Diagnostic {
+    let (id, rest) = entry.split_once(": ").unwrap_or(("", entry));
+    let (kind, why) = rest.split_once(": ").unwrap_or((rest, ""));
+    let (message, elements) = match id == kind {
+        true => (format!("a {kind} cannot be read: {why}"), Vec::new()),
+        false => (
+            format!("{kind} {id} cannot be read: {why}"),
+            vec![id.to_string()],
+        ),
+    };
+    Diagnostic {
+        rule: "malformed_element".to_string(),
+        message,
+        help: Some(
+            "fix the field the error names; a rule cannot check what it cannot read".to_string(),
+        ),
+        elements,
+        ..Default::default()
+    }
+}
+
 /// Every defect of one element: a missing identifier, and a trace whose
 /// connection lists are both empty.
 fn defects(index: usize, element: &CircuitElement) -> Vec<Diagnostic> {
@@ -95,6 +118,7 @@ impl Rule for MalformedElementRule {
             .iter()
             .enumerate()
             .flat_map(|(index, element)| defects(index, element))
+            .chain(ctx.circuit.model().unreadable.iter().map(|e| unreadable(e)))
             .collect()
     }
 }

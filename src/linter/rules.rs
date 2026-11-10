@@ -22,6 +22,7 @@ mod dangling_reference;
 mod decoupling_capacitor;
 mod dfa;
 mod dfm;
+mod erc;
 mod fab_profile;
 mod geom2d;
 mod ghost_net;
@@ -52,6 +53,11 @@ pub use dfa::{
 pub use dfm::{
     AcidTrapRule, AnnularRingRule, DrillToCopperRule, EdgeClearanceRule, HoleSpacingRule,
     MaskSliverRule, SilkOverPadRule, SilkTextSizeRule, ViaAspectRatioRule,
+};
+pub use erc::roles;
+pub use erc::{
+    BringUpRule, DeratingRule, LedSeriesResistorRule, MissingPullupRule, NcConnectedRule,
+    PinConflictRule, PinUnconnectedRule, PowerUndrivenRule, RailBudgetRule, VoltageDomainRule,
 };
 pub use fab_profile::FabProfileRule;
 pub use ghost_net::GhostNetRule;

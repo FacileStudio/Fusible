@@ -4,7 +4,7 @@
   { "type": "source_net", "net_id": "n1", "name": "GND" },
   { "type": "source_net", "net_id": "n2", "name": "+3V3" },
   { "type": "source_port", "source_port_id": "sp_u1_1", "name": "VSS", "pin_number": 1, "source_component_id": "sc_u1", "net_id": "n1" },
-  { "type": "source_port", "source_port_id": "sp_u1_2", "name": "VDD", "pin_number": 2, "source_component_id": "sc_u1", "net_id": "n2" },
+  { "type": "source_port", "source_port_id": "sp_u1_2", "name": "VDD", "pin_number": 2, "source_component_id": "sc_u1", "net_id": "n2", "should_have_decoupling_capacitor": true },
   { "type": "source_port", "source_port_id": "sp_r1_1", "name": "1", "pin_number": 1, "source_component_id": "sc_r1", "net_id": "n1" },
   { "type": "source_port", "source_port_id": "sp_r1_2", "name": "2", "pin_number": 2, "source_component_id": "sc_r1", "net_id": "n2" }
 ]

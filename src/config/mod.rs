@@ -37,7 +37,9 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
 pub use date::Date;
-pub use design::{ClearanceClass, CopperSpec, DesignRules, FabProfile, FabSpec, NetSpec};
+pub use design::{
+    ClearanceClass, CopperSpec, DesignRules, FabProfile, FabSpec, NetSource, NetSpec,
+};
 use discovery::{check_file_target, find_in_dir};
 pub use error::ConfigError;
 pub use fab::{builtin_fab, builtin_fab_names};
