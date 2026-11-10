@@ -16,7 +16,8 @@ fn the_summary_lists_each_board_with_counts() {
         ..Default::default()
     };
     let state = crate::dev::state::State::new(&[board]);
-    let json: serde_json::Value = serde_json::from_str(&summary_json(&state)).unwrap();
+    let json: serde_json::Value =
+        serde_json::from_str(&summary_json(&state, &crate::project::Project::current())).unwrap();
     assert_eq!(json["boards"][0]["name"], "main");
     assert_eq!(json["boards"][0]["fuse_blown"], true);
     assert!(json["last_run"].is_null());

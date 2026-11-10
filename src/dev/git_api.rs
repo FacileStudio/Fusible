@@ -12,7 +12,7 @@ use super::refresh::refresh;
 use super::run_api::forbidden;
 use super::server::{query_param, route_path};
 use super::state::State;
-use crate::config::FusibleConfig;
+use crate::project::Project;
 
 const MAX_REQUEST: u64 = 4096;
 
@@ -24,11 +24,9 @@ pub(super) fn owns(path: &str) -> bool {
     )
 }
 
-fn project_dir() -> std::path::PathBuf {
-    let found = FusibleConfig::nearest().map(|(path, _)| path);
-    found
-        .as_deref()
-        .and_then(Path::parent)
+fn project_dir(project: &Project) -> std::path::PathBuf {
+    project
+        .manifest_dir()
         .map(Path::to_path_buf)
         .unwrap_or_default()
 }
@@ -48,7 +46,7 @@ fn respond(request: Request, state: &State, reply: Reply) {
 }
 
 /// Answers the Sync panel: the status on GET, and save, update or resolve on guarded POSTs.
-pub(super) fn serve(mut request: Request, state: &State, port: u16) {
+pub(super) fn serve(mut request: Request, state: &State, port: u16, project: &Project) {
     let path = route_path(request.url()).to_string();
     let route = if path == "/api/git" {
         if *request.method() != Method::Get {
@@ -71,7 +69,7 @@ pub(super) fn serve(mut request: Request, state: &State, port: u16) {
     };
     match route {
         Ok(route) => {
-            let reply = perform("git", &project_dir(), route);
+            let reply = perform("git", &project_dir(project), route);
             respond(request, state, reply);
         }
         Err(message) => respond_json(request, 400, error_body(&message)),

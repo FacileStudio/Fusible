@@ -9,7 +9,7 @@ use crate::bom::{self, BomError, BomFile, Part, Report};
 use crate::cli::{BomArgs, BomFormat};
 use crate::commands::check::{load_circuit_source, CheckError};
 use crate::commands::target::{resolve_boards, TargetError};
-use crate::config::FusibleConfig;
+use crate::project::Project;
 
 /// A BOM that could not be produced.
 #[derive(Debug, Error, Diagnostic)]
@@ -34,8 +34,8 @@ pub enum BomCommandError {
     },
 }
 
-pub(crate) fn report(args: &BomArgs) -> Result<Report, BomCommandError> {
-    let boards = resolve_boards(args.target.clone())?;
+pub(crate) fn report(project: &Project, args: &BomArgs) -> Result<Report, BomCommandError> {
+    let boards = resolve_boards(project, args.target.clone())?;
     let scoped = boards.len() > 1;
     let mut parts: Vec<Part> = Vec::new();
     for board in &boards {
@@ -43,25 +43,23 @@ pub(crate) fn report(args: &BomArgs) -> Result<Report, BomCommandError> {
         let scope = board.name.as_deref().filter(|_| scoped);
         parts.extend(bom::detect(&source, scope)?);
     }
-    let (manifest, cfg) = FusibleConfig::nearest().unzip();
     let names: Vec<&str> = boards.iter().filter_map(|b| b.name.as_deref()).collect();
-    let file = match &manifest {
+    let file = match &project.manifest {
         Some(manifest) => BomFile::load_or_create(&bom::bom_path(manifest))?,
         None => BomFile::default(),
     };
-    let root = manifest
-        .as_deref()
-        .and_then(Path::parent)
-        .unwrap_or(Path::new("."));
-    let bodies = cfg.map_or_else(Vec::new, |c| bom::bodies_of(&c, &names, root));
+    let root = project.manifest_dir().unwrap_or(Path::new("."));
+    let bodies = project
+        .found()
+        .map_or_else(Vec::new, |(_, c)| bom::bodies_of(c, &names, root));
     Ok(bom::build(parts, &bodies, &file))
 }
 
 /// Prints or writes the bill of materials.
-pub fn run(args: BomArgs) -> Result<(), BomCommandError> {
-    let report = report(&args)?;
+pub fn run(project: &Project, args: BomArgs) -> Result<(), BomCommandError> {
+    let report = report(project, &args)?;
     if args.opus.opus {
-        crate::commands::opus::report_bom(&report, &args.opus);
+        crate::commands::opus::report_bom(project, &report, &args.opus);
     }
     let text = match args.format {
         BomFormat::Table => bom::table(&report),

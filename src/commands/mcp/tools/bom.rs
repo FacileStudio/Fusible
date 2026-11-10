@@ -16,14 +16,14 @@ pub fn schema() -> Value {
 }
 
 /// Builds the same report as `fusible bom --format json`.
-pub fn run(_session: &mut Session, _args: &Value) -> Outcome {
+pub fn run(session: &mut Session, _args: &Value) -> Outcome {
     let args = BomArgs {
         target: None,
         format: BomFormat::Json,
         output: None,
         opus: OpusArgs::default(),
     };
-    match bom::report(&args) {
+    match bom::report(&session.project(), &args) {
         Ok(report) => Outcome::ok(json!(report)),
         Err(err) => Outcome::fail(err.to_string()),
     }

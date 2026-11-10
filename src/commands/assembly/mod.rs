@@ -49,8 +49,8 @@ use serde::Serialize;
 
 use crate::commands::body::{generator_dir, run_script};
 use crate::commands::check::CheckError;
-use crate::config::FusibleConfig;
 use crate::linter::FuseBlown;
+use crate::project::Project;
 
 pub use error::AssemblyError;
 use gate::{fuse_gate, load_circuits};
@@ -81,21 +81,22 @@ struct Job {
 /// against the boards: `check.json` and `preview.glb` land in `<out_dir>/assembly/`, and a
 /// blown fuse stops the run before any `assembly.*` file is written.
 pub fn run(
+    project: &Project,
     format: Option<String>,
     output: Option<PathBuf>,
     skip_lint: bool,
 ) -> Result<(), AssemblyError> {
-    let (manifest, cfg) = FusibleConfig::nearest().ok_or(AssemblyError::Missing)?;
+    let (manifest, cfg) = project.found().ok_or(AssemblyError::Missing)?;
     let assembly = cfg.assembly.clone().ok_or(AssemblyError::Missing)?;
     let root = manifest.parent().unwrap_or(Path::new("."));
     let formats = formats(format.or(assembly.format.clone()))?;
     let out_dir = out_dir(output.or(assembly.out_dir.clone()), root)?;
     let parts_dir = out_dir.join("assembly");
     remove_stale(&parts_dir, &out_dir);
-    let circuits = fuse_gate(&cfg, &assembly, skip_lint)?;
-    let frames = board_frames(&cfg, &assembly);
+    let circuits = fuse_gate(project, &assembly, skip_lint)?;
+    let frames = board_frames(cfg, &assembly);
     let ctx = Context {
-        cfg: &cfg,
+        cfg,
         root,
         parts_dir: &parts_dir,
         circuits: &circuits,
@@ -132,11 +133,12 @@ fn outputs(formats: &[&'static str], out_dir: &Path) -> Vec<Output> {
 /// Checks the cross-world rules of the manifest's `assembly:` without writing any output.
 ///
 /// Used by `fusible check` once every board passed. A manifest without `assembly:` passes.
-pub fn verify(cfg: &FusibleConfig, root: &Path) -> Result<(), AssemblyError> {
+pub fn verify(project: &Project, root: &Path) -> Result<(), AssemblyError> {
+    let cfg = &project.config;
     let Some(assembly) = &cfg.assembly else {
         return Ok(());
     };
-    let circuits = load_circuits(cfg, assembly)?;
+    let circuits = load_circuits(project, assembly)?;
     let scratch = generator_dir().join(format!("check-{}", std::process::id()));
     let frames = board_frames(cfg, assembly);
     let ctx = Context {

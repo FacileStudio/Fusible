@@ -5,6 +5,7 @@ use thiserror::Error;
 
 use crate::commands::check::{load_circuit_source, CheckError};
 use crate::commands::target::{resolve_entry, TargetError};
+use crate::project::Project;
 use crate::router::{route_circuit, RouteOptions};
 
 #[derive(Debug, Error, Diagnostic)]
@@ -35,11 +36,12 @@ pub enum RouteCommandError {
 
 /// Autoroutes the target circuit and writes the routed Circuit JSON unless `options.dry_run`.
 pub fn run(
+    project: &Project,
     file: Option<PathBuf>,
     output: Option<PathBuf>,
     options: RouteOptions,
 ) -> Result<(), RouteCommandError> {
-    let entry = resolve_entry(file)?;
+    let entry = resolve_entry(project, file)?;
     println!("⚡ Initializing autorouter for \"{}\"...", entry.display());
 
     let (_json_path, source) = load_circuit_source(&entry)?;

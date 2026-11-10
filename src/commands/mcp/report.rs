@@ -6,6 +6,7 @@ use crate::commands::check_lint::lint_board as lint_board_entry;
 use crate::commands::target::{resolve_boards, BoardTarget};
 use crate::linter::{Diagnostic, Severity};
 use crate::parser::{self, Circuit};
+use crate::project::Project;
 
 /// The lint result of one board.
 pub struct BoardReport {
@@ -20,8 +21,8 @@ pub fn board_name(target: &BoardTarget) -> String {
 }
 
 /// Resolves the named board, or every board of the project when `name` is `None`.
-pub fn select(name: Option<&str>) -> Result<Vec<BoardTarget>, String> {
-    let boards = resolve_boards(None).map_err(|e| e.to_string())?;
+pub fn select(project: &Project, name: Option<&str>) -> Result<Vec<BoardTarget>, String> {
+    let boards = resolve_boards(project, None).map_err(|e| e.to_string())?;
     let Some(name) = name else {
         return Ok(boards);
     };
@@ -55,15 +56,15 @@ fn source_error(message: String) -> Diagnostic {
     }
 }
 
-fn lint(target: &BoardTarget) -> Result<Vec<Diagnostic>, String> {
-    let (_, _, diagnostics) =
-        lint_board_entry(&target.entry, target.mcu.as_deref()).map_err(|e| e.to_string())?;
+fn lint(project: &Project, target: &BoardTarget) -> Result<Vec<Diagnostic>, String> {
+    let (_, _, diagnostics) = lint_board_entry(project, &target.entry, target.mcu.as_deref())
+        .map_err(|e| e.to_string())?;
     Ok(diagnostics)
 }
 
 /// Lints one board; a source that cannot load blows the fuse with a `source_error`.
-pub fn lint_board(target: &BoardTarget) -> BoardReport {
-    let diagnostics = lint(target).unwrap_or_else(|message| vec![source_error(message)]);
+pub fn lint_board(project: &Project, target: &BoardTarget) -> BoardReport {
+    let diagnostics = lint(project, target).unwrap_or_else(|message| vec![source_error(message)]);
     let blown = diagnostics.iter().any(|d| d.severity == Severity::Error);
     BoardReport {
         name: board_name(target),

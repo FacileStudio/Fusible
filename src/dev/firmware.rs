@@ -13,6 +13,7 @@ use crate::config::{FirmwareConfig, FusibleConfig};
 use crate::linter::{LintContext, PinMuxRule, Rule};
 use crate::netlist::Netlist;
 use crate::parser;
+use crate::project::Project;
 
 /// A status code and JSON body for the response.
 pub(super) type Reply = (u16, String);
@@ -25,14 +26,11 @@ fn failure(status: u16, message: String) -> Reply {
 }
 
 /// Serves the pin map of the firmware named by `?name=`.
-pub(super) fn serve(request: Request, state: &State) {
+pub(super) fn serve(request: Request, state: &State, project: &Project) {
     let name = query_param(request.url(), "name").unwrap_or_default();
-    let (path, cfg) = FusibleConfig::nearest().unzip();
-    let root = path
-        .as_deref()
-        .and_then(Path::parent)
-        .unwrap_or(Path::new(""));
-    let (status, body) = firmware_reply(cfg.as_ref(), state, &name, root);
+    let cfg = project.found().map(|(_, cfg)| cfg);
+    let root = project.manifest_dir().unwrap_or(Path::new(""));
+    let (status, body) = firmware_reply(cfg, state, &name, root);
     respond_json(request, status, body);
 }
 

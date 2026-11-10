@@ -3,9 +3,9 @@
 use std::path::{Path, PathBuf};
 
 use super::kit_data::build_kit;
-use super::{fuse_gate, BodyError};
+use super::{fuse_gate, BodyError, Gate};
 use crate::commands::target::{is_tsx_target, resolve_board, BoardTarget};
-use crate::config::FusibleConfig;
+use crate::project::Project;
 use crate::tscircuit::Runner;
 
 /// Writes `kit.json` and, when a tscircuit runner is available, `board.step` for one board.
@@ -15,14 +15,15 @@ use crate::tscircuit::Runner;
 /// file. Fuse-gated unless `skip_lint` is set. A runner that is found but fails the
 /// `board.step` export is a tool error, raised after `kit.json` is written.
 pub fn kit(
+    project: &Project,
     board: Option<PathBuf>,
     output: Option<PathBuf>,
     skip_lint: bool,
 ) -> Result<(), BodyError> {
-    let target = resolve_board(board)?;
+    let target = resolve_board(project, board)?;
     let name = kit_name(&target);
-    let out_dir = output.unwrap_or_else(|| default_dir(&name));
-    let json = fuse_gate(&target, skip_lint)?;
+    let out_dir = output.unwrap_or_else(|| default_dir(project, &name));
+    let json = fuse_gate(Gate { project, skip_lint }, &target)?;
     let data = build_kit(&json, target.name.clone())?;
     std::fs::create_dir_all(&out_dir)?;
     let path = out_dir.join("kit.json");
@@ -50,10 +51,10 @@ fn kit_name(target: &BoardTarget) -> String {
         .unwrap_or_else(|| "board".into())
 }
 
-fn default_dir(name: &str) -> PathBuf {
-    let manifest = FusibleConfig::nearest().map(|(path, _)| path);
-    let root = manifest.as_deref().and_then(Path::parent);
-    root.unwrap_or(Path::new(""))
+fn default_dir(project: &Project, name: &str) -> PathBuf {
+    project
+        .manifest_dir()
+        .unwrap_or(Path::new(""))
         .join("bodies")
         .join("kit")
         .join(name)

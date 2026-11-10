@@ -19,6 +19,7 @@ const MAX_BODY: u64 = 4096;
 use crate::dev::api::{error_body, respond_json};
 use crate::dev::limiter::lock;
 use crate::dev::state::State;
+use crate::project::Project;
 
 /// Whether the pairing module serves `path`.
 pub(in crate::dev) fn owns(path: &str) -> bool {
@@ -29,12 +30,12 @@ fn fail(request: Request, status: u16, message: &str) {
     respond_json(request, status, error_body(message));
 }
 
-fn handle_start(request: Request, state: &State, pair: &PairState) {
+fn handle_start(request: Request, state: &State, pair: &PairState, project: &Project) {
     let Some(host) = state.lan_host.as_deref() else {
         return fail(request, 404, "run fusible studio --share");
     };
     let (token, expires) = start_pairing(pair, Instant::now(), unix_now());
-    let name = encode(&project_name());
+    let name = encode(&project_name(project));
     let uri = format!("fusible://pair?h={host}&t={token}&n={name}");
     respond_json(
         request,
@@ -69,7 +70,7 @@ fn handle_revoke(request: Request, pair: &PairState, id: &str) {
 }
 
 /// Routes one pairing request. Only reached once the guards have passed.
-pub(in crate::dev) fn serve(request: Request, state: &State, path: &str) {
+pub(in crate::dev) fn serve(request: Request, state: &State, path: &str, project: &Project) {
     let Some(pair) = state.pair.as_deref() else {
         return match path {
             "/api/pair/start" => fail(request, 404, "run fusible studio --share"),
@@ -77,8 +78,10 @@ pub(in crate::dev) fn serve(request: Request, state: &State, path: &str) {
         };
     };
     match (request.method().clone(), path) {
-        (Method::Get, "/api/mobile/summary") => respond_json(request, 200, summary_json(state)),
-        (Method::Post, "/api/pair/start") => handle_start(request, state, pair),
+        (Method::Get, "/api/mobile/summary") => {
+            respond_json(request, 200, summary_json(state, project))
+        }
+        (Method::Post, "/api/pair/start") => handle_start(request, state, pair, project),
         (Method::Post, CLAIM) => handle_claim(request, pair),
         (Method::Get, "/api/pair/devices") => {
             respond_json(request, 200, json!(lock(&pair.devices).view()).to_string())

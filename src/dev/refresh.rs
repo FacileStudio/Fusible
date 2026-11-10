@@ -9,6 +9,7 @@ use super::assets::load_studio_bundle;
 use super::kicad_sync::evaluate;
 use super::pipeline::execute_pipeline;
 use super::state::{Health, Slot, State};
+use crate::project::Project;
 
 /// Loads the studio bundle: every time in debug builds, so a `bun run build` is picked up,
 /// and once in release builds, where it is embedded and never changes.
@@ -43,7 +44,7 @@ pub(super) fn refresh(slot: &Slot, state: &State) {
         })
         .to_string(),
     );
-    let (payload, source) = execute_pipeline(&slot.entry);
+    let (payload, source) = execute_pipeline(&Project::current(), &slot.entry);
     let shared: Option<Arc<str>> = source.as_deref().map(Arc::from);
     let health = Health {
         fuse_blown: payload.fuse_blown,

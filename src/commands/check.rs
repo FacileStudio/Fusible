@@ -16,6 +16,7 @@ use crate::config::FusibleConfig;
 use crate::linter::{FuseBlown, LintContext, Severity};
 use crate::netlist::Netlist;
 use crate::parser;
+use crate::project::Project;
 use crate::tscircuit::RunnerError;
 
 /// The input file could not be read.
@@ -60,10 +61,11 @@ pub enum CheckError {
 ///
 /// Returns the path and text of the Circuit JSON that passed the fuse check.
 pub fn lint_source(
+    project: &Project,
     entry: &Path,
     target_mcu: Option<String>,
 ) -> Result<(PathBuf, String), CheckError> {
-    let (json_path, source, diagnostics) = lint_board(entry, target_mcu.as_deref())?;
+    let (json_path, source, diagnostics) = lint_board(project, entry, target_mcu.as_deref())?;
     let (warnings, violations): (Vec<_>, Vec<_>) = diagnostics
         .into_iter()
         .partition(|d| d.severity == Severity::Warning);
@@ -84,17 +86,19 @@ pub fn lint_source(
 
 /// Runs the electrical linter on the target board, or on every board of the manifest.
 pub fn run(
+    project: &Project,
     file: Option<PathBuf>,
     mcu: Option<String>,
     pins_rs: Option<PathBuf>,
 ) -> Result<(), CheckError> {
-    run_boards(&resolve_boards(file)?, mcu, pins_rs)
+    run_boards(project, &resolve_boards(project, file)?, mcu, pins_rs)
 }
 
 /// Checks every board, then returns the merged violations or the first tool error.
 ///
 /// CLI `mcu` and `pins_rs` override the manifest values of each board.
 pub fn run_boards(
+    project: &Project,
     boards: &[BoardTarget],
     mcu: Option<String>,
     pins_rs: Option<PathBuf>,
@@ -106,14 +110,15 @@ pub fn run_boards(
         if let Some(name) = name {
             println!("\n▸ board {name}");
         }
-        let next = check_board(board, mcu.clone(), pins_rs.clone())
+        let next = check_board(project, board, mcu.clone(), pins_rs.clone())
             .err()
             .map(|error| label(error, name));
         failure = merge(failure, next, &mut report);
     }
-    failure = merge(failure, check_manifest_links(boards).err(), &mut report);
+    let links = check_manifest_links(project, boards).err();
+    failure = merge(failure, links, &mut report);
     if failure.is_none() {
-        failure = check_manifest_assembly(boards).err();
+        failure = check_manifest_assembly(project, boards).err();
     }
     failure.map_or(Ok(()), Err)
 }
@@ -122,40 +127,41 @@ fn checked_every_board(cfg: &FusibleConfig, boards: &[BoardTarget]) -> bool {
     !cfg.boards.is_empty() && cfg.boards.len() == boards.len()
 }
 
-fn check_manifest_links(boards: &[BoardTarget]) -> Result<(), CheckError> {
-    let Some((_, cfg)) = FusibleConfig::nearest() else {
+fn check_manifest_links(project: &Project, boards: &[BoardTarget]) -> Result<(), CheckError> {
+    let Some((_, cfg)) = project.found() else {
         return Ok(());
     };
-    if cfg.links.is_empty() || !checked_every_board(&cfg, boards) {
+    if cfg.links.is_empty() || !checked_every_board(cfg, boards) {
         return Ok(());
     }
-    check_links(&cfg)
+    check_links(cfg)
 }
 
-fn check_manifest_assembly(boards: &[BoardTarget]) -> Result<(), CheckError> {
-    let Some((manifest, cfg)) = FusibleConfig::nearest() else {
+fn check_manifest_assembly(project: &Project, boards: &[BoardTarget]) -> Result<(), CheckError> {
+    let Some((manifest, cfg)) = project.found() else {
         return Ok(());
     };
-    if !checked_every_board(&cfg, boards) {
+    if !checked_every_board(cfg, boards) {
         return Ok(());
     }
     let root = manifest.parent().unwrap_or(Path::new("."));
     if cfg.assembly.is_some() {
-        assembly::verify(&cfg, root).map_err(|error| match error {
+        assembly::verify(project, root).map_err(|error| match error {
             AssemblyError::Check(inner) => inner,
             other => CheckError::Assembly(Box::new(other)),
         })?;
     }
-    body::verify_mech(&cfg, root)
+    body::verify_mech(cfg, root)
 }
 
 fn check_board(
+    project: &Project,
     board: &BoardTarget,
     mcu: Option<String>,
     pins_rs: Option<PathBuf>,
 ) -> Result<(), CheckError> {
     let target_mcu = mcu.or_else(|| board.mcu.clone());
-    let (json_path, source) = lint_source(&board.entry, target_mcu.clone())?;
+    let (json_path, source) = lint_source(project, &board.entry, target_mcu.clone())?;
     let pins = pins_rs.map_or_else(|| board.pins_rs.clone(), |path| vec![path]);
     if pins.is_empty() {
         return Ok(());

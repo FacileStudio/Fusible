@@ -45,7 +45,12 @@ fn export_fab(job: &ExportJob, circuit_json: &str) -> Result<(), ExportError> {
     std::fs::create_dir_all(&base)?;
     println!("📦 Running fabrication export preset (fab)...");
     println!("  • Exporting RS-274X gerbers & drill files via native Rust engine...");
-    super::fab_files::write_fab_bundle(circuit_json, &job.board_title, &base)?;
+    super::fab_files::write_fab_bundle(
+        circuit_json,
+        &job.board_title,
+        &base,
+        job.manifest.as_deref(),
+    )?;
     println!(
         "✅ Fabrication artifacts generated in \"{}\" (gerbers.zip, circuit.json, bom.csv, pnp.csv)",
         base.display()

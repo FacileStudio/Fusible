@@ -9,6 +9,7 @@ use crate::kicad::diff::parse_circuit_elements;
 use crate::kicad::{
     compare_kicad_with_circuit, extract_footprints, format_diff_report, parse_sexpr,
 };
+use crate::project::Project;
 
 #[derive(Debug, Error, Diagnostic)]
 pub enum DiffCommandError {
@@ -48,7 +49,11 @@ pub enum DiffCommandError {
     DriftDetected,
 }
 
-pub fn run(kicad_pcb: PathBuf, file: Option<PathBuf>) -> Result<(), DiffCommandError> {
+pub fn run(
+    project: &Project,
+    kicad_pcb: PathBuf,
+    file: Option<PathBuf>,
+) -> Result<(), DiffCommandError> {
     let content = std::fs::read_to_string(&kicad_pcb).map_err(|source| DiffCommandError::Read {
         path: kicad_pcb.display().to_string(),
         source,
@@ -57,7 +62,7 @@ pub fn run(kicad_pcb: PathBuf, file: Option<PathBuf>) -> Result<(), DiffCommandE
     let sexpr = parse_sexpr(&content).map_err(DiffCommandError::Sexpr)?;
     let footprints = extract_footprints(&sexpr);
 
-    let entry = resolve_entry(file)?;
+    let entry = resolve_entry(project, file)?;
     let (json_path, source) = load_circuit_source(&entry)?;
     let elements =
         parse_circuit_elements(&source).map_err(|source| DiffCommandError::CircuitJson {

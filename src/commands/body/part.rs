@@ -10,11 +10,12 @@ use super::mech_rules_data::clearance_gap;
 use super::part_features::PartReport;
 use super::settings::resolve_settings;
 use super::spec::Output;
-use super::{fuse_gate, run_capture, BodyError};
+use super::{fuse_gate, run_capture, BodyError, Gate};
 use crate::bom::resolve_material;
 use crate::commands::check::load_circuit_source;
 use crate::commands::target::BoardTarget;
-use crate::config::{BodyConfig, EnclosureConfig, FusibleConfig};
+use crate::config::{BodyConfig, EnclosureConfig};
+use crate::project::Project;
 
 #[derive(Serialize)]
 struct PartJob<'a> {
@@ -74,11 +75,11 @@ pub(crate) fn build_code(
     body: &BodyConfig,
     board: Option<&BoardTarget>,
     overrides: &EnclosureConfig,
-    skip_lint: bool,
+    gate: Gate,
 ) -> Result<(), BodyError> {
     let settings = resolve_settings(overrides.clone(), body.enclosure.clone())?;
     let circuit = board
-        .map(|b| fuse_gate(b, skip_lint).map(|json| (json, b.name.clone())))
+        .map(|b| fuse_gate(gate, b).map(|json| (json, b.name.clone())))
         .transpose()?;
     let out_dir = std::path::absolute(&settings.out_dir)?;
     std::fs::create_dir_all(&out_dir)?;
@@ -133,16 +134,20 @@ pub(crate) fn read_report(root: &Path, name: &str, body: &BodyConfig) -> Option<
 
 /// Builds the code part `name` as a GLB at `output` without a fuse check, for the dev studio.
 pub(crate) fn code_glb(
-    cfg: &FusibleConfig,
+    project: &Project,
     name: &str,
     root: &Path,
     output: &Path,
 ) -> Result<(), BodyError> {
-    let body = cfg.bodies.get(name).ok_or_else(|| BodyError::UnknownBody {
-        name: name.to_string(),
-        help: "add it to `bodies:` in fusible.yml".into(),
-    })?;
-    let board = code_board(cfg, body)?;
+    let body = project
+        .config
+        .bodies
+        .get(name)
+        .ok_or_else(|| BodyError::UnknownBody {
+            name: name.to_string(),
+            help: "add it to `bodies:` in fusible.yml".into(),
+        })?;
+    let board = code_board(project, body)?;
     code_model(body, root, board.as_ref(), "glb", output.to_path_buf()).map(|_| ())
 }
 

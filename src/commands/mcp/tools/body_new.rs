@@ -34,7 +34,7 @@ pub fn run(session: &mut Session, args: &Value) -> Outcome {
     let material = optional_str(args, "material").unwrap_or("petg").to_string();
     let process = optional_str(args, "process").unwrap_or("fdm").to_string();
     let _ = std::env::set_current_dir(&session.root);
-    match body::new(name.clone(), None, material, process) {
+    match body::new(&session.project(), name.clone(), None, material, process) {
         Ok(()) => Outcome::ok(json!({"created": [format!("mech/{name}.ts"), "mech/fusible.d.ts"]})),
         Err(err) => Outcome::fail(err.to_string()),
     }

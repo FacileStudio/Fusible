@@ -12,7 +12,7 @@ use super::authored::{authored_glb, Failure};
 use super::body::no_store;
 use super::server::percent_decode;
 use crate::commands::body::{code_glb, convert_to_glb, generator_dir};
-use crate::config::FusibleConfig;
+use crate::project::Project;
 
 use super::api::{error_body, respond_json};
 use super::bodies_list::bodies_json;
@@ -40,19 +40,21 @@ pub(super) fn scrub(message: &str, root: &Path, cache: &Path) -> String {
         .replace(&root.display().to_string(), ".")
 }
 
-fn build(path: &str) -> Result<Vec<u8>, Failure> {
+fn build(path: &str, project: &Project) -> Result<Vec<u8>, Failure> {
     let bad = |status, message: &str| Failure::new(status, message);
     let name = body_name(path).ok_or_else(|| bad(400, "bad body name"))?;
-    let (manifest, cfg) =
-        FusibleConfig::nearest().ok_or_else(|| bad(404, "no fusible.yml found"))?;
+    let (manifest, cfg) = project
+        .found()
+        .ok_or_else(|| bad(404, "no fusible.yml found"))?;
     let root = manifest.parent().unwrap_or(Path::new("."));
     let cache = generator_dir();
     authored_glb(
-        &cfg,
+        cfg,
+        manifest.parent(),
         &name,
         &cache.join("authored"),
         |input, format, output| match format {
-            "ts" => code_glb(&cfg, &name, root, output).map_err(describe),
+            "ts" => code_glb(project, &name, root, output).map_err(describe),
             _ => convert_to_glb(input, format, output).map_err(describe),
         },
     )
@@ -60,8 +62,8 @@ fn build(path: &str) -> Result<Vec<u8>, Failure> {
 }
 
 /// Answers `request` for the body named in `path`, on the thread the server gave this request.
-pub(super) fn serve(request: Request, path: &str) {
-    let response = match build(path) {
+pub(super) fn serve(request: Request, path: &str, project: &Project) {
+    let response = match build(path, project) {
         Ok(glb) => http_response(200, "model/gltf-binary", glb),
         Err(failure) => {
             let body = serde_json::json!({ "error": failure.message }).to_string();
@@ -72,11 +74,11 @@ pub(super) fn serve(request: Request, path: &str) {
 }
 
 /// Answers `GET /api/bodies` with the list of bodies of the manifest.
-pub(super) fn list(request: Request) {
-    match FusibleConfig::nearest() {
+pub(super) fn list(request: Request, project: &Project) {
+    match project.found() {
         Some((manifest, cfg)) => {
             let root = manifest.parent().unwrap_or(Path::new("."));
-            respond_json(request, 200, bodies_json(&cfg, root));
+            respond_json(request, 200, bodies_json(cfg, root));
         }
         None => respond_json(request, 404, error_body("no fusible.yml found")),
     }

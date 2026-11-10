@@ -8,7 +8,7 @@ use super::assets::http_response;
 use super::project::project_json;
 use super::server::query_param;
 use super::state::State;
-use crate::config::FusibleConfig;
+use crate::project::Project;
 
 pub(super) const JSON: &str = "application/json";
 
@@ -41,22 +41,19 @@ pub(super) fn circuit(request: Request, state: &State) {
 }
 
 /// Serves the generated body preview of the board named by `?board=`.
-pub(super) fn body_preview(request: Request, state: &State, glb: bool) {
+pub(super) fn body_preview(request: Request, state: &State, project: &Project, glb: bool) {
     let board = query_param(request.url(), "board");
     match state.slot(board.as_deref()) {
-        Some(slot) => slot.body.serve(request, glb),
+        Some(slot) => slot.body.serve(request, glb, project),
         None => respond_json(request, 404, error_body("unknown board")),
     }
 }
 
 /// Serves the project tree.
-pub(super) fn project(request: Request, state: &State) {
-    let (path, cfg) = FusibleConfig::nearest().unzip();
-    let root = path
-        .as_deref()
-        .and_then(Path::parent)
-        .unwrap_or(Path::new(""));
-    respond_json(request, 200, project_json(state, cfg.as_ref(), root));
+pub(super) fn project(request: Request, state: &State, current: &Project) {
+    let cfg = current.found().map(|(_, cfg)| cfg);
+    let root = current.manifest_dir().unwrap_or(Path::new(""));
+    respond_json(request, 200, project_json(state, cfg, root));
 }
 
 /// Serves the KiCad status of every board that has a KiCad file.

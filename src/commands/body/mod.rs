@@ -14,6 +14,7 @@ mod eject_edit;
 mod eject_files;
 mod eject_manifest;
 mod error;
+mod gate;
 mod generator;
 mod generator_setup;
 mod jobs;
@@ -66,15 +67,17 @@ mod tests;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 
-use crate::commands::check;
 use crate::commands::target::BoardTarget;
 use crate::config::{EnclosureConfig, FusibleConfig};
 use crate::gerber::PcbModel;
+use crate::project::Project;
 
 pub(crate) use authored::build_authored;
 pub(crate) use convert::convert_to_glb;
 pub use eject::eject;
 pub use error::BodyError;
+use gate::fuse_gate;
+pub(crate) use gate::Gate;
 use generator::run_generator;
 pub(crate) use generator::{generator_dir, run_capture, run_script};
 use jobs::{select_jobs, Job};
@@ -125,24 +128,22 @@ static PREVIEW_COUNTER: AtomicU64 = AtomicU64::new(0);
 /// a default enclosure. CLI `overrides` win over each generated body's settings.
 /// Generated bodies are **fuse-gated**: a blown fuse stops them before any file is written.
 pub fn run(
+    project: &Project,
     target: Option<PathBuf>,
     overrides: EnclosureConfig,
     skip_lint: bool,
 ) -> Result<(), BodyError> {
-    let (manifest, cfg) = FusibleConfig::nearest().unzip();
-    let root = manifest
-        .as_deref()
-        .and_then(Path::parent)
-        .unwrap_or(Path::new("."));
-    for job in select_jobs(&cfg.unwrap_or_default(), target)? {
+    let root = project.manifest_dir().unwrap_or(Path::new("."));
+    let gate = Gate { project, skip_lint };
+    for job in select_jobs(project, target)? {
         match job {
             Job::Authored { name, body } => build_authored(&name, &body, root)?,
             Job::Code { name, body, board } => {
-                part::build_code(&name, &body, board.as_deref(), &overrides, skip_lint)?;
+                part::build_code(&name, &body, board.as_deref(), &overrides, gate)?;
             }
             Job::Generated { name, body, board } => {
                 let settings = resolve_settings(overrides.clone(), body.enclosure)?;
-                build_generated(&name, &board, &settings, skip_lint)?;
+                build_generated(&name, &board, &settings, gate)?;
             }
         }
     }
@@ -153,9 +154,9 @@ fn build_generated(
     name: &str,
     board: &BoardTarget,
     settings: &Settings,
-    skip_lint: bool,
+    gate: Gate,
 ) -> Result<(), BodyError> {
-    let circuit_json = fuse_gate(board, skip_lint)?;
+    let circuit_json = fuse_gate(gate, board)?;
     let out_dir = std::path::absolute(&settings.out_dir)?;
     let outputs = settings
         .formats
@@ -205,8 +206,9 @@ pub fn preview(
 /// Returns the settings of the first generated body for `board`, for the dev studio.
 ///
 /// A generated body without `board:` fits every board.
-pub(crate) fn preview_config(board: Option<&str>) -> Option<EnclosureConfig> {
-    FusibleConfig::nearest().and_then(|(_, cfg)| fitted_settings(cfg, board))
+pub(crate) fn preview_config(project: &Project, board: Option<&str>) -> Option<EnclosureConfig> {
+    let (_, cfg) = project.found()?;
+    fitted_settings(cfg.clone(), board)
 }
 
 fn fitted_settings(cfg: FusibleConfig, board: Option<&str>) -> Option<EnclosureConfig> {
@@ -216,18 +218,6 @@ fn fitted_settings(cfg: FusibleConfig, board: Option<&str>) -> Option<EnclosureC
             body.generate.is_some() && (body.board.is_none() || body.board.as_deref() == board)
         })
         .map(|body| body.enclosure)
-}
-
-/// Lints the board unless `skip_lint` is set, and returns its Circuit JSON.
-fn fuse_gate(board: &BoardTarget, skip_lint: bool) -> Result<String, BodyError> {
-    if skip_lint {
-        println!("⚠️  Skipping electrical rule verification (--skip-lint requested).\n");
-        return Ok(check::load_circuit_source(&board.entry)?.1);
-    }
-    println!("🔍 Verifying electrical rules before generating bodies (fuse check)...");
-    let (_, source) = check::lint_source(&board.entry, board.mcu.clone())?;
-    println!("⚡ Fuse intact — proceeding with body generation.\n");
-    Ok(source)
 }
 
 fn generate(

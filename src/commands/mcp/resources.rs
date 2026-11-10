@@ -19,7 +19,7 @@ pub fn list(session: &Session) -> Result<Value, RpcError> {
     if session.manifest.is_some() {
         items.push(json!({"uri": PROJECT_URI, "name": "project", "mimeType": "application/yaml"}));
     }
-    for board in report::select(None).unwrap_or_default() {
+    for board in report::select(&session.project(), None).unwrap_or_default() {
         let name = report::board_name(&board);
         let item = json!({"uri": board_uri(&name), "name": name, "mimeType": "application/json"});
         items.push(item);
@@ -40,7 +40,7 @@ fn read_text(session: &Session, uri: &str) -> Result<(&'static str, String), Str
         .strip_prefix("fusible://board/")
         .and_then(|rest| rest.strip_suffix("/circuit.json"))
         .ok_or_else(|| format!("unknown resource: {uri}"))?;
-    let boards = report::select(Some(name))?;
+    let boards = report::select(&session.project(), Some(name))?;
     let (_, text) = load_circuit_source(&boards[0].entry).map_err(|e| e.to_string())?;
     Ok(("application/json", text))
 }

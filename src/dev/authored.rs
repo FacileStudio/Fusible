@@ -57,11 +57,8 @@ fn source_of(cfg: &FusibleConfig, name: &str) -> Result<PathBuf, Failure> {
     })
 }
 
-fn relative_to_project(source: &Path) -> String {
-    let root = FusibleConfig::nearest().and_then(|(path, _)| path.parent().map(Path::to_path_buf));
-    let relative = root
-        .as_deref()
-        .and_then(|dir| source.strip_prefix(dir).ok());
+fn relative_to_project(source: &Path, root: Option<&Path>) -> String {
+    let relative = root.and_then(|dir| source.strip_prefix(dir).ok());
     match (relative, source.is_absolute()) {
         (Some(rel), _) => rel.display().to_string(),
         (None, true) => source
@@ -73,16 +70,18 @@ fn relative_to_project(source: &Path) -> String {
 
 /// Returns the GLB bytes of the authored body `name`, converting and caching when needed.
 ///
-/// `convert(source, format, output)` writes the GLB of a STEP or STL file to `output`.
+/// `convert(source, format, output)` writes the GLB of a STEP or STL file to `output`. Error
+/// messages show the source relative to `root`, the directory of the manifest.
 pub(super) fn authored_glb(
     cfg: &FusibleConfig,
+    root: Option<&Path>,
     name: &str,
     cache_dir: &Path,
     convert: impl Fn(&Path, &str, &Path) -> Result<(), String>,
 ) -> Result<Vec<u8>, Failure> {
     let source = source_of(cfg, name)?;
     let meta = std::fs::metadata(&source).map_err(|_| {
-        let shown = relative_to_project(&source);
+        let shown = relative_to_project(&source, root);
         Failure::new(404, format!("source file \"{shown}\" does not exist"))
     })?;
     if meta.len() > MAX_BYTES {

@@ -3,10 +3,12 @@ use std::path::Path;
 use super::pipeline::{execute_pipeline, revision};
 use super::server::route_path;
 use super::watcher::is_relevant_change;
+use crate::project::Project;
 
 #[test]
 fn pipeline_runs_on_valid_circuit_json() {
-    let (payload, source) = execute_pipeline(Path::new("examples/circuit.json"));
+    let (payload, source) =
+        execute_pipeline(&Project::current(), Path::new("examples/circuit.json"));
     assert!(!payload.fuse_blown);
     assert!(payload.diagnostics.is_empty());
     assert!(payload.circuit_json.is_some());
@@ -15,7 +17,10 @@ fn pipeline_runs_on_valid_circuit_json() {
 
 #[test]
 fn pipeline_flags_blown_fuse_on_floating_net() {
-    let (payload, _) = execute_pipeline(Path::new("examples/circuit-floating.json"));
+    let (payload, _) = execute_pipeline(
+        &Project::current(),
+        Path::new("examples/circuit-floating.json"),
+    );
     assert!(payload.fuse_blown);
     assert!(!payload.diagnostics.is_empty());
     assert!(payload
@@ -26,7 +31,7 @@ fn pipeline_flags_blown_fuse_on_floating_net() {
 
 #[test]
 fn pipeline_handles_missing_file_gracefully() {
-    let (payload, source) = execute_pipeline(Path::new("nonexistent.json"));
+    let (payload, source) = execute_pipeline(&Project::current(), Path::new("nonexistent.json"));
     assert!(payload.fuse_blown);
     assert_eq!(payload.diagnostics[0].rule, "source_error");
     assert!(payload.revision.is_empty());

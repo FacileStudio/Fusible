@@ -65,7 +65,13 @@ pub fn run(session: &mut Session, args: &Value) -> Outcome {
         Ok(_) => return Outcome::fail(format!("unknown body \"{name}\"")),
         Err(message) => return Outcome::fail(message),
     };
-    match body::run(Some(PathBuf::from(name)), EnclosureConfig::default(), false) {
+    let project = session.project();
+    match body::run(
+        &project,
+        Some(PathBuf::from(name)),
+        EnclosureConfig::default(),
+        false,
+    ) {
         Ok(()) => built(&cfg, &session.root, name),
         Err(BodyError::Check(CheckError::FuseBlown(blown))) => Outcome::fail_with(
             json!({"fuse": "blown", "violations": report::violations_json(&blown)}),

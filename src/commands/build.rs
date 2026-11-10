@@ -7,7 +7,8 @@ use thiserror::Error;
 
 use crate::commands::check::{self, CheckError};
 use crate::commands::target::{resolve_board, resolve_boards, BoardTarget};
-use crate::config::{FirmwareConfig, FusibleConfig};
+use crate::config::FirmwareConfig;
+use crate::project::Project;
 
 /// Error raised during full build orchestration.
 #[derive(Debug, Error, Diagnostic)]
@@ -36,10 +37,9 @@ pub enum BuildError {
 /// `target` names a firmware, a board, or a circuit file; without it every board and
 /// firmware of the manifest is built. No firmware builds unless every board keeps the
 /// fuse intact.
-pub fn run(target: Option<PathBuf>) -> Result<(), BuildError> {
-    let cfg = FusibleConfig::nearest().map(|(_, c)| c).unwrap_or_default();
-    let (boards, firmware) = select(&cfg, target)?;
-    check::run_boards(&boards, None, None)?;
+pub fn run(project: &Project, target: Option<PathBuf>) -> Result<(), BuildError> {
+    let (boards, firmware) = select(project, target)?;
+    check::run_boards(project, &boards, None, None)?;
     for (name, fw) in firmware {
         build_firmware(name, fw)?;
     }
@@ -49,16 +49,17 @@ pub fn run(target: Option<PathBuf>) -> Result<(), BuildError> {
 
 type Selection<'a> = (Vec<BoardTarget>, Vec<(&'a String, &'a FirmwareConfig)>);
 
-fn select(cfg: &FusibleConfig, target: Option<PathBuf>) -> Result<Selection<'_>, CheckError> {
+fn select(project: &Project, target: Option<PathBuf>) -> Result<Selection<'_>, CheckError> {
+    let cfg = &project.config;
     let by_name = target
         .as_deref()
         .and_then(|t| t.to_str())
         .and_then(|n| cfg.firmware.get_key_value(n));
     if let Some((name, fw)) = by_name {
-        let board = resolve_board(fw.board.clone().map(PathBuf::from))?;
+        let board = resolve_board(project, fw.board.clone().map(PathBuf::from))?;
         return Ok((vec![board], vec![(name, fw)]));
     }
-    let boards = resolve_boards(target)?;
+    let boards = resolve_boards(project, target)?;
     let firmware = cfg
         .firmware
         .iter()

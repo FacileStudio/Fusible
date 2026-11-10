@@ -11,11 +11,11 @@ use thiserror::Error;
 use crate::commands::check::{self, load_circuit_source, CheckError};
 use crate::commands::export::{write_fab_bundle, ExportError};
 use crate::commands::target::{resolve_boards, BoardTarget};
-use crate::config::DesignRules;
 use crate::gerber::generate_gerber_files;
 use crate::linter::{LintContext, Linter, Severity};
 use crate::netlist::Netlist;
 use crate::parser;
+use crate::project::Project;
 
 /// A release that could not be produced.
 #[derive(Debug, Error, Diagnostic)]
@@ -61,12 +61,17 @@ struct Staged {
 
 /// Checks every board, then writes `gerbers.zip`, `bom.csv`, `pnp.csv` and `RELEASE.txt` into `out`.
 /// Nothing is written unless every board passes every check.
-pub fn run(file: Option<PathBuf>, out: &Path, allow_warnings: bool) -> Result<(), ReleaseError> {
-    let boards = resolve_boards(file).map_err(CheckError::from)?;
-    check::run_boards(&boards, None, None)?;
+pub fn run(
+    project: &Project,
+    file: Option<PathBuf>,
+    out: &Path,
+    allow_warnings: bool,
+) -> Result<(), ReleaseError> {
+    let boards = resolve_boards(project, file).map_err(CheckError::from)?;
+    check::run_boards(project, &boards, None, None)?;
     let staged = boards
         .iter()
-        .map(|board| stage(board, allow_warnings))
+        .map(|board| stage(project, board, allow_warnings))
         .collect::<Result<Vec<_>, _>>()?;
     for board in &staged {
         let dir = if staged.len() > 1 {
@@ -74,7 +79,8 @@ pub fn run(file: Option<PathBuf>, out: &Path, allow_warnings: bool) -> Result<()
         } else {
             out.to_path_buf()
         };
-        write_fab_bundle(&board.circuit_json, &board.title, &dir)?;
+        let manifest = project.manifest.as_deref();
+        write_fab_bundle(&board.circuit_json, &board.title, &dir, manifest)?;
     }
     let names: Vec<&str> = staged.iter().map(|b| b.name.as_str()).collect();
     manifest::write(out, &names)?;
@@ -86,10 +92,14 @@ pub fn run(file: Option<PathBuf>, out: &Path, allow_warnings: bool) -> Result<()
     Ok(())
 }
 
-fn stage(board: &BoardTarget, allow_warnings: bool) -> Result<Staged, ReleaseError> {
+fn stage(
+    project: &Project,
+    board: &BoardTarget,
+    allow_warnings: bool,
+) -> Result<Staged, ReleaseError> {
     let name = board.name.clone().unwrap_or_else(|| board.title.clone());
     let (path, source) = load_circuit_source(&board.entry)?;
-    let count = warning_count(&path, &source, board.mcu.as_deref())?;
+    let count = warning_count(project, &path, &source, board.mcu.as_deref())?;
     if count > 0 && !allow_warnings {
         return Err(ReleaseError::Warnings { board: name, count });
     }
@@ -102,13 +112,17 @@ fn stage(board: &BoardTarget, allow_warnings: bool) -> Result<Staged, ReleaseErr
     })
 }
 
-fn warning_count(path: &Path, source: &str, mcu: Option<&str>) -> Result<usize, CheckError> {
+fn warning_count(
+    project: &Project,
+    path: &Path,
+    source: &str,
+    mcu: Option<&str>,
+) -> Result<usize, CheckError> {
     let circuit = parser::parse(source, path)?;
     let netlist = Netlist::from_circuit(&circuit);
-    let design = DesignRules::nearest();
     let ctx = LintContext::new(&circuit, &netlist)
         .with_mcu(mcu)
-        .with_design(design.as_ref());
+        .with_design(project.design_rules());
     let found = Linter::default().run_with_context(&ctx);
     Ok(found
         .iter()

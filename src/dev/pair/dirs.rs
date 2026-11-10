@@ -2,7 +2,7 @@
 
 use std::path::PathBuf;
 
-use crate::config::FusibleConfig;
+use crate::project::Project;
 
 fn env_path(key: &str) -> Option<PathBuf> {
     std::env::var_os(key)
@@ -36,13 +36,16 @@ pub(super) fn state_dir() -> Option<PathBuf> {
 }
 
 /// The manifest name, or the name of the folder that holds the manifest.
-pub(super) fn project_name() -> String {
-    let Some((path, cfg)) = FusibleConfig::nearest() else {
+pub(super) fn project_name(project: &Project) -> String {
+    let Some((path, cfg)) = project.found() else {
         return "project".into();
     };
     let folder = path.parent().and_then(|dir| dir.file_name());
     let folder = folder.map(|name| name.to_string_lossy().into_owned());
-    cfg.name.or(folder).unwrap_or_else(|| "project".into())
+    cfg.name
+        .clone()
+        .or(folder)
+        .unwrap_or_else(|| "project".into())
 }
 
 #[cfg(all(test, unix))]

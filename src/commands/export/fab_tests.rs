@@ -23,5 +23,5 @@ fn pnp_lists_designator_package_position_and_side() {
 
 #[test]
 fn bom_lists_the_mounted_part() {
-    assert!(bom_csv(CIRCUIT).unwrap().contains("R1"));
+    assert!(bom_csv(CIRCUIT, None).unwrap().contains("R1"));
 }

@@ -6,6 +6,7 @@ use miette::Diagnostic;
 use thiserror::Error;
 
 use crate::config::{BoardConfig, FusibleConfig};
+use crate::project::Project;
 
 mod kind;
 
@@ -50,13 +51,16 @@ pub struct BoardTarget {
 }
 
 /// Resolves the circuit entry file from CLI argument, `fusible.yml`, or convention.
-pub fn resolve_entry(explicit: Option<PathBuf>) -> Result<PathBuf, TargetError> {
-    resolve_board(explicit).map(|board| board.entry)
+pub fn resolve_entry(project: &Project, explicit: Option<PathBuf>) -> Result<PathBuf, TargetError> {
+    resolve_board(project, explicit).map(|board| board.entry)
 }
 
 /// Resolves exactly one board; fails when the manifest has several and none was named.
-pub fn resolve_board(explicit: Option<PathBuf>) -> Result<BoardTarget, TargetError> {
-    let mut boards = resolve_boards(explicit)?;
+pub fn resolve_board(
+    project: &Project,
+    explicit: Option<PathBuf>,
+) -> Result<BoardTarget, TargetError> {
+    let mut boards = resolve_boards(project, explicit)?;
     if boards.len() > 1 {
         let names = boards.into_iter().filter_map(|b| b.name).collect();
         return Err(TargetError::Ambiguous { names });
@@ -68,25 +72,27 @@ pub fn resolve_board(explicit: Option<PathBuf>) -> Result<BoardTarget, TargetErr
 ///
 /// `explicit` is a board name or a circuit file. Without it, every manifest board is
 /// returned, or the conventional entry file when the manifest declares no board.
-pub fn resolve_boards(explicit: Option<PathBuf>) -> Result<Vec<BoardTarget>, TargetError> {
-    let cfg = FusibleConfig::nearest().map(|(_, c)| c).unwrap_or_default();
+pub fn resolve_boards(
+    project: &Project,
+    explicit: Option<PathBuf>,
+) -> Result<Vec<BoardTarget>, TargetError> {
+    let cfg = &project.config;
     if let Some(arg) = explicit {
-        return Ok(vec![board_for(&cfg, arg)]);
+        return Ok(vec![board_for(cfg, arg)]);
     }
     if cfg.boards.is_empty() {
         let entry = entry_from_conventions().ok_or(TargetError::Missing)?;
-        return Ok(vec![bare_board(&cfg, entry)]);
+        return Ok(vec![bare_board(cfg, entry)]);
     }
     cfg.boards
         .iter()
-        .map(|(name, board)| named_board(&cfg, name, board, None))
+        .map(|(name, board)| named_board(cfg, name, board, None))
         .collect()
 }
 
 /// Resolves the board context of a circuit file, such as the one the dev server watches.
-pub fn board_for_entry(entry: &Path) -> BoardTarget {
-    let cfg = FusibleConfig::nearest().map(|(_, c)| c).unwrap_or_default();
-    board_for(&cfg, entry.to_path_buf())
+pub fn board_for_entry(project: &Project, entry: &Path) -> BoardTarget {
+    board_for(&project.config, entry.to_path_buf())
 }
 
 fn board_for(cfg: &FusibleConfig, arg: PathBuf) -> BoardTarget {

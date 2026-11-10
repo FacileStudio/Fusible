@@ -10,7 +10,7 @@ use super::bom_read::file_for_read;
 use super::run_api::forbidden;
 use super::state::State;
 use crate::bom::{self, BomError, BomFile, Part};
-use crate::config::FusibleConfig;
+use crate::project::Project;
 
 const MAX_REQUEST: u64 = 256 * 1024;
 
@@ -29,22 +29,21 @@ fn parts_of(state: &State) -> (Vec<Part>, usize) {
 }
 
 /// The priced report of every served board with `file` applied, and how many boards are still building.
-pub(super) fn report_of(state: &State, file: &BomFile) -> (bom::Report, usize) {
+pub(super) fn report_of(state: &State, file: &BomFile, project: &Project) -> (bom::Report, usize) {
     let (parts, pending) = parts_of(state);
-    let (manifest, cfg) = FusibleConfig::nearest().unzip();
-    let root = manifest.as_deref().and_then(std::path::Path::parent);
-    let cfg = cfg.unwrap_or_default();
+    let root = project.manifest_dir();
+    let cfg = &project.config;
     let names: Vec<&str> = state
         .slots
         .iter()
         .filter_map(|s| s.name.as_deref())
         .collect();
-    let bodies = bom::bodies_of(&cfg, &names, root.unwrap_or(std::path::Path::new(".")));
+    let bodies = bom::bodies_of(cfg, &names, root.unwrap_or(std::path::Path::new(".")));
     (bom::build(parts, &bodies, file), pending)
 }
 
-fn reply(state: &State, file: &BomFile, editable: bool) -> String {
-    let (report, pending) = report_of(state, file);
+fn reply(state: &State, project: &Project, file: &BomFile, editable: bool) -> String {
+    let (report, pending) = report_of(state, file, project);
     json!({ "report": report, "file": file, "editable": editable, "pending": pending }).to_string()
 }
 
@@ -67,11 +66,11 @@ pub(super) fn save(path: &std::path::Path, body: &str) -> Result<BomFile, (u16, 
     Ok(file)
 }
 
-fn update(mut request: Request, state: &State, port: u16) {
+fn update(mut request: Request, state: &State, port: u16, project: &Project) {
     if forbidden(&request, port) {
         return respond_json(request, 403, error_body("forbidden"));
     }
-    let Some((manifest, _)) = FusibleConfig::nearest() else {
+    let Some((manifest, _)) = project.found() else {
         return respond_json(
             request,
             409,
@@ -82,27 +81,28 @@ fn update(mut request: Request, state: &State, port: u16) {
         Ok(body) => body,
         Err(message) => return respond_json(request, 400, error_body(&message)),
     };
-    match save(&bom::bom_path(&manifest), &body) {
-        Ok(file) => respond_json(request, 200, reply(state, &file, true)),
+    match save(&bom::bom_path(manifest), &body) {
+        Ok(file) => respond_json(request, 200, reply(state, project, &file, true)),
         Err((status, message)) => respond_json(request, status, error_body(&message)),
     }
 }
 
-fn read(request: Request, state: &State) {
-    let Some((manifest, _)) = FusibleConfig::nearest() else {
-        return respond_json(request, 200, reply(state, &BomFile::default(), false));
+fn read(request: Request, state: &State, project: &Project) {
+    let Some((manifest, _)) = project.found() else {
+        let empty = reply(state, project, &BomFile::default(), false);
+        return respond_json(request, 200, empty);
     };
-    match file_for_read(&bom::bom_path(&manifest)) {
-        Ok(file) => respond_json(request, 200, reply(state, &file, true)),
+    match file_for_read(&bom::bom_path(manifest)) {
+        Ok(file) => respond_json(request, 200, reply(state, project, &file, true)),
         Err(err) => respond_json(request, 422, error_body(&err.to_string())),
     }
 }
 
 /// Serves the report on GET and saves the edited file on POST.
-pub(super) fn serve(request: Request, state: &State, port: u16) {
+pub(super) fn serve(request: Request, state: &State, port: u16, project: &Project) {
     match request.method() {
-        Method::Get => read(request, state),
-        Method::Post => update(request, state, port),
+        Method::Get => read(request, state, project),
+        Method::Post => update(request, state, port, project),
         _ => respond_json(request, 405, error_body("use GET or POST")),
     }
 }

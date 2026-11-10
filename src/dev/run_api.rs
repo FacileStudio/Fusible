@@ -10,7 +10,7 @@ use super::guard::is_allowed_origin;
 use super::run_request::parse;
 use super::runs::Busy;
 use super::state::State;
-use crate::config::FusibleConfig;
+use crate::project::Project;
 
 const MAX_REQUEST: u64 = 4096;
 
@@ -26,7 +26,7 @@ pub(super) fn forbidden(request: &Request, port: u16) -> bool {
 }
 
 /// Starts a check, build, or body run after validating the origin and the target.
-pub(super) fn start_run(mut request: Request, state: &State, port: u16) {
+pub(super) fn start_run(mut request: Request, state: &State, port: u16, project: &Project) {
     if forbidden(&request, port) {
         return respond_json(request, 403, error_body("forbidden"));
     }
@@ -38,8 +38,8 @@ pub(super) fn start_run(mut request: Request, state: &State, port: u16) {
     if read.is_err() {
         return respond_json(request, 400, error_body("unreadable request body"));
     }
-    let cfg = FusibleConfig::nearest().map(|(_, cfg)| cfg);
-    let spec = match parse(&body, cfg.as_ref()) {
+    let cfg = project.found().map(|(_, cfg)| cfg);
+    let spec = match parse(&body, cfg) {
         Ok(spec) => spec,
         Err(message) => return respond_json(request, 400, error_body(&message)),
     };

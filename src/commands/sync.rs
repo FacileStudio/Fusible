@@ -3,10 +3,12 @@ use std::path::{Path, PathBuf};
 use miette::Diagnostic;
 use thiserror::Error;
 
+use crate::cli::SyncArgs;
 use crate::commands::check::{load_circuit_source, CheckError};
 use crate::commands::target::{resolve_entry, TargetError};
 use crate::kicad::diff::parse_circuit_elements;
 use crate::kicad::{apply_kicad_sync, compare_kicad_with_circuit, extract_footprints, parse_sexpr};
+use crate::project::Project;
 
 #[derive(Debug, Error, Diagnostic)]
 pub enum SyncCommandError {
@@ -43,13 +45,14 @@ pub enum SyncCommandError {
     Sync(String),
 }
 
-pub fn run(
-    kicad_pcb: PathBuf,
-    file: Option<PathBuf>,
-    target: Option<PathBuf>,
-    write: bool,
-    dry_run: bool,
-) -> Result<(), SyncCommandError> {
+pub fn run(project: &Project, args: SyncArgs) -> Result<(), SyncCommandError> {
+    let SyncArgs {
+        kicad_pcb,
+        file,
+        target,
+        write,
+        dry_run,
+    } = args;
     let content = std::fs::read_to_string(&kicad_pcb).map_err(|source| SyncCommandError::Read {
         path: kicad_pcb.display().to_string(),
         source,
@@ -58,7 +61,7 @@ pub fn run(
     let sexpr = parse_sexpr(&content).map_err(SyncCommandError::Sexpr)?;
     let footprints = extract_footprints(&sexpr);
 
-    let entry = resolve_entry(file)?;
+    let entry = resolve_entry(project, file)?;
     let (json_path, source) = load_circuit_source(&entry)?;
     let elements =
         parse_circuit_elements(&source).map_err(|source| SyncCommandError::CircuitJson {

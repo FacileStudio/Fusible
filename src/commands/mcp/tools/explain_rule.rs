@@ -5,7 +5,6 @@ use serde_json::{json, Value};
 use super::args::{object, required_str, string};
 use super::outcome::Outcome;
 use crate::commands::mcp::session::Session;
-use crate::config::DesignRules;
 use crate::linter::Linter;
 
 pub const DESCRIPTION: &str =
@@ -20,13 +19,13 @@ pub fn schema() -> Value {
 }
 
 /// Looks the rule up by id in the registered rule set.
-pub fn run(_session: &mut Session, args: &Value) -> Outcome {
+pub fn run(session: &mut Session, args: &Value) -> Outcome {
     let id = match required_str(args, "rule") {
         Ok(id) => id,
         Err(outcome) => return outcome,
     };
-    let design = DesignRules::nearest();
-    let rules = Linter::default().describe(design.as_ref());
+    let project = session.project();
+    let rules = Linter::default().describe(project.design_rules());
     match rules.iter().find(|r| r.id == id) {
         Some(rule) => Outcome::ok(json!({
             "id": rule.id,

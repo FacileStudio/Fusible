@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use crate::config::{FusibleConfig, CONFIG_FILENAMES};
+use crate::project::Project;
 
 /// The project served by this process.
 pub struct Session {
@@ -41,6 +42,13 @@ impl Session {
         FusibleConfig::from_file(path)
             .map(Some)
             .map_err(|e| e.to_string())
+    }
+
+    /// Loads the project afresh: tools edit the manifest, so it is never cached.
+    ///
+    /// The process runs inside the root, so this is the project of the working directory.
+    pub fn project(&self) -> Project {
+        Project::current()
     }
 
     /// Records the bytes this session left in `file`.

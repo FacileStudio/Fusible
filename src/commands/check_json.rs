@@ -9,6 +9,7 @@ use super::check_lint::lint_board;
 use super::target::resolve_boards;
 use crate::dev::pipeline::DevDiagnostic;
 use crate::linter::Severity;
+use crate::project::Project;
 
 /// The verdict document and whether the fuse blew.
 pub type Verdict = (Value, bool);
@@ -17,12 +18,16 @@ pub type Verdict = (Value, bool);
 ///
 /// Nothing is printed here. The manifest's `links` and `assembly` checks are not part
 /// of this document; board diagnostics are.
-pub fn run(file: Option<PathBuf>, mcu: Option<String>) -> Result<Verdict, CheckError> {
+pub fn run(
+    project: &Project,
+    file: Option<PathBuf>,
+    mcu: Option<String>,
+) -> Result<Verdict, CheckError> {
     let mut blown = false;
     let mut boards = Vec::new();
-    for board in resolve_boards(file)? {
+    for board in resolve_boards(project, file)? {
         let target_mcu = mcu.clone().or_else(|| board.mcu.clone());
-        let (_, _, found) = lint_board(&board.entry, target_mcu.as_deref())?;
+        let (_, _, found) = lint_board(project, &board.entry, target_mcu.as_deref())?;
         blown |= found.iter().any(|d| d.severity == Severity::Error);
         let stem = board
             .entry

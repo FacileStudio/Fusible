@@ -17,6 +17,7 @@ pub mod kicad;
 pub mod linter;
 pub mod netlist;
 pub mod parser;
+pub mod project;
 pub mod router;
 pub mod silicon;
 pub mod svg;
@@ -29,7 +30,8 @@ use std::process::ExitCode;
 use clap::Parser;
 use miette::Diagnostic;
 
-use crate::cli::{Cli, Commands};
+use crate::cli::{CheckArgs, Cli, Commands, OpusArgs};
+use crate::project::Project;
 
 /// Exit code: electrical violations (the fuse blew).
 pub const EXIT_VIOLATIONS: u8 = 1;
@@ -38,50 +40,60 @@ pub const EXIT_TOOL_ERROR: u8 = 2;
 
 fn main() -> ExitCode {
     let cli = Cli::parse();
-
-    if !matches!(
-        cli.command,
-        Some(Commands::Init(_) | Commands::Doctor { .. } | Commands::Mcp(_))
-    ) {
-        if let Err(err) = config::FusibleConfig::find_and_load(std::path::Path::new(".")) {
-            return fail(err, EXIT_TOOL_ERROR);
-        }
-    }
-
+    let project = match load_project(cli.command.as_ref()) {
+        Ok(project) => project,
+        Err(err) => return fail(err, EXIT_TOOL_ERROR),
+    };
     match cli.command {
-        Some(command) => run_command(command),
-        None => dispatch::check(cli.input, cli.mcu, None, false, cli::OpusArgs::default()),
+        Some(command) => run_command(command, &project),
+        None => dispatch::check(
+            &project,
+            CheckArgs {
+                file: cli.input,
+                mcu: cli.mcu,
+                pins_rs: None,
+                json: false,
+                opus: OpusArgs::default(),
+            },
+        ),
+    }
+}
+
+/// Loads the project of the working directory once, for every command.
+///
+/// `init`, `doctor` and `mcp` run without a valid manifest, so a manifest error fails only
+/// the other commands.
+fn load_project(command: Option<&Commands>) -> Result<Project, config::ConfigError> {
+    let tolerant = matches!(
+        command,
+        Some(Commands::Init(_) | Commands::Doctor { .. } | Commands::Mcp(_))
+    );
+    match tolerant {
+        true => Ok(Project::current()),
+        false => Project::load(std::path::Path::new(".")),
     }
 }
 
 /// Dispatches one subcommand and returns its exit code.
-fn run_command(command: Commands) -> ExitCode {
+fn run_command(command: Commands, project: &Project) -> ExitCode {
     match command {
-        Commands::Studio {
-            file,
-            port,
-            legacy,
-            desktop,
-            share,
-        } => dispatch::dev(file, port, legacy, desktop, share),
-        Commands::Check(args) => {
-            dispatch::check(args.file, args.mcu, args.pins_rs, args.json, args.opus)
-        }
-        Commands::Build { file } => dispatch::build(file),
-        Commands::Export(args) => dispatch::export(args),
-        Commands::Release(args) => dispatch::release(args),
-        Commands::Body(args) => dispatch::body(args),
-        Commands::Assembly(args) => dispatch::assembly(args),
-        Commands::Bom(args) => tool_exit(commands::bom::run(args)),
+        Commands::Studio(args) => dispatch::dev(project, args),
+        Commands::Check(args) => dispatch::check(project, args),
+        Commands::Build { file } => dispatch::build(project, file),
+        Commands::Export(args) => dispatch::export(project, args),
+        Commands::Release(args) => dispatch::release(project, args),
+        Commands::Body(args) => dispatch::body(project, args),
+        Commands::Assembly(args) => dispatch::assembly(project, args),
+        Commands::Bom(args) => tool_exit(commands::bom::run(project, args)),
         Commands::Mcp(args) => tool_exit(commands::mcp::run(args)),
-        Commands::Share(args) => dispatch::share(args),
-        Commands::Route(args) => dispatch::route(args),
-        Commands::Diff { kicad_pcb, file } => dispatch::diff(kicad_pcb, file),
-        Commands::Sync(args) => dispatch::sync(args),
+        Commands::Share(args) => dispatch::share(project, args),
+        Commands::Route(args) => dispatch::route(project, args),
+        Commands::Diff { kicad_pcb, file } => dispatch::diff(project, kicad_pcb, file),
+        Commands::Sync(args) => dispatch::sync(project, args),
         Commands::Doctor { install, json } => tool_exit(commands::doctor::run(install, json)),
         Commands::Init(args) => dispatch::init(args),
-        Commands::Add { packages } => tool_exit(commands::add::run(&packages)),
-        Commands::Install { dir } => tool_exit(commands::install::run(dir)),
+        Commands::Add { packages } => tool_exit(commands::add::run(project, &packages)),
+        Commands::Install { dir } => tool_exit(commands::install::run(project, dir)),
         Commands::Search { query } => tool_exit(commands::search::run(&query)),
     }
 }

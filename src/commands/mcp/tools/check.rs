@@ -20,12 +20,16 @@ pub fn schema() -> Value {
 }
 
 /// Lints the selected boards.
-pub fn run(_session: &mut Session, args: &Value) -> Outcome {
-    let targets = match report::select(optional_str(args, "board")) {
+pub fn run(session: &mut Session, args: &Value) -> Outcome {
+    let project = session.project();
+    let targets = match report::select(&project, optional_str(args, "board")) {
         Ok(targets) => targets,
         Err(message) => return Outcome::fail(message),
     };
-    let reports: Vec<report::BoardReport> = targets.iter().map(report::lint_board).collect();
+    let reports: Vec<report::BoardReport> = targets
+        .iter()
+        .map(|t| report::lint_board(&project, t))
+        .collect();
     let boards: Vec<Value> = reports
         .iter()
         .map(|r| json!({"name": r.name, "diagnostics": report::diagnostics_json(r)}))

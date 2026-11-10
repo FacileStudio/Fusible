@@ -6,6 +6,7 @@ use miette::Diagnostic;
 use thiserror::Error;
 
 use crate::commands::add::find_hardware_dir;
+use crate::project::Project;
 use crate::tscircuit::error::RunnerError;
 use crate::tscircuit::Runner;
 
@@ -21,8 +22,8 @@ pub enum InstallError {
 }
 
 /// Installs dependencies in the project's hardware workspace.
-pub fn run(dir: Option<PathBuf>) -> Result<(), InstallError> {
-    let hw_dir = dir.unwrap_or_else(find_hardware_dir);
+pub fn run(project: &Project, dir: Option<PathBuf>) -> Result<(), InstallError> {
+    let hw_dir = dir.unwrap_or_else(|| find_hardware_dir(project));
     let runner = Runner::detect()?;
 
     println!(

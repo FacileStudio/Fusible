@@ -33,6 +33,7 @@ mod pair;
 pub mod pipeline;
 mod project;
 mod refresh;
+mod routes;
 mod rules_api;
 mod run_api;
 mod run_exec;

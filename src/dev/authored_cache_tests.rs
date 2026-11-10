@@ -19,18 +19,18 @@ fn step_and_stl_convert_once_and_reconvert_when_the_file_changes() {
         formats.borrow_mut().push(format.to_string());
         std::fs::write(out, format!("glb{}", calls.get())).map_err(|e| e.to_string())
     };
-    let first = authored_glb(&cfg, "case", &dir.cache(), convert).unwrap();
+    let first = authored_glb(&cfg, None, "case", &dir.cache(), convert).unwrap();
     assert_eq!(first, b"glb1");
     assert_eq!(
-        authored_glb(&cfg, "case", &dir.cache(), convert).unwrap(),
+        authored_glb(&cfg, None, "case", &dir.cache(), convert).unwrap(),
         b"glb1"
     );
     assert_eq!(calls.get(), 1);
     std::fs::write(&step, b"version two").unwrap();
-    let again = authored_glb(&cfg, "case", &dir.cache(), convert).unwrap();
+    let again = authored_glb(&cfg, None, "case", &dir.cache(), convert).unwrap();
     assert_eq!(again, b"glb2");
     assert_eq!(dir.glbs(), 1, "the stale entry of the same file is pruned");
-    authored_glb(&cfg, "knob", &dir.cache(), convert).unwrap();
+    authored_glb(&cfg, None, "knob", &dir.cache(), convert).unwrap();
     assert_eq!(*formats.borrow(), ["step", "step", "stl"]);
     assert_eq!(dir.glbs(), 2);
 }
@@ -40,7 +40,7 @@ fn a_failed_conversion_is_a_422_and_caches_nothing() {
     let dir = Dir::new();
     let cfg = manifest(&[("case", &dir.file("case.stp", b"x"))]);
     let broken = |_: &Path, _: &str, _: &Path| Err("bad shape".to_string());
-    let (status, message) = failure(authored_glb(&cfg, "case", &dir.cache(), broken));
+    let (status, message) = failure(authored_glb(&cfg, None, "case", &dir.cache(), broken));
     assert_eq!(status, 422);
     assert!(message.contains("conversion failed: bad shape"));
     assert_eq!(dir.glbs(), 0);
@@ -93,7 +93,7 @@ fn overlapping_requests_for_one_file_convert_it_once() {
     let cache = dir.cache();
     let served: Vec<Vec<u8>> = std::thread::scope(|scope| {
         let workers: Vec<_> = (0..4)
-            .map(|_| scope.spawn(|| authored_glb(&cfg, "case", &cache, convert).unwrap()))
+            .map(|_| scope.spawn(|| authored_glb(&cfg, None, "case", &cache, convert).unwrap()))
             .collect();
         workers.into_iter().map(|w| w.join().unwrap()).collect()
     });
@@ -110,7 +110,7 @@ fn a_conversion_timeout_is_a_504_and_leaves_no_partial_file() {
         std::fs::write(out, b"half").unwrap();
         Err("the generator timed out after 120 s".to_string())
     };
-    let (status, message) = failure(authored_glb(&cfg, "case", &dir.cache(), hang));
+    let (status, message) = failure(authored_glb(&cfg, None, "case", &dir.cache(), hang));
     assert_eq!(status, 504);
     assert!(message.contains("timed out after"));
     let leftovers = std::fs::read_dir(dir.cache()).unwrap().count();
@@ -124,7 +124,7 @@ fn pruning_removes_old_glbs_but_not_files_another_request_is_writing() {
     let cfg = manifest(&[("case", &step)]);
     let convert =
         |_: &Path, _: &str, out: &Path| std::fs::write(out, b"g").map_err(|e| e.to_string());
-    authored_glb(&cfg, "case", &dir.cache(), convert).unwrap();
+    authored_glb(&cfg, None, "case", &dir.cache(), convert).unwrap();
     let key = cache_key(&step, &std::fs::metadata(&step).unwrap());
     let prefix = key.split('-').next().unwrap();
     let in_flight = dir
@@ -132,7 +132,7 @@ fn pruning_removes_old_glbs_but_not_files_another_request_is_writing() {
         .join(format!("{prefix}-0000000000000000.99.7.part"));
     std::fs::write(&in_flight, b"writing").unwrap();
     std::fs::write(&step, b"version two").unwrap();
-    authored_glb(&cfg, "case", &dir.cache(), convert).unwrap();
+    authored_glb(&cfg, None, "case", &dir.cache(), convert).unwrap();
     assert!(
         in_flight.exists(),
         "an in-flight .part file must survive pruning"
