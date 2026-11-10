@@ -1,5 +1,6 @@
-//! The thirteen MCP tools and their registry.
+//! The fifteen MCP tools and their registry.
 
+mod apply_fix;
 mod args;
 mod body_new;
 mod bom;
@@ -15,6 +16,7 @@ mod list_nets;
 pub mod outcome;
 mod project_info;
 mod render;
+mod waive;
 
 use serde_json::{json, Value};
 
@@ -42,7 +44,7 @@ macro_rules! tool {
     };
 }
 
-fn registry() -> [Tool; 13] {
+fn registry() -> [Tool; 15] {
     [
         tool!(project_info),
         tool!(check),
@@ -52,6 +54,8 @@ fn registry() -> [Tool; 13] {
         tool!(bom),
         tool!(firmware_pins),
         tool!(edit_board),
+        tool!(apply_fix),
+        tool!(waive),
         tool!(body_new),
         tool!(edit_body),
         tool!(build_body),

@@ -3,6 +3,7 @@ import type {
   BomData,
   BomFile,
   DevPayload,
+  SetProp,
   FirmwareData,
   GitStatus,
   KicadBoard,
@@ -67,6 +68,8 @@ export const api = {
   getFirmware: (name: string) => getJson<FirmwareData>(firmwareUrl(name)),
   getKicad: () => getJson<KicadBoard[]>("/api/kicad"),
   getRules: () => getJson<Rule[]>("/api/rules"),
+  applyFix: (board: string, fix: SetProp) =>
+    sendJson<{ applied: boolean }>("POST", "/api/fix", { board: board || undefined, fix: { set_prop: fix } }),
   getBodies: () => getJson<BodyInfo[]>("/api/bodies"),
   startPair: () => sendJson<PairStart>("POST", "/api/pair/start"),
   getGit: (check: boolean) => getJson<GitStatus>(`/api/git${check ? "?check=1" : ""}`),

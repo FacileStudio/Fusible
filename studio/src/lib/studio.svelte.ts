@@ -1,5 +1,5 @@
 import { remember, remembered } from "./storage";
-import type { Diagnostic, PaneName, ViewName } from "./types";
+import type { Diagnostic, PaneName, ViewName, WaivedDiagnostic } from "./types";
 
 export const THEME_KEY = "fusible-theme";
 export const SIDEBAR_KEY = "fusible.sidebarCollapsed";
@@ -23,9 +23,11 @@ export const studio = $state({
   desktop: Boolean(window.FUSIBLE_DESKTOP),
   hasAssembly: false,
   boardName: "",
+  board: "",
   revision: null as string | null,
   fuseBlown: false,
   diagnostics: [] as Diagnostic[],
+  waived: [] as WaivedDiagnostic[],
   status: "",
 });
 

@@ -9,7 +9,8 @@ maximize-square-2-linear arrow-up-linear arrow-down-linear box-linear square-top
 add-circle-linear trash-bin-2-linear link-linear diskette-linear download-minimalistic-linear
 check-circle-linear close-circle-linear plug-circle-linear share-circle-linear cursor-linear
 play-circle-linear checklist-minimalistic-linear shield-check-linear refresh-linear
-minimize-square-linear maximize-square-linear close-square-linear`.split(/\s+/);
+minimize-square-linear maximize-square-linear close-square-linear info-circle-bold-duotone
+danger-circle-bold-duotone`.split(/\s+/);
 
 const icons = solar.icons as Record<string, { body: string }>;
 const aliases = (solar as { aliases?: Record<string, { parent: string }> }).aliases ?? {};

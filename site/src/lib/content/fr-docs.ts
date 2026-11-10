@@ -1,5 +1,5 @@
 import type { DocsContent } from "./types";
-import { BULLE_SNIPPET, CODEX_SNIPPET, MANIFEST_YAML } from "./shared";
+import { BULLE_SNIPPET, CODEX_SNIPPET, MANIFEST_YAML, RULES_YAML } from "./shared";
 import { frTools } from "./fr-tools";
 
 export const frDocs: DocsContent = {
@@ -33,12 +33,17 @@ export const frDocs: DocsContent = {
       id: "quick-start",
       title: "Démarrage rapide",
       blocks: [
-        { kind: "code", code: "fusible init --name sensor-node\nfusible check\nfusible studio" },
+        {
+          kind: "code",
+          code: "fusible new sensor-node --template esp32-s3\ncd sensor-node\nfusible check\nfusible studio",
+        },
         {
           kind: "p",
           text:
-            "`init` écrit un `fusible.yml`. `check` vérifie chaque carte. " +
-            "`studio` ouvre la vue en direct.",
+            "`new` écrit une carte, un crate de firmware, un boîtier généré et un `fusible.yml`. " +
+            "Les modèles sont `esp32-s3`, `stm32g4`, `rp2040` et `blank`. " +
+            "Chacun fournit un Circuit JSON déjà construit : `check` passe avant toute installation. " +
+            "`init` ajoute toujours un manifeste à un dossier existant.",
         },
         {
           kind: "p",
@@ -85,8 +90,39 @@ export const frDocs: DocsContent = {
         {
           kind: "p",
           text:
+            "`fusible rules` liste chaque règle avec sa catégorie et son niveau. " +
+            "`fusible explain <règle>` en décrit une. `docs/rules/` contient une page par règle.",
+        },
+        { kind: "code", code: RULES_YAML },
+        {
+          kind: "p",
+          text:
+            "`rules:` fixe un niveau par règle. Une dérogation accepte un cas précis et exige une raison. " +
+            "Les diagnostics dérogés restent dans le rapport, sous `waived`. " +
+            "Les règles de netlist ne peuvent être ni abaissées ni dérogées.",
+        },
+        {
+          kind: "p",
+          text:
             "Vérifications de conception, pas des certifications. " +
             "Un produit soumis à des normes de sécurité passe encore par un laboratoire.",
+        },
+      ],
+    },
+    {
+      id: "upgrade",
+      title: "Passer à la 2.0",
+      blocks: [
+        { kind: "code", code: "fusible migrate --check\nfusible migrate" },
+        {
+          kind: "list",
+          items: [
+            "`fusible migrate` réécrit un `fusible.yml` 1.x, garde ses commentaires et affiche le diff.",
+            "`E_SCHEMATIC_SCALE_EXCESSIVE` devient `schematic_scale`. " +
+              "`autoroute` devient `unrouted`, plus un identifiant par type d'erreur tscircuit.",
+            "`fusible check` n'écrit plus `pins.rs`. Lancez `fusible build` ou `check --write-bindings`.",
+            "`check --json` affiche le rapport version 2.",
+          ],
         },
       ],
     },

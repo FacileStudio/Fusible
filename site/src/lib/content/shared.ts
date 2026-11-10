@@ -31,6 +31,15 @@ export const SOURCES = {
   rtp: "https://www.rtpcompany.com/wp-content/uploads/Part-Design-Guidelines-Brochure.pdf",
 };
 
+export const RULES_YAML = `rules:
+  decoupling_capacitor: warning   # off | info | warning | error
+
+waivers:
+  - rule: decoupling_capacitor
+    match: U3.VDD
+    reason: bulk capacitor C12 is shared, checked on rev A
+    until: 2027-03-01`;
+
 export const MANIFEST_YAML = `name: rover
 
 boards:
@@ -54,13 +63,15 @@ clearance_class: B2`;
 
 export const MCP_TOOLS: string[][] = [
   ["project_info", "Boards, firmware, bodies and git state."],
-  ["check", "Runs the rules and returns the fuse verdict."],
-  ["explain_rule", "Summary, standard and source for one rule."],
+  ["check", "Runs the rules and returns the version 2 report: fuse, boards, links, assembly, waived."],
+  ["explain_rule", "Category, summary, level, standard and source for one rule."],
   ["list_components", "Components and ports of a board."],
   ["list_nets", "Nets of a board and their declared limits."],
   ["bom", "Bill of materials rows and totals."],
   ["firmware_pins", "Generated pins.rs, only when the fuse is intact."],
   ["edit_board", "Patch or replace a board file. Dry run by default."],
+  ["apply_fix", "Apply a set_prop fix from a diagnostic to the board TSX. Dry run by default."],
+  ["waive", "Append a waiver with a required reason to fusible.yml. Dry run by default."],
   ["body_new", "Scaffold a code part."],
   ["edit_body", "Patch or replace a code part."],
   ["build_body", "Build a code part to STEP, STL and GLB."],

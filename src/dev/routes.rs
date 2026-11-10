@@ -7,6 +7,7 @@ use super::assembly;
 use super::bodies;
 use super::bom;
 use super::firmware;
+use super::fix_api;
 use super::git_api;
 use super::pair;
 use super::rules_api;
@@ -32,6 +33,7 @@ pub(super) fn api_route(request: Request, state: &State, port: u16, path: &str, 
         "/api/kicad" => api::kicad(request, state),
         "/api/firmware" => firmware::serve(request, state, project),
         "/api/run" => run_api::start_run(request, state, port, project),
+        "/api/fix" => fix_api::serve(request, state, port),
         p if git_api::owns(p) => git_api::serve(request, state, port, project),
         _ => serve_static(request, state, path),
     }

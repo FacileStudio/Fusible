@@ -69,7 +69,7 @@ export const enLanding: Landing = {
     },
     firmware: {
       title: "Firmware follows the board",
-      text: "Move a pin in the TSX and the typed Rust constants follow on the next check.",
+      text: "Move a pin in the TSX and the typed Rust constants follow on the next build.",
     },
     cost: { title: "Costs stay up to date", text: "Parts, prints and prices roll up into one BOM.", label: "Total" },
   },

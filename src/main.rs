@@ -74,6 +74,7 @@ fn load_project(command: Option<&Commands>) -> Result<Project, config::ConfigErr
                 | Commands::Doctor { .. }
                 | Commands::Mcp(_)
                 | Commands::Migrate { .. }
+                | Commands::New(_)
         )
     );
     match tolerant {
@@ -103,6 +104,14 @@ fn run_command(command: Commands, project: &Project) -> ExitCode {
         Commands::Doctor { install, json } => tool_exit(commands::doctor::run(install, json)),
         Commands::Init(args) => dispatch::init(args),
         Commands::Migrate { check } => dispatch::migrate(check),
+        Commands::New(args) => tool_exit(commands::new::run(args)),
+        Commands::Explain(args) => {
+            tool_exit(commands::explain::run(project, &args.rule, args.json))
+        }
+        Commands::Rules { json } => {
+            commands::rules::run(project, json);
+            ExitCode::SUCCESS
+        }
         Commands::Add { packages } => tool_exit(commands::add::run(project, &packages)),
         Commands::Install { dir } => tool_exit(commands::install::run(project, dir)),
         Commands::Search { query } => tool_exit(commands::search::run(&query)),

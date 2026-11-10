@@ -5,7 +5,7 @@ use std::ops::Range;
 /// Returns the byte range of the single JSX opening tag with `name="<designator>"`.
 ///
 /// `None` when no tag or several tags carry that name: the part cannot be located safely.
-pub(super) fn find_tag(source: &str, designator: &str) -> Option<Range<usize>> {
+pub(crate) fn find_tag(source: &str, designator: &str) -> Option<Range<usize>> {
     let needle = format!("name=\"{designator}\"");
     let mut hits = source.match_indices(&needle).map(|(at, _)| at);
     let at = hits.next()?;

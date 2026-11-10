@@ -18,13 +18,15 @@ Without a `fusible.yml` the server still starts, and `project_info` returns `{"m
 | Tool | Input | What it does |
 |---|---|---|
 | `project_info` | none | Boards, firmware, bodies and git state. |
-| `check` | `board?` | Runs the rules. Returns `fuse` (`intact` or `blown`) and the violations. |
-| `explain_rule` | `rule` | Severity of a rule id. Summary, standard and source URL arrive with the rules track. |
+| `check` | `board?` | Runs the rules. Returns the version 2 report: `fuse`, `boards[]`, `links[]`, `assembly[]`, `waived[]`, `unused_waivers[]`, `expired_waivers[]`. |
+| `explain_rule` | `rule` | Category, summary, default severity, level in this project, standard, source URL and whether it can be waived. Same data as `fusible explain <rule> --json`. |
 | `list_components` | `board` | Components with kind and ports. |
 | `list_nets` | `board` | Nets with the ports they join. |
 | `bom` | none | The bill of materials, same data as `fusible bom --format json`. |
 | `firmware_pins` | `firmware` | The generated `pins.rs` and a pin table. Refuses while the fuse is blown. |
 | `edit_board` | `board`, `patch` or `content`, `dry_run?` | Edits the board source, checks it and returns the diff. |
+| `apply_fix` | `board`, `fix`, `dry_run?` | Applies a `set_prop` fix from a diagnostic's `fixes` to the board TSX, checks it and returns the diff. |
+| `waive` | `rule`, `match`, `reason`, `until?`, `dry_run?` | Appends a waiver to `fusible.yml`, keeping its comments, checks the project and returns the diff and the waived diagnostics. |
 | `body_new` | `name`, `material?`, `process?` | Creates a code-first body. Needs Fusible 1.0 bodies. |
 | `edit_body` | `name`, `content`, `dry_run?` | Edits the `.ts` source of a code-first body. |
 | `build_body` | `name` | Builds one body and lists its files. |
@@ -37,10 +39,10 @@ The server also exposes two kinds of resource: `fusible://project` (the manifest
 
 ## Write safety
 
-`edit_board` and `edit_body` change files in your project. They follow these rules, in this order.
+`edit_board`, `edit_body`, `apply_fix` and `waive` change files in your project. They follow these rules, in this order. `apply_fix` writes the board file, `waive` writes `fusible.yml`.
 
 1. The target comes from the manifest and must resolve, after symlinks, inside the project root.
-2. Give exactly one of `patch` (unified diff) or `content` (whole file).
+2. Give exactly one of `patch` (unified diff) or `content` (whole file). `apply_fix` builds the content from the fix; `waive` builds it from the waiver.
 3. The file must have no uncommitted changes, unless this server session wrote them and nobody touched the file since.
 4. The server reads the original bytes.
 5. It applies the change. A patch runs through `git apply --check`, then `git apply`, and may only name the target file.
@@ -79,13 +81,20 @@ args = ["mcp"]
 
 `fusible mcp --print-config bulle|claude|codex` prints the same snippets.
 
+## Fixes and waivers
+
+A diagnostic may carry `fixes`. Pass a `{"set_prop": {"selector": ".R1", "prop": "pcbX", "value": 2.5}}` entry to `apply_fix`. The selector names one component (`R1` or `.R1`). The tool sets the prop on that component's JSX tag, or adds it when the tag has none. `note` and `add_element` fixes are for a human or for `edit_board`.
+
+When a diagnostic is correct but the case is safe, call `waive` with the rule id, the element or `REFDES.PIN` it names, and the reason. `waive` refuses an empty reason, an unknown rule, a netlist rule and a date that is not `YYYY-MM-DD`. The waived diagnostic moves to the report's `waived` list with its reason. It never disappears.
+
 ## A worked loop
 
 1. Call `check`. The reply says `"fuse": "blown"` and lists a floating net.
-2. Call `edit_board` with the fix as `content` and the default `dry_run: true`. Read `diff` and `fuse`. The file on disk is unchanged.
-3. When the preview shows `"fuse": "intact"`, call `edit_board` again with `dry_run: false`.
-4. Call `check` again to confirm.
-5. Call `export` with `preset: "fab"`. It returns the file paths. While the fuse is blown it returns an error and the violations instead.
+2. Call `explain_rule` with the diagnostic's `rule` when its meaning is unclear.
+3. When the diagnostic has a `set_prop` fix, call `apply_fix` with it. Otherwise call `edit_board` with the change as `content`. Both default to `dry_run: true`: read `diff` and `fuse`, the file on disk is unchanged.
+4. When the preview shows `"fuse": "intact"`, repeat the call with `dry_run: false`.
+5. Call `check` again to confirm.
+6. Call `export` with `preset: "fab"`. It returns the file paths. While the fuse is blown it returns an error and the violations instead.
 
 ## Opus and Nuage
 

@@ -86,12 +86,18 @@ verified against Fusible's own signing key.
 ## Quick start
 
 ```sh
-fusible init --name sensor-node
+fusible new sensor-node --template esp32-s3
+cd sensor-node
 fusible check
 fusible studio
 ```
 
-`init` writes a `fusible.yml`:
+`new` writes a board with `pinAttributes` on its MCU and regulator, a firmware crate, a
+generated enclosure and a `fusible.yml`. Templates are `esp32-s3`, `stm32g4`, `rp2040` and
+`blank`. Each ships a pre-built Circuit JSON, so `fusible check` passes before any install.
+Upgrading a 1.x project? Run `fusible migrate`; see [docs/migrate-2.0.md](docs/migrate-2.0.md).
+
+To add Fusible to an existing folder, `fusible init --name sensor-node` writes a `fusible.yml`:
 
 ```yaml
 name: sensor-node
@@ -167,11 +173,15 @@ The flag-by-flag reference lives in [docs/usage.md](docs/usage.md): the studio p
 `body kit`, `assembly`, `route`, `bom`, `release`, phone pairing and the Opus/Nuage hooks.
 
 ```sh
+fusible new demo --template rp2040  # a project from a template
 fusible check                       # every board of fusible.yml, then every link
 fusible check sensor --mcu stm32g431 # one board, pin muxing checked against the silicon
 fusible --input circuit.json        # Circuit JSON directly
 fusible studio                      # the browser studio, on port 3020
 fusible build main-fw               # check, write pins.rs, build that firmware
+fusible rules                       # every rule with its category and level
+fusible explain trace_current       # one rule: standard, source, level, how to waive it
+fusible migrate --check             # does fusible.yml need the 2.0 rewrite?
 fusible export --preset fab         # gerbers + circuit.json, only while the fuse is intact
 fusible body                        # generated enclosure or authored body into dist/bodies/
 fusible assembly                    # boards and bodies as one model
@@ -179,6 +189,8 @@ fusible route                       # multi-layer A* autorouter
 fusible bom                         # parts, prices, print mass
 fusible release                     # fab files, BOM, pick and place, RELEASE.txt
 fusible mcp                         # MCP server for agents
+fusible flash app                   # fuse-gated, then probe-rs or espflash
+fusible bringup main                # dist/bringup.md: rails, test points, straps
 ```
 
 ```
@@ -195,8 +207,10 @@ it: silence is never the default.
 
 ## Rules
 
-Every rule runs in the fuse. Errors blow it. Warnings print. Rules that need your numbers stay
-off until you declare them in `fusible.yml`.
+Every rule runs in the fuse. Errors blow it. Warnings and infos print. Rules that need your
+numbers stay off until you declare them in `fusible.yml`. `fusible rules` lists every rule with
+its category and level, `fusible explain <rule>` describes one, and [docs/rules/](docs/rules/README.md)
+holds one generated page per rule.
 
 | Rule | Checks | Source |
 |---|---|---|
@@ -227,6 +241,21 @@ clearance_class: B2           # B1 internal, B2 external uncoated (default), B4 
 copper: { outer_oz: 1, inner_oz: 0.5 }
 ```
 
+Set a rule's level, or accept one case with a reasoned waiver:
+
+```yaml
+rules:
+  decoupling_capacitor: warning   # off | info | warning | error
+waivers:
+  - rule: decoupling_capacitor
+    match: U3.VDD                 # element id or REFDES.PIN
+    reason: bulk capacitor C12 is shared, checked on rev A
+    until: 2027-03-01             # optional
+```
+
+A waived diagnostic moves to the report's `waived` list; it never disappears. Netlist rules
+cannot be lowered or waived. An unknown rule id is exit 2.
+
 These are design pre-checks, not certifications: Fusible does not check creepage under IEC
 62368-1 yet, and a product with a safety rating still needs a lab. Fab profiles carry a source
 URL and the date they were checked.
@@ -238,7 +267,8 @@ fusible mcp --print-config bulle     # or claude, or codex
 ```
 
 The server exposes checks, rule explanations, the BOM, firmware pins and fuse-gated edits:
-every edit returns the diff and the new verdict, and nothing is committed for you. See
+`edit_board`, `apply_fix` for a diagnostic's `set_prop` fix, and `waive` for a reasoned waiver.
+Every edit returns the diff and the new verdict, and nothing is committed for you. See
 [docs/usage.md](docs/usage.md#agents) for the YAML snippet and
 [docs/agents.md](docs/agents.md) for the tool list and write-safety rules.
 
@@ -275,6 +305,8 @@ output is `intact`, `blown` or `error`, from exit codes 0, 1 and 2.
 |---|---|
 | [usage](docs/usage.md) | Every command, flag and behaviour |
 | [agents](docs/agents.md) | Driving Fusible from an AI agent |
+| [rules](docs/rules/README.md) | One page per rule, generated from `fusible rules --json` |
+| [migrate to 2.0](docs/migrate-2.0.md) | Rule renames, the version 2 report, `pins.rs`, `fusible migrate` |
 | [mechanical](docs/v1/E-mechanical.md) | Materials, processes and the limits behind `mech.*` |
 
 ## Layout of the source
@@ -282,8 +314,10 @@ output is `intact`, `blown` or `error`, from exit codes 0, 1 and 2.
 ```
 src/
 ├── cli.rs, dispatch.rs, main.rs   # commands and exit codes
-├── commands/                      # check, build, export, body, bom, release, mcp, share, links, init, doctor
-├── config/                        # fusible.yml: boards, firmware, bodies, links
+├── commands/                      # check, build, export, body, bom, release, mcp, new, explain, migrate, doctor
+├── check/                         # one check pipeline: levels, waivers, links, assembly -> Report
+├── project/                       # the project loaded once per command
+├── config/                        # fusible.yml: boards, firmware, bodies, links, rules, waivers
 ├── parser/, netlist/, linter/     # pure Rust: Circuit JSON, net graph, rules
 ├── silicon/, codegen/             # pin muxing databases and pins.rs
 ├── gerber/, svg/, router/, kicad/ # fabrication, rendering, routing, KiCad sync
@@ -294,7 +328,7 @@ studio/                            # Svelte studio, built into src/assets/studio
 desktop/                           # Tauri shell and its Svelte UI
 mobile/                            # Capacitor Android viewer
 site/                              # fusible.facile.studio
-scripts/                           # screenshots
+scripts/                           # screenshots, rules-doc.ts (docs/rules/)
 ```
 
 The parser, netlist and rules have no C dependencies. tscircuit, bun and `occt-wasm` are used

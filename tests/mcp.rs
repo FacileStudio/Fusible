@@ -7,7 +7,7 @@ use fake_support::rpc::{call, is_error, request, session, structured};
 use fake_support::{git_commit_all, project, BLOWN, INTACT};
 use serde_json::{json, Value};
 
-const TOOLS: [&str; 13] = [
+const TOOLS: [&str; 15] = [
     "project_info",
     "check",
     "explain_rule",
@@ -16,6 +16,8 @@ const TOOLS: [&str; 13] = [
     "bom",
     "firmware_pins",
     "edit_board",
+    "apply_fix",
+    "waive",
     "body_new",
     "edit_body",
     "build_body",
@@ -30,7 +32,7 @@ fn initialize() -> Value {
 }
 
 #[test]
-fn initialize_and_tools_list_name_the_thirteen_tools() {
+fn initialize_and_tools_list_name_the_fifteen_tools() {
     let dir = project(INTACT);
     let replies = session(&dir.path, &[initialize(), request(2, "tools/list")]);
 

@@ -1,5 +1,6 @@
 //! A scripted MCP session: send requests, close stdin, read every reply.
 
+use std::ffi::OsStr;
 use std::io::Write;
 use std::path::Path;
 use std::process::Stdio;
@@ -22,7 +23,16 @@ pub fn request(id: u64, method: &str) -> Value {
 ///
 /// Fails when any line on stdout is not a JSON-RPC message.
 pub fn session(root: &Path, requests: &[Value]) -> Vec<Value> {
-    let mut child = fusible()
+    session_with(root, requests, None)
+}
+
+/// [`session`] with `PATH` replaced by `path` when given.
+pub fn session_with(root: &Path, requests: &[Value], path: Option<&OsStr>) -> Vec<Value> {
+    let mut command = fusible();
+    if let Some(path) = path {
+        command.env("PATH", path).env_remove("FUSIBLE_BUN");
+    }
+    let mut child = command
         .args(["mcp", "--root"])
         .arg(root)
         .stdin(Stdio::piped())
