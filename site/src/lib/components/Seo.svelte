@@ -24,7 +24,7 @@
       url: SITE_URL,
       downloadUrl: `${SITE_URL}/download`,
       softwareVersion: "1.0.0",
-      license: "https://opensource.org/licenses/MIT",
+      license: "https://www.gnu.org/licenses/gpl-3.0.html",
       isAccessibleForFree: true,
       offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
       author: { "@type": "Organization", name: "Facile Studio", url: "https://facile.studio" },

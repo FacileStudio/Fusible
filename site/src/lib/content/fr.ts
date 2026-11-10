@@ -33,7 +33,7 @@ export const fr: Content = {
       title: "Télécharger Fusible",
       description:
         "Téléchargez Fusible pour Windows, macOS, Linux et Android, ou installez l'outil en ligne de commande " +
-        "avec cargo. Gratuit et open source sous licence MIT.",
+        "avec cargo. Gratuit et open source sous licence GPL-3.0.",
       imageAlt: "Télécharger Fusible",
     },
     docs: {

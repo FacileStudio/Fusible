@@ -154,5 +154,5 @@ export const enLanding: Landing = {
       { label: "Opus, tasks from blown fuses", href: SUITE_LINKS.opus },
     ],
   },
-  footer: { license: "MIT licensed", github: "GitHub", crates: "crates.io", studio: "Facile Studio" },
+  footer: { license: "GPL-3.0 licensed", github: "GitHub", crates: "crates.io", studio: "Facile Studio" },
 };

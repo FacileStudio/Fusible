@@ -25,6 +25,9 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 
 ### Changed
 
+- The licence is now GPL-3.0-only. Releases up to 1.1.2 stay under the MIT licence; 2.0.0 is the first
+  release under GPL-3.0-only.
+
 - **Breaking:** `autoroute` is split. `unrouted` blows the fuse on nets with no routed trace.
   Each tscircuit error kind has its own id (`footprint_overlap`, `off_board`, `placement`,
   `trace_missing`, `port_not_connected`, `autorouting`, ...); an unknown `*_error` is

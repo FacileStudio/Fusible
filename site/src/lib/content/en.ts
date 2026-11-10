@@ -33,7 +33,7 @@ export const en: Content = {
       title: "Download Fusible",
       description:
         "Download Fusible for Windows, macOS, Linux and Android, or install the command line tool with cargo. " +
-        "Free and open source under the MIT license, signed updates.",
+        "Free and open source under the GPL-3.0 license, signed updates.",
       imageAlt: "Download Fusible",
     },
     docs: {

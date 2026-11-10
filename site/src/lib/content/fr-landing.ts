@@ -178,5 +178,5 @@ export const frLanding: Landing = {
       { label: "Opus, tâches issues des fusibles sautés", href: SUITE_LINKS.opus },
     ],
   },
-  footer: { license: "Licence MIT", github: "GitHub", crates: "crates.io", studio: "Facile Studio" },
+  footer: { license: "Licence GPL-3.0", github: "GitHub", crates: "crates.io", studio: "Facile Studio" },
 };

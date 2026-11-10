@@ -20,7 +20,7 @@
 <p align="center">
   <a href="https://crates.io/crates/fusible"><img src="https://img.shields.io/crates/v/fusible?color=111111&label=crates.io" alt="crates.io version"></a>
   <a href="https://github.com/FacileStudio/Fusible/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/FacileStudio/Fusible/ci.yml?branch=main&color=111111&label=ci" alt="CI status"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-111111" alt="MIT license"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0--only-111111" alt="GPL-3.0-only license"></a>
 </p>
 
 Fusible reads the Circuit JSON that [tscircuit](https://tscircuit.com) produces, checks every
@@ -314,4 +314,4 @@ what is next and [CHANGELOG.md](CHANGELOG.md) for what changed.
 
 ## License
 
-[MIT](LICENSE)
+Fusible is licensed under the GNU General Public License v3.0 only ([GPL-3.0-only](LICENSE)).
