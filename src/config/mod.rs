@@ -15,6 +15,9 @@ mod design_validate;
 mod discovery;
 pub mod error;
 mod fab;
+mod firmware;
+#[cfg(test)]
+mod firmware_tests;
 #[cfg(test)]
 mod kicad_tests;
 #[cfg(test)]
@@ -45,8 +48,8 @@ use raw::RawConfig;
 pub use raw::LEGACY_BOARD;
 pub use rules::{is_netlist_rule, RuleLevel, NETLIST_RULES};
 pub use types::{
-    AssemblyConfig, BoardConfig, BodyConfig, EnclosureConfig, FirmwareConfig, LinkConfig, PinId,
-    PlacementConfig, WireConfig, DEFAULT_HOLE_MIN,
+    AssemblyConfig, BoardConfig, BodyConfig, EnclosureConfig, FirmwareConfig, Framework,
+    LinkConfig, OutputKind, Outputs, PinId, PlacementConfig, WireConfig, DEFAULT_HOLE_MIN,
 };
 pub use validate::GENERATORS;
 pub use waivers::Waiver;
@@ -116,6 +119,7 @@ impl FusibleConfig {
         for fw in self.firmware.values_mut() {
             rebase(&mut fw.path);
             rebase(&mut fw.pins_rs);
+            fw.rebase_outputs(dir);
         }
         for body in self.bodies.values_mut() {
             rebase(&mut body.source);

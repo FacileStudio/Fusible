@@ -1,29 +1,67 @@
-//! Firmware pin bindings (`pins.rs`), written by `fusible build` and `check --write-bindings`.
+//! Firmware bindings (`pins.rs`, `board.rs`, `pins.h`, Zephyr overlay), written by
+//! `fusible build` and `check --write-bindings`.
 
 use std::path::{Path, PathBuf};
 
 use crate::check::{CheckError, ReadError};
-use crate::codegen::{extract_mcu_pins, generate_pins_rs, mcu_hint};
+use crate::codegen::{
+    board_bindings, c, extract_mcu_pins, generate_pins_rs, mcu_hint, rust, zephyr, BoardBindings,
+};
 use crate::commands::source::load_circuit_source;
 use crate::commands::target::BoardTarget;
+use crate::config::OutputKind;
 use crate::netlist::Netlist;
 use crate::parser;
+use crate::project::Project;
 
-/// Writes the pin bindings of every board into its firmware's `pins_rs` files, or into
-/// `path` when given. Call only once the fuse is intact.
-pub fn write(boards: &[BoardTarget], path: Option<PathBuf>) -> Result<(), CheckError> {
+/// One file to generate.
+struct Job {
+    kind: OutputKind,
+    path: PathBuf,
+    board_rs: bool,
+}
+
+/// Writes the bindings of every board into the `outputs:` of the firmware bound to it,
+/// or only `pins.rs` into `path` when given. Call only once the fuse is intact.
+pub fn write(
+    project: &Project,
+    boards: &[BoardTarget],
+    path: Option<PathBuf>,
+) -> Result<(), CheckError> {
     for board in boards {
-        let targets = path
-            .clone()
-            .map_or_else(|| board.pins_rs.clone(), |p| vec![p]);
-        if !targets.is_empty() {
-            write_board(board, &targets)?;
+        let jobs = jobs(project, board, path.clone());
+        if !jobs.is_empty() {
+            write_board(board, &jobs)?;
         }
     }
     Ok(())
 }
 
-fn write_board(board: &BoardTarget, targets: &[PathBuf]) -> Result<(), CheckError> {
+fn jobs(project: &Project, board: &BoardTarget, path: Option<PathBuf>) -> Vec<Job> {
+    if let Some(path) = path {
+        return vec![Job {
+            kind: OutputKind::Rust,
+            path,
+            board_rs: false,
+        }];
+    }
+    let firmware = board
+        .firmware
+        .iter()
+        .filter_map(|n| project.config.firmware.get(n));
+    firmware
+        .flat_map(|fw| {
+            let board_rs = fw.wants_board_rs();
+            fw.output_paths().into_iter().map(move |(kind, path)| Job {
+                board_rs: board_rs && kind == OutputKind::Rust,
+                kind,
+                path,
+            })
+        })
+        .collect()
+}
+
+fn write_board(board: &BoardTarget, jobs: &[Job]) -> Result<(), CheckError> {
     let (json_path, source) = load_circuit_source(&board.entry)?;
     let circuit = parser::parse(&source, &json_path)?;
     let netlist = Netlist::from_circuit(&circuit);
@@ -34,8 +72,24 @@ fn write_board(board: &BoardTarget, targets: &[PathBuf]) -> Result<(), CheckErro
         }
         return Ok(());
     };
-    let code = generate_pins_rs(&info, &board.title);
-    targets.iter().try_for_each(|path| save(path, &code))
+    let bindings = board_bindings(&board.title, info, &circuit, &netlist);
+    for (path, code) in jobs.iter().flat_map(|job| render(job, &bindings)) {
+        save(&path, &code)?;
+    }
+    Ok(())
+}
+
+fn render(job: &Job, b: &BoardBindings) -> Vec<(PathBuf, String)> {
+    let mut files = vec![match job.kind {
+        OutputKind::Rust => (job.path.clone(), generate_pins_rs(&b.mcu, &b.board)),
+        OutputKind::C => (job.path.clone(), c::pins_h(b)),
+        OutputKind::Zephyr => (job.path.clone(), zephyr::overlay(b)),
+    }];
+    if job.board_rs {
+        let board_rs = rust::board_rs(b);
+        files.extend(board_rs.map(|code| (job.path.with_file_name("board.rs"), code)));
+    }
+    files
 }
 
 fn save(path: &Path, code: &str) -> Result<(), CheckError> {

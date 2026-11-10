@@ -25,22 +25,7 @@ pub struct BoardConfig {
     pub kicad: Option<PathBuf>,
 }
 
-/// A firmware crate bound to one board, with its generated pin bindings and build command.
-#[derive(Debug, Clone, Deserialize, Default, PartialEq, Eq)]
-#[serde(deny_unknown_fields)]
-pub struct FirmwareConfig {
-    #[serde(default)]
-    pub path: Option<PathBuf>,
-    #[serde(default)]
-    pub framework: Option<String>,
-    #[serde(default, alias = "pins-rs")]
-    pub pins_rs: Option<PathBuf>,
-    #[serde(default, alias = "build-cmd")]
-    pub build_cmd: Option<String>,
-    /// Board the firmware runs on; optional when the project has a single board.
-    #[serde(default)]
-    pub board: Option<String>,
-}
+pub use super::firmware::{FirmwareConfig, Framework, OutputKind, Outputs};
 
 /// A physical body: either a file authored in any CAD tool or a model Fusible generates.
 #[derive(Debug, Clone, Deserialize, Default, PartialEq)]
