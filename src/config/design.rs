@@ -1,10 +1,12 @@
 //! Design rules declared in the manifest: nets, fab profile, clearance class, copper weight.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
+use std::path::Path;
 
 use serde::Deserialize;
 
 use super::fab::builtin_fab;
+pub use super::fab::FabProfile;
 use super::FusibleConfig;
 
 fn default_outer_oz() -> f64 {
@@ -27,30 +29,17 @@ pub struct NetSpec {
     pub max_rise: Option<f64>,
 }
 
-/// What a fab house can build. Lengths are in millimetres.
-#[derive(Debug, Clone, Deserialize, PartialEq)]
-pub struct FabProfile {
-    #[serde(default)]
-    pub name: String,
-    #[serde(default)]
-    pub source: String,
-    pub min_trace: f64,
-    pub min_space: f64,
-    pub min_drill: f64,
-    pub min_via_pad: f64,
-    pub min_annular: f64,
-    pub min_via_to_via: f64,
-    pub drill_step: f64,
-    pub board_min: [f64; 2],
-    pub board_max: [f64; 2],
-}
-
 /// The `fab:` key: a built-in profile name or a custom profile.
 #[derive(Debug, Clone, Deserialize, PartialEq)]
 #[serde(untagged)]
 pub enum FabSpec {
     Named(String),
-    Custom(FabProfile),
+    Builtin {
+        profile: String,
+        #[serde(default)]
+        assembly_service: bool,
+    },
+    Custom(Box<FabProfile>),
 }
 
 /// Copper weights in ounces per square foot.
@@ -105,6 +94,8 @@ pub struct DesignRules {
     pub fab: Option<FabProfile>,
     pub clearance_class: ClearanceClass,
     pub copper: CopperSpec,
+    /// BOM line ids that `bom.yml` gives a manufacturer part number.
+    pub bom_parts: BTreeSet<String>,
 }
 
 impl DesignRules {
@@ -112,9 +103,16 @@ impl DesignRules {
     pub fn from_config(cfg: &FusibleConfig) -> Self {
         let fab = cfg.fab.as_ref().and_then(|spec| match spec {
             FabSpec::Named(name) => builtin_fab(name),
+            FabSpec::Builtin {
+                profile,
+                assembly_service,
+            } => builtin_fab(profile).map(|fab| FabProfile {
+                assembly_service: *assembly_service,
+                ..fab
+            }),
             FabSpec::Custom(profile) => Some(FabProfile {
                 name: profile_name(profile),
-                ..profile.clone()
+                ..*profile.clone()
             }),
         });
         Self {
@@ -126,7 +124,18 @@ impl DesignRules {
                 .and_then(ClearanceClass::parse)
                 .unwrap_or_default(),
             copper: cfg.copper.clone().unwrap_or_default(),
+            bom_parts: BTreeSet::new(),
         }
+    }
+
+    /// Reads the `bom.yml` beside `manifest`; an unreadable file adds nothing,
+    /// `fusible bom` reports it.
+    pub fn with_bom(mut self, manifest: Option<&Path>) -> Self {
+        let file = manifest.and_then(|m| crate::bom::BomFile::load(&crate::bom::bom_path(m)).ok());
+        let parts = file.map(|f| f.parts).unwrap_or_default();
+        let named = parts.into_iter().filter(|(_, p)| p.mpn.is_some());
+        self.bom_parts = named.map(|(id, _)| id).collect();
+        self
     }
 }
 

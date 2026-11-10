@@ -69,10 +69,11 @@ impl Project {
             .as_deref()
             .and_then(Path::parent)
             .map_or_else(|| start.to_path_buf(), Path::to_path_buf);
+        let design = DesignRules::from_config(&config).with_bom(manifest.as_deref());
         Self {
             root,
             manifest,
-            design: DesignRules::from_config(&config),
+            design,
             config,
             start: start.to_path_buf(),
         }

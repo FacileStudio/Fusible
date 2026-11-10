@@ -25,6 +25,11 @@ pub use diagnostics::{Diagnostic, Fix, FuseBlown, Location, Severity, SourceRef}
 pub use info::RuleInfo;
 pub use rule::{Category, Rule, RuleMeta};
 pub use rules::{
+    AcidTrapRule, AnnularRingRule, BomIncompleteRule, ComponentEdgeClearanceRule,
+    CourtyardClearanceRule, DrillToCopperRule, EdgeClearanceRule, FiducialsRule, HoleSpacingRule,
+    MaskSliverRule, SilkOverPadRule, SilkTextSizeRule, ViaAspectRatioRule,
+};
+pub use rules::{
     DanglingReferenceRule, DecouplingCapacitorRule, FabProfileRule, GhostNetRule,
     MalformedElementRule, PinMuxRule, QfnFootprintSpanRule, SchematicScaleRule, ShortedNetsRule,
     TraceClearanceRule, TraceCurrentRule, UnconnectedNetRule, UnroutedRule, UpstreamRule,
@@ -93,5 +98,18 @@ impl Default for Linter {
             .with_rule(TraceCurrentRule)
             .with_rule(VoltageClearanceRule)
             .with_rule(FabProfileRule)
+            .with_rule(AnnularRingRule)
+            .with_rule(DrillToCopperRule)
+            .with_rule(HoleSpacingRule)
+            .with_rule(ViaAspectRatioRule)
+            .with_rule(EdgeClearanceRule)
+            .with_rule(SilkOverPadRule)
+            .with_rule(SilkTextSizeRule)
+            .with_rule(MaskSliverRule)
+            .with_rule(AcidTrapRule)
+            .with_rule(CourtyardClearanceRule)
+            .with_rule(ComponentEdgeClearanceRule)
+            .with_rule(FiducialsRule)
+            .with_rule(BomIncompleteRule)
     }
 }

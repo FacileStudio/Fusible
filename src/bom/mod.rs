@@ -10,6 +10,7 @@ mod detect;
 mod error;
 mod estimate;
 mod file;
+mod line_id;
 mod materials;
 #[cfg(test)]
 mod materials_tests;
@@ -29,6 +30,7 @@ pub use detect::{detect, Part};
 pub use error::BomError;
 pub use estimate::Body;
 pub use file::{bom_path, BomFile, PartEntry, PrintEntry, PrintSettings};
+pub use line_id::line_id;
 pub use materials::{
     library as materials, resolve as resolve_material, validate as validate_material, Material,
 };

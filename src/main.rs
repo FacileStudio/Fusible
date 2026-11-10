@@ -13,6 +13,7 @@ pub mod commands;
 pub mod config;
 pub mod dev;
 mod dispatch;
+pub mod fab;
 pub mod gerber;
 pub mod kicad;
 pub mod linter;

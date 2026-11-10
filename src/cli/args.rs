@@ -38,7 +38,7 @@ pub struct ExportArgs {
     #[arg(value_name = "FILE")]
     pub file: Option<PathBuf>,
 
-    /// Export preset batch: fab (gerbers + bom + pnp), cad (kicad + step), docs (svg + pdf), or all
+    /// Export preset batch: fab (gerbers + bom + centroid + netlist), cad (kicad + step), docs (svg + pdf), or all
     #[arg(long, value_name = "PRESET")]
     pub preset: Option<String>,
 

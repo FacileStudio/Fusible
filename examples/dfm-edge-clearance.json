@@ -1,0 +1,6 @@
+[
+  {"type": "pcb_board", "pcb_board_id": "pcb_board_0", "center": {"x": 0, "y": 0}, "width": 20, "height": 20, "thickness": 1.6, "num_layers": 2},
+  {"type": "source_net", "source_net_id": "n_A", "name": "A"},
+  {"type": "source_trace", "source_trace_id": "st0", "connected_source_net_ids": ["n_A"]},
+  {"type": "pcb_trace", "pcb_trace_id": "pcb_trace_0", "source_trace_id": "st0", "route": [{"route_type": "wire", "x": -5, "y": 9.9, "width": 0.2, "layer": "top"}, {"route_type": "wire", "x": 5, "y": 9.9, "width": 0.2, "layer": "top"}]}
+]

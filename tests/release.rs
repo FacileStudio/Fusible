@@ -43,7 +43,7 @@ fn intact_board_writes_the_bundle_and_manifest() {
     let manifest = std::fs::read_to_string(out.join("RELEASE.txt")).unwrap();
     assert!(manifest.contains("fuse intact"));
     assert!(manifest.contains("gerbers.zip"));
-    assert!(out.join("bom.csv").exists() && out.join("pnp.csv").exists());
+    assert!(out.join("bom.csv").exists() && out.join("centroid.csv").exists());
 }
 
 #[test]

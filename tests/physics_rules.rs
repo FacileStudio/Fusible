@@ -73,7 +73,10 @@ fn voltage_clearance_blows_on_mains_next_to_ground() {
 fn fab_profile_blows_on_a_thin_trace_and_a_small_drill() {
     let (out, json) = check("circuit-fab-profile.json", &["--json"]);
     assert_eq!(out.status.code(), Some(1));
-    let found = diagnostics(&json);
+    let found: Vec<&Value> = diagnostics(&json)
+        .into_iter()
+        .filter(|d| d["severity"] == "error")
+        .collect();
     assert!(
         found
             .iter()

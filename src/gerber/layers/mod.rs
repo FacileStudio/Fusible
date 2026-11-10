@@ -22,6 +22,7 @@ mod text;
 
 use thiserror::Error;
 
+pub use build::DEFAULT_MASK_MARGIN_MM;
 pub use copper::CopperLayer;
 pub use elements::{
     PcbBoardElm, PcbComponentElm, PcbCopperPourElm, PcbHoleElm, PcbModel, PcbPlatedHoleElm,

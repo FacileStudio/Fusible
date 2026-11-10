@@ -1,0 +1,9 @@
+[
+  {"type": "pcb_board", "pcb_board_id": "pcb_board_0", "center": {"x": 0, "y": 0}, "width": 20, "height": 20, "thickness": 1.6, "num_layers": 2},
+  {"type": "source_component", "source_component_id": "sc0", "name": "U1", "ftype": "simple_chip", "manufacturer_part_number": "PART-0"},
+  {"type": "pcb_component", "pcb_component_id": "pc0", "source_component_id": "sc0", "center": {"x": 0, "y": 0}, "width": 1, "height": 1, "layer": "top", "rotation": 90},
+  {"type": "source_component", "source_component_id": "sc1", "name": "U2", "ftype": "simple_chip", "manufacturer_part_number": "PART-1"},
+  {"type": "pcb_component", "pcb_component_id": "pc1", "source_component_id": "sc1", "center": {"x": 0, "y": 1.5}, "width": 1, "height": 1, "layer": "top", "rotation": 0},
+  {"type": "pcb_courtyard_rect", "pcb_courtyard_rect_id": "pcb_courtyard_rect_0", "pcb_component_id": "pc0", "layer": "top", "center": {"x": 0, "y": 0}, "width": 4, "height": 1},
+  {"type": "pcb_courtyard_rect", "pcb_courtyard_rect_id": "pcb_courtyard_rect_1", "pcb_component_id": "pc1", "layer": "top", "center": {"x": 0, "y": 1.5}, "width": 1, "height": 1}
+]

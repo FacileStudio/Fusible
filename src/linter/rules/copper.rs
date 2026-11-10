@@ -51,7 +51,7 @@ impl Shape {
         (self.centre_distance(other) - self.reach() - other.reach()).max(0.0)
     }
 
-    fn envelope(&self, margin: f64) -> AABB<[f64; 2]> {
+    pub(super) fn envelope(&self, margin: f64) -> AABB<[f64; 2]> {
         let reach = self.reach() + margin;
         let (lo, hi) = match self {
             Self::Seg { a, b, .. } => ((a.0.min(b.0), a.1.min(b.1)), (a.0.max(b.0), a.1.max(b.1))),
