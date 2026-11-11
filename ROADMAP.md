@@ -75,11 +75,18 @@ MCP gains `apply_fix` (applies a `set_prop` fix) and `waive` (adds a reasoned wa
 ## 2.0 milestones
 
 - [x] **Foundations.** Typed Circuit JSON model, pin attributes and part data, one check pipeline for the CLI, `--json`, the studio and MCP, a rule registry with stable ids and categories, located diagnostics with machine fixes, `info` severity, rule levels and waivers, `fusible migrate`.
-- [ ] **Electrical rules.** Pin roles from `pinAttributes`, pin conflicts, undriven power inputs, unconnected and no-connect pins, missing pull-ups, voltage domains, rail budget, capacitor derating, LED series resistors, bring-up warnings.
-- [ ] **Fabrication and assembly.** Annular ring, drill to copper, hole spacing, via aspect ratio, edge clearance, silkscreen, mask slivers, acid traps, rotation-aware courtyards, fiducials, BOM completeness, IPC-D-356 netlist and centroid files.
-- [ ] **Firmware bridge.** Generated STM32 pin tables, one bindings model rendered as Rust, a C header and a Zephyr overlay, `fusible flash`, `fusible bringup`.
+- [x] **Electrical rules.** Pin roles from `pinAttributes`, pin conflicts, undriven power inputs, unconnected and no-connect pins, missing pull-ups, voltage domains, rail budget, capacitor derating, LED series resistors, bring-up warnings.
+- [x] **Fabrication and assembly.** Annular ring, drill to copper, hole spacing, via aspect ratio, edge clearance, silkscreen, mask slivers, acid traps, rotation-aware courtyards, fiducials, BOM completeness, IPC-D-356 netlist and centroid files.
+- [x] **Firmware bridge.** Generated STM32 pin tables, one bindings model rendered as Rust, a C header and a Zephyr overlay, `fusible flash`, `fusible bringup`.
 - [x] **Agent and human experience.** `fusible new` with four templates, `fusible rules` and `fusible explain`, generated `docs/rules/`, MCP `apply_fix` and `waive`, studio Checks grouped by category with zoom, waivers and Apply fix.
-- [ ] **Integration.** Workspace split (`fusible-core` builds for `wasm32`), studio server modules grouped, FieldCam acceptance, 2.0.0 release.
+- [ ] **Integration.** 2.0.0 shipped. Left: FieldCam acceptance, where the board runs `check`, `export`, `bringup`, `build` and `bom` with the real SIM7600G-H land pattern. The land pattern is drawn and checked against SIMCom's hardware design V1.03, but with it the board no longer routes: tscircuit's `beta_pipeline9` autorouter aborts on the hand-routed `VBAT_MODEM` feed ("cannot reconnect preloaded trace").
+
+The workspace split (`fusible-core` for `wasm32`) is dropped: `fusible` stays the only published crate.
+
+## After 2.0
+
+- Group the studio server modules in `src/dev/` by feature.
+- Render an exported Gerber set in a real viewer (`gerbv`) in CI. The Gerbers are checked against the Ucamco specification only.
 
 ## Done before 2.0
 
