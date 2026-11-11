@@ -23,11 +23,10 @@ export const en: Content = {
   nav: { features: "Features", agents: "Agents", mobile: "Mobile", docs: "Docs", download: "Download" },
   meta: {
     home: {
-      title: "Fusible: boards, firmware and enclosures in one checked project",
+      title: "Fusible · Boards, firmware and enclosures, verified",
       description:
-        "Fusible checks boards, firmware and enclosures against electrical, physical and mechanical rules. " +
-        "When the fuse blows, nothing is exported, built or flashed.",
-      imageAlt: "Fusible: one project for your boards, firmware and enclosure",
+        "Electrical and physical linting, generated Rust firmware pins, 3D parts in code and fabrication files.",
+      imageAlt: "Fusible: Boards, firmware and enclosures, verified",
     },
     download: {
       title: "Download Fusible",

@@ -1,11 +1,21 @@
 {
   "name": "Fusible",
   "short_name": "Fusible",
+  "description": "Electrical and physical linting, generated Rust firmware pins, 3D parts in code and fabrication files.",
   "icons": [
-    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
   ],
-  "theme_color": "#0a0a0a",
-  "background_color": "#0a0a0a",
-  "display": "browser"
+  "theme_color": "#fafafa",
+  "background_color": "#fafafa",
+  "display": "standalone",
+  "start_url": "/"
 }

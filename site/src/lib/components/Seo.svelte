@@ -12,7 +12,7 @@
     { lang: "x-default", href: pageUrl("", page) },
   ]);
   const altLocale = $derived(content.locale === "en" ? "fr_FR" : "en_US");
-  const image = `${SITE_URL}/og.png`;
+  const image = `${SITE_URL}/og-image.png`;
   const structured = $derived(
     JSON.stringify({
       "@context": "https://schema.org",
@@ -41,7 +41,7 @@
     <link rel="alternate" hreflang={alt.lang} href={alt.href} />
   {/each}
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="Fusible" />
+  <meta property="og:site_name" content="Facile" />
   <meta property="og:url" content={url} />
   <meta property="og:title" content={meta.title} />
   <meta property="og:description" content={meta.description} />
