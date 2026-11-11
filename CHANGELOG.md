@@ -5,6 +5,19 @@ All notable changes to this project are documented here. The format is
 follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 `0.x`, a breaking change bumps the minor.
 
+## [Unreleased]
+
+### Fixed
+
+- A trace that changes layer no longer leaves phantom copper at the via. The zero-length piece
+  between a via and the next wire took the via's `to_layer` and the wire's width, so a 1 mm
+  inner-layer wire put a 1 mm disc on the top layer and `voltage_clearance` reported nets
+  "0.00 mm apart". A segment now lies on the layer of its wire end.
+- `fusible route` accepts polygon pads. It stopped with `pcb_smtpad ...: missing x/y` (exit 2)
+  on a pad drawn as an outline, such as the chamfered pad of an LGA module. The pad's bounding
+  box is the obstacle and its center the anchor; a polygon whose center lies outside its outline
+  is refused.
+
 ## [2.1.2] - 2026-11-11
 
 ### Changed

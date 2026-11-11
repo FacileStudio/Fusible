@@ -7,7 +7,7 @@ use serde_json::Value;
 use super::super::astar::{AStarConfig, Terminal};
 use super::super::spatial::{SpatialObstacle, SpatialRoutingIndex};
 use super::connectivity::Connectivity;
-use super::json::{num, pad_half_extent, str_of, type_of};
+use super::json::{num, pad_box, pad_half_extent, str_of, type_of};
 use super::trace::insert_existing_trace;
 use crate::gerber::layers::PcbBoardElm;
 
@@ -98,7 +98,7 @@ impl IndexBuilder<'_> {
     fn add(&mut self, el: &Value, typ: &str, net: Option<String>) -> Result<(), String> {
         let at = || num(el, "x").zip(num(el, "y")).ok_or("missing x/y");
         match typ {
-            "pcb_smtpad" => self.add_smtpad(el, at()?, net),
+            "pcb_smtpad" => self.add_smtpad(el, net),
             "pcb_plated_hole" => self.add_plated_hole(el, at()?, net),
             "pcb_hole" | "pcb_via" => self.add_hole(el, at()?),
             "pcb_trace" => {
@@ -111,14 +111,9 @@ impl IndexBuilder<'_> {
         }
     }
 
-    fn add_smtpad(
-        &mut self,
-        el: &Value,
-        (x, y): (f64, f64),
-        net: Option<String>,
-    ) -> Result<(), String> {
+    fn add_smtpad(&mut self, el: &Value, net: Option<String>) -> Result<(), String> {
         let layer = str_of(el, "layer").ok_or("missing layer")?;
-        let [hw, hh] = pad_half_extent(el).ok_or("missing pad size")?;
+        let ([x, y], [hw, hh]) = pad_box(el)?;
         self.index.insert_obstacle(
             layer,
             SpatialObstacle::pad(net.clone(), [x - hw, y - hh], [x + hw, y + hh]),

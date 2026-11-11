@@ -3,6 +3,7 @@
 
 mod engine;
 mod fixtures;
+mod polygon;
 
 use super::astar::{find_path, AStarConfig, RouteStepKind, Terminal};
 use super::spatial::{Probe, SpatialObstacle, SpatialRoutingIndex};

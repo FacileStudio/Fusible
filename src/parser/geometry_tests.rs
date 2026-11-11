@@ -93,3 +93,22 @@ fn lists_elements_it_cannot_read() {
     assert_eq!(g.unreadable.len(), 3);
     assert!(g.segments.is_empty() && g.vias.is_empty() && g.board.is_none());
 }
+
+#[test]
+fn a_segment_leaving_a_via_lies_on_the_layer_of_its_wire() {
+    let g = geometry(
+        r#"[
+  {"type":"pcb_trace","pcb_trace_id":"t","route":[
+    {"route_type":"wire","x":0,"y":0,"width":0.15,"layer":"top"},
+    {"route_type":"via","x":0,"y":0,"from_layer":"inner1","to_layer":"top"},
+    {"route_type":"wire","x":0,"y":0,"width":1.0,"layer":"inner1"},
+    {"route_type":"wire","x":3,"y":0,"width":0.15,"layer":"inner1"}]}
+]"#,
+    );
+    let read: Vec<(&str, f64)> = g
+        .segments
+        .iter()
+        .map(|s| (s.layer.as_str(), s.width))
+        .collect();
+    assert_eq!(read, [("top", 0.15), ("inner1", 1.0), ("inner1", 1.0)]);
+}

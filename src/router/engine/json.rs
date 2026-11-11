@@ -25,6 +25,44 @@ pub(super) fn pad_half_extent(el: &Value) -> Option<[f64; 2]> {
     Some([(w * c + h * s) / 2.0, (w * s + h * c) / 2.0])
 }
 
+/// Center and half extents of a pad's bounding box. A polygon pad carries
+/// `points` instead of a center: its box is the box of its outline, and the
+/// box center must lie inside the outline to serve as the routing anchor.
+pub(super) fn pad_box(el: &Value) -> Result<([f64; 2], [f64; 2]), &'static str> {
+    if let Some((x, y)) = num(el, "x").zip(num(el, "y")) {
+        return Ok(([x, y], pad_half_extent(el).ok_or("missing pad size")?));
+    }
+    let points: Vec<[f64; 2]> = el
+        .get("points")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(|p| Some([num(p, "x")?, num(p, "y")?]))
+        .collect();
+    if points.len() < 3 {
+        return Err("missing x/y");
+    }
+    let span = |axis: usize| {
+        let low = points.iter().map(|p| p[axis]).fold(f64::MAX, f64::min);
+        let high = points.iter().map(|p| p[axis]).fold(f64::MIN, f64::max);
+        ((low + high) / 2.0, (high - low) / 2.0)
+    };
+    let ((cx, hw), (cy, hh)) = (span(0), span(1));
+    if !polygon_contains(&points, [cx, cy]) {
+        return Err("polygon pad whose center lies outside its outline");
+    }
+    Ok(([cx, cy], [hw, hh]))
+}
+
+fn polygon_contains(points: &[[f64; 2]], [x, y]: [f64; 2]) -> bool {
+    let edges = points.iter().zip(points.iter().cycle().skip(1));
+    let crossings = edges
+        .filter(|(a, b)| (a[1] > y) != (b[1] > y))
+        .filter(|(a, b)| x < a[0] + (y - a[1]) * (b[0] - a[0]) / (b[1] - a[1]))
+        .count();
+    crossings % 2 == 1
+}
+
 pub(super) fn type_of(el: &Value) -> &str {
     str_of(el, "type").unwrap_or("")
 }

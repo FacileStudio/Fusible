@@ -8,7 +8,7 @@ struct Point {
     x: f64,
     y: f64,
     width: Option<f64>,
-    layer: String,
+    layer: Option<String>,
 }
 
 fn point(route: &RoutePoint) -> Result<Point, String> {
@@ -19,27 +19,24 @@ fn point(route: &RoutePoint) -> Result<Point, String> {
             if *width <= 0.0 {
                 return Err("wire point without a positive width".into());
             }
-            (*x, *y, Some(*width), layer)
+            (*x, *y, Some(*width), Some(layer.to_ascii_lowercase()))
         }
-        RoutePoint::Via { x, y, to_layer, .. } => (*x, *y, None, to_layer),
+        RoutePoint::Via { x, y, .. } => (*x, *y, None, None),
     };
-    Ok(Point {
-        x,
-        y,
-        width,
-        layer: layer.to_ascii_lowercase(),
-    })
+    Ok(Point { x, y, width, layer })
 }
 
+/// A segment lies on the layer of its wire end: a via point is on both of its
+/// layers, so it takes the layer and the width of the wire it meets.
 fn segment(id: &str, names: &[String], p: &Point, q: &Point) -> Result<Segment, String> {
-    let width = p
-        .width
-        .or(q.width)
-        .ok_or("segment between two vias has no width")?;
+    let wire = [p, q]
+        .into_iter()
+        .find_map(|end| end.width.zip(end.layer.clone()));
+    let (width, layer) = wire.ok_or("segment between two vias has no width")?;
     Ok(Segment {
         trace_id: id.to_string(),
         net_names: names.to_vec(),
-        layer: p.layer.clone(),
+        layer,
         a: (p.x, p.y),
         b: (q.x, q.y),
         width,
