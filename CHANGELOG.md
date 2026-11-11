@@ -5,6 +5,12 @@ All notable changes to this project are documented here. The format is
 follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 `0.x`, a breaking change bumps the minor.
 
+## [2.1.4] - 2026-11-11
+
+### Fixed
+
+- site: favicons, touch and manifest icons, `site.webmanifest` and the 1200x630 `og-image.png` come from muse v0.19.2's brand generator. The English home page uses the catalog title and description, and every page's link preview points at the absolute `https://fusible.facile.studio/og-image.png` with `og:site_name` Facile. The old `og.png` and `scripts/og.ts`, which drew it, are gone.
+
 ## [2.1.3] - 2026-11-11
 
 ### Fixed
