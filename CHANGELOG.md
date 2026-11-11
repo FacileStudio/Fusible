@@ -5,6 +5,15 @@ All notable changes to this project are documented here. The format is
 follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 `0.x`, a breaking change bumps the minor.
 
+## [2.1.1] - 2026-11-11
+
+### Fixed
+
+- A signal net named after its voltage (`MODEM_RX_1V8`, `VBAT_SENSE`) is no longer taken for a
+  supply rail: a name with a signal word (`RX`, `TX`, `SDA`, `SENSE`, ...) is never a rail, and
+  a name never makes a rail of a net whose pins declare a logic role. `rail_test_point`, the
+  pin-binding generator and the Zephyr overlay asked for test points and read levels on such nets.
+
 ## [2.1.0] - 2026-11-10
 
 ### Added
