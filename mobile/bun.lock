@@ -35,6 +35,9 @@
       },
     },
   },
+  "overrides": {
+    "sharp": "^0.35.5",
+  },
   "packages": {
     "@capacitor/android": ["@capacitor/android@8.6.0", "", { "peerDependencies": { "@capacitor/core": "^8.6.0" } }, "sha512-6IJS0TCfV/F/8+324CCwYd3xL6r+TH0W7zzaxYzPz9IV3YWCNvsZDuCCPHUIBC5iASb9od827ddSJ6rz+9Pu1Q=="],
 
@@ -105,6 +108,7 @@
     "@esbuild/win32-ia32": ["@esbuild/win32-ia32@0.28.2", "", { "os": "win32", "cpu": "ia32" }, "sha512-YmJbfTlvU7Sdn9BB+4PRES4oB6pxgS37MAONj+hBr/cpXS1aBPKXxNnDbu+QCWPj0o9dgyxeq79g6c5P8KeuYA=="],
 
     "@esbuild/win32-x64": ["@esbuild/win32-x64@0.28.2", "", { "os": "win32", "cpu": "x64" }, "sha512-5ebpxr3nWMzrL/rnUI755Jkuee0bHL/Gq0WTF9lvcpv73wAp5eu8MfBUgWK9bhWvZjj7yX8etf/8tI8Ney695g=="],
+
     "@facile/muse": ["@facile/muse@github:FacileStudio/muse#b25a33c", { "dependencies": { "gsap": "^3.13.0", "tailwind-merge": "^3.5.0" }, "peerDependencies": { "svelte": "^5.0.0", "tailwindcss": "^4.0.0" } }, "FacileStudio-muse-b25a33c", "sha512-p7bnxSj4q2Sd3RtPbJw6njpV1xZHc4RbixVd6ScEaA4iv7eNF/o7VP53xU2lzUDWUiGCfjEBQrW0U15LFwZYkw=="],
 
     "@flatten-js/core": ["@flatten-js/core@1.6.15", "", { "dependencies": { "@flatten-js/interval-tree": "^2.0.0" } }, "sha512-tG/P0v3AqWpNf+vuvGNZ9lYMdHKzgY/I+fEXOVHng1kUm+YWLxewIWWeK5TNSGXWkBXiyHn8g53T/X5EoyyyyA=="],

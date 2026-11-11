@@ -14,6 +14,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
   with exit 2 on every clone without tscircuit's `.tscircuit/cache`. The timeout message now
   prints the limit in force next to `FUSIBLE_BUILD_TIMEOUT_SECS`.
 
+### Security
+
+- The studio and mobile builds pin `sharp` 0.35.5 (GHSA-f88m-g3jw-g9cj, GHSA-rgj7-g3m4-5g8c,
+  GHSA-wq5f-xc86-pv6w), and the studio lockfile takes the in-range fixes. `zod` 3
+  (GHSA-mrhx-c7xc-m3w5) stays: tscircuit requires zod 3 and the fix exists only in zod 4.6.6.
+
 ## [2.1.1] - 2026-11-11
 
 ### Fixed

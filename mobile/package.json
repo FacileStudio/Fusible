@@ -39,5 +39,8 @@
 		"circuit-to-svg": "^0.0.456",
 		"gsap": "^3.13",
 		"three": "^0.186"
+	},
+	"overrides": {
+		"sharp": "^0.35.5"
 	}
 }
