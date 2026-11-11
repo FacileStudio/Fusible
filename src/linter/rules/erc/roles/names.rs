@@ -16,6 +16,12 @@ const RAIL_NETS: &[&str] = &[
 /// Words that name a rail on their own.
 const RAIL_WORDS: &[&str] = &["BAT", "3V3", "+3V3", "5V", "+5V", "1V8", "+1V8"];
 
+/// Words that make a name a signal, whatever voltage it carries (`MODEM_RX_1V8`, `VBAT_SENSE`).
+const SIGNAL_WORDS: &[&str] = &[
+    "RX", "TX", "RXD", "TXD", "CTS", "RTS", "SDA", "SCL", "SCK", "CLK", "MOSI", "MISO", "CS", "EN",
+    "RST", "RESET", "INT", "IRQ", "PWM", "SENSE", "ADC", "KEY", "DATA",
+];
+
 /// Whether a pin is a supply pin by its own name (`VDD`, `AVDD`, `VBAT`, `3V3`, ...).
 pub fn is_supply_name(name: &str) -> bool {
     let upper = name.to_ascii_uppercase();
@@ -53,14 +59,19 @@ pub fn is_generic_name(name: &str) -> bool {
 
 /// Whether a net name names a supply rail: a word of it starts with `V` and holds a supply
 /// token (`VDD3V3`, `VSYS`), is `V` and a digit (`V3_3`), or is a rail word (`BAT`, `3V3`).
-/// Grounds and the names tscircuit makes up for unnamed nets
-/// (`.R1 > .pin2 to .U1 > .VDD`) never are.
+/// Grounds, names with a signal word (`MODEM_RX_1V8`, `VBAT_SENSE`) and the names tscircuit
+/// makes up for unnamed nets (`.R1 > .pin2 to .U1 > .VDD`) never are.
 pub fn is_rail_name(name: &str) -> bool {
     if name.starts_with('.') || is_ground_name(name) {
         return false;
     }
     let upper = name.to_ascii_uppercase();
-    let words = upper.split(|c: char| !c.is_ascii_alphanumeric() && c != '+');
+    let words: Vec<&str> = upper
+        .split(|c: char| !c.is_ascii_alphanumeric() && c != '+')
+        .collect();
+    if words.iter().any(|w| SIGNAL_WORDS.contains(w)) {
+        return false;
+    }
     let volts = |w: &str| {
         w.strip_prefix('V')
             .is_some_and(|r| r.starts_with(|c: char| c.is_ascii_digit()))

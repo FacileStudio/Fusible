@@ -94,10 +94,20 @@ fn supply_pin_and_rail_names_are_told_from_signals() {
     for name in ["EN", "CE", "G", "LEDA", "D", "SCL"] {
         assert!(!is_supply_name(name), "{name}");
     }
-    for net in ["VDD3V3", "VSYS", "+3V3", "VBAT", "V3_3"] {
+    for net in [
+        "VDD3V3", "VSYS", "+3V3", "VBAT", "V3_3", "VDD_1V8", "3V3_MCU",
+    ] {
         assert!(is_rail_name(net), "{net}");
     }
-    for net in ["BATT_SENSE", "GND", ".R1 > .pin2 to .U1 > .VDD", "SDA"] {
+    for net in [
+        "BATT_SENSE",
+        "GND",
+        ".R1 > .pin2 to .U1 > .VDD",
+        "SDA",
+        "MODEM_RX_1V8",
+        "MODEM_TX_1V8",
+        "VBAT_SENSE",
+    ] {
         assert!(!is_rail_name(net), "{net}");
     }
 }

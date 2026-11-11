@@ -7,15 +7,26 @@ use super::roles::{is_ground_name, is_rail_name, Role};
 use super::Board;
 
 /// Whether net `net` is a supply rail (`up`) or a ground (`!up`): by a pin's role, by a
-/// declared `nets:` voltage (rails only), or by the net's name.
+/// declared `nets:` voltage (rails only), or by the net's name. A name never makes a rail of
+/// a net whose pins declare a logic role.
 pub(super) fn is_rail(board: &Board<'_>, net: usize, up: bool) -> bool {
     let wanted: &[Role] = match up {
         true => &[Role::PowerIn, Role::PowerOut],
         false => &[Role::GroundIn, Role::GroundOut],
     };
     let name = board.on_net(net).next().map_or("", |p| p.net_name);
+    let signal = [
+        Role::Output,
+        Role::OpenDrain,
+        Role::Input,
+        Role::Bidirectional,
+    ];
+    let declared_signal = board.on_net(net).any(|p| {
+        let (role, declared) = p.role();
+        declared && signal.contains(&role)
+    });
     let named = match up {
-        true => is_rail_name(name),
+        true => is_rail_name(name) && !declared_signal,
         false => is_ground_name(name),
     };
     let declared = up
