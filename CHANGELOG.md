@@ -5,6 +5,15 @@ All notable changes to this project are documented here. The format is
 follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 `0.x`, a breaking change bumps the minor.
 
+## [Unreleased]
+
+### Changed
+
+- TSX compilation now stops after 600 seconds instead of 120. A cold `fusible check` of FieldCam
+  spends 160-220 s in the tscircuit autorouter and 0.05 s in Fusible, so the old limit failed
+  with exit 2 on every clone without tscircuit's `.tscircuit/cache`. The timeout message now
+  prints the limit in force next to `FUSIBLE_BUILD_TIMEOUT_SECS`.
+
 ## [2.1.1] - 2026-11-11
 
 ### Fixed

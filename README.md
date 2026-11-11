@@ -206,7 +206,7 @@ the fuse blew: 1 electrical violation(s)
 help: every net must connect at least two pads/ports: complete the routing in tscircuit
 ```
 
-TSX compilation stops after 120 seconds (`FUSIBLE_BUILD_TIMEOUT_SECS`) and results are cached
+TSX compilation stops after 600 seconds (`FUSIBLE_BUILD_TIMEOUT_SECS`) and results are cached
 in `.fusible/cache` (`FUSIBLE_NO_CACHE=1` bypasses it). `check` writes no file; `fusible build`
 or `check --write-bindings` writes `pins.rs`. `--json` prints the verdict with every
 diagnostic, links, assembly and waivers, and exit codes do not change. A rule that cannot prove a net is connected reports

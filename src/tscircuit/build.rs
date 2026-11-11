@@ -138,7 +138,11 @@ fn timeout_error(command: &str, timeout: Duration) -> RunnerError {
         command: command.to_string(),
         code: None,
         stderr: format!("compilation timed out after {} seconds", timeout.as_secs()),
-        help: "raise FUSIBLE_BUILD_TIMEOUT_SECS or set `routingDisabled` on <board>".to_string(),
+        help: format!(
+            "a cold autoroute of a large board takes minutes; raise FUSIBLE_BUILD_TIMEOUT_SECS \
+             (now {}) or set `routingDisabled` on <board>",
+            timeout.as_secs()
+        ),
     }
 }
 
@@ -161,12 +165,12 @@ fn fresh_circuit_json(
     }
 }
 
-/// Returns the tscircuit build timeout: `FUSIBLE_BUILD_TIMEOUT_SECS` when set to a positive integer, else 120 seconds.
+/// Returns the tscircuit build timeout: `FUSIBLE_BUILD_TIMEOUT_SECS` when set to a positive integer, else 600 seconds.
 fn build_timeout() -> Duration {
     let secs = std::env::var("FUSIBLE_BUILD_TIMEOUT_SECS")
         .ok()
         .and_then(|v| v.parse::<u64>().ok())
         .filter(|s| *s > 0)
-        .unwrap_or(120);
+        .unwrap_or(600);
     Duration::from_secs(secs)
 }

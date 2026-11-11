@@ -24,7 +24,7 @@ the fuse blew: 1 electrical violation(s)
 help: every net must connect at least two pads/ports: complete the routing in tscircuit
 ```
 
-Compiling TSX stops after 120 seconds (`FUSIBLE_BUILD_TIMEOUT_SECS`). Compiled circuits and
+Compiling TSX stops after 600 seconds (`FUSIBLE_BUILD_TIMEOUT_SECS`). Compiled circuits and
 exports are cached in `.fusible/cache`; unchanged sources skip `tsci` and print a `⚡` line
 (`FUSIBLE_NO_CACHE=1` bypasses the cache). `--json` prints one report, version 2, and nothing
 else on stdout: `fuse`, `boards[]` with their diagnostics (rule, message, help, severity, and
