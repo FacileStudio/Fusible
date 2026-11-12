@@ -8,7 +8,7 @@ use thiserror::Error;
 
 use crate::config::FusibleConfig;
 use crate::tscircuit::detect::{find_binary_in_path, resolve_program};
-use crate::tscircuit::{bun_path, Runner};
+use crate::tscircuit::{bun_path, process, Runner, RunnerError};
 
 pub mod firmware;
 pub mod flash;
@@ -18,18 +18,9 @@ pub mod json;
 /// Errors that can occur during toolchain inspection or automated installation.
 #[derive(Debug, Error, Diagnostic)]
 pub enum DoctorError {
-    #[error("failed to run package manager: {command}")]
-    #[diagnostic(
-        code(fusible::doctor::install_failed),
-        help(
-            "verify your internet connection or install manually with `npm install -g tscircuit`"
-        )
-    )]
-    InstallFailed {
-        command: String,
-        #[source]
-        source: std::io::Error,
-    },
+    #[error(transparent)]
+    #[diagnostic(transparent)]
+    Runner(#[from] RunnerError),
 
     #[error("package manager command `{command}` exited with failure ({code:?})")]
     #[diagnostic(
@@ -183,13 +174,7 @@ fn install_tscircuit(has_bun: bool, has_npm: bool) -> Result<(), DoctorError> {
     };
 
     println!("   Executing: {prog} {}", args.join(" "));
-    let status = Command::new(resolve_program(&prog))
-        .args(args)
-        .status()
-        .map_err(|source| DoctorError::InstallFailed {
-            command: format!("{prog} {}", args.join(" ")),
-            source,
-        })?;
+    let status = process::status(Command::new(resolve_program(&prog)).args(args))?;
 
     if !status.success() {
         return Err(DoctorError::InstallNonZero {

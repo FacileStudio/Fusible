@@ -115,12 +115,9 @@ fn run_script_with_runners(script: &str, node_path: &std::ffi::OsStr) -> Result<
     let mut last_error = "neither bun nor node is installed".to_string();
     let bun = super::bun_path().unwrap_or_else(|| PathBuf::from("bun"));
     for runner_bin in [bun, PathBuf::from("node")] {
-        let out = std::process::Command::new(&runner_bin)
-            .arg("-e")
-            .arg(script)
-            .env("NODE_PATH", node_path)
-            .output();
-        match out {
+        let mut cmd = std::process::Command::new(&runner_bin);
+        cmd.arg("-e").arg(script).env("NODE_PATH", node_path);
+        match super::process::output(&mut cmd) {
             Ok(out) if out.status.success() => return Ok(()),
             Ok(out) => {
                 last_error = format!(
@@ -128,6 +125,9 @@ fn run_script_with_runners(script: &str, node_path: &std::ffi::OsStr) -> Result<
                     runner_bin.display(),
                     String::from_utf8_lossy(&out.stderr).trim()
                 )
+            }
+            Err(super::RunnerError::CommandFailed { stderr, help, .. }) => {
+                return Err(format!("{} {stderr}; {help}", runner_bin.display()))
             }
             Err(_) => continue,
         }

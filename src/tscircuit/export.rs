@@ -25,10 +25,7 @@ impl Runner {
         }
 
         let mut cmd = export_command(&self.kind, file, format, abs_output.as_deref());
-        let out = cmd.output().map_err(|source| RunnerError::Io {
-            command: process::format_command(&cmd),
-            source,
-        })?;
+        let out = process::output(&mut cmd)?;
 
         if !out.status.success() {
             let details = process::extract_output_details(&out);

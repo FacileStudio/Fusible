@@ -8,13 +8,14 @@ mod build;
 mod bun;
 mod cache;
 pub mod command;
+mod deadline;
 pub mod detect;
 pub mod error;
 mod export;
 mod interactive;
 pub mod kicad;
 pub mod output;
-mod process;
+pub mod process;
 #[cfg(test)]
 mod tests;
 

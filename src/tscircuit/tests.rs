@@ -7,3 +7,4 @@ mod command;
 mod detect;
 #[cfg(unix)]
 mod stale;
+mod timeout;

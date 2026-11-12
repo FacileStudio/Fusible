@@ -5,6 +5,7 @@ use std::process::{Command, Stdio};
 use std::sync::{Mutex, PoisonError};
 
 use super::BodyError;
+use crate::tscircuit::process;
 
 const GENERATOR_TS: &str = include_str!("../../assets/enclosure.ts");
 const CONVERT_TS: &str = include_str!("../../assets/convert.ts");
@@ -57,11 +58,12 @@ pub(super) fn prepare_generator(bun: &Path, dir: &Path) -> Result<(), BodyError>
         return Ok(());
     }
     println!("📦 Installing occt-wasm {OCCT_WASM_VERSION} (first run only)...");
-    let status = Command::new(bun)
-        .arg("install")
-        .current_dir(dir)
-        .stdin(Stdio::null())
-        .status()?;
+    let status = process::status(
+        Command::new(bun)
+            .arg("install")
+            .current_dir(dir)
+            .stdin(Stdio::null()),
+    )?;
     if status.success() {
         return Ok(());
     }

@@ -1,12 +1,11 @@
 //! `build` invocation: drains output pipes, enforces a timeout, and locates fresh Circuit JSON.
 
-use std::io::Read;
 use std::path::{Path, PathBuf};
-use std::process::{Child, ExitStatus, Output, Stdio};
-use std::thread::JoinHandle;
-use std::time::{Duration, Instant, SystemTime};
+use std::process::{Child, Output, Stdio};
+use std::time::{Duration, SystemTime};
 
-use super::process::{extract_output_details, format_command};
+use super::deadline::{collect_output, timeout};
+use super::process::{self, extract_output_details, format_command};
 use super::{command, output, resolve_hardware_context, Runner, RunnerError};
 
 const CACHE_KIND: &str = "build";
@@ -30,11 +29,11 @@ impl Runner {
             return output::deliver(hit, out_file);
         }
         let mut spawned = self.spawn_build(file, true)?;
-        let mut out = collect_output(&mut spawned.child, &spawned.command)?;
+        let mut out = collect_output(&mut spawned.child, &spawned.command, timeout())?;
         let stderr = String::from_utf8_lossy(&out.stderr);
         if !out.status.success() && stderr.contains("unknown option '--ignore-errors'") {
             spawned = self.spawn_build(file, false)?;
-            out = collect_output(&mut spawned.child, &spawned.command)?;
+            out = collect_output(&mut spawned.child, &spawned.command, timeout())?;
         }
         let produced = fresh_circuit_json(file, &out, &spawned);
 
@@ -72,77 +71,13 @@ impl Runner {
         let before = output::resolve_circuit_json(file, "")
             .ok()
             .and_then(|path| std::fs::metadata(path).ok()?.modified().ok());
-        let child = cmd.spawn().map_err(|source| RunnerError::Io {
-            command: command.clone(),
-            source,
-        })?;
+        let child = process::spawn(&mut cmd)?;
         Ok(SpawnedBuild {
             child,
             command,
             started,
             before,
         })
-    }
-}
-
-/// Waits for `child` while draining both pipes, then returns its full output.
-fn collect_output(child: &mut Child, command: &str) -> Result<Output, RunnerError> {
-    let stdout_handle = drain(child.stdout.take());
-    let stderr_handle = drain(child.stderr.take());
-    let status = wait_with_timeout(child, command)?;
-    Ok(Output {
-        status,
-        stdout: stdout_handle.join().unwrap_or_default(),
-        stderr: stderr_handle.join().unwrap_or_default(),
-    })
-}
-
-/// Reads `pipe` to the end on a background thread.
-fn drain<R: Read + Send + 'static>(pipe: Option<R>) -> JoinHandle<Vec<u8>> {
-    std::thread::spawn(move || {
-        let mut buf = Vec::new();
-        if let Some(mut pipe) = pipe {
-            let _ = pipe.read_to_end(&mut buf);
-        }
-        buf
-    })
-}
-
-/// Polls `child` until it exits; kills it on timeout or wait failure.
-fn wait_with_timeout(child: &mut Child, command: &str) -> Result<ExitStatus, RunnerError> {
-    let start = Instant::now();
-    let timeout = build_timeout();
-    let result = loop {
-        match child.try_wait() {
-            Ok(Some(status)) => break Ok(status),
-            Ok(None) if start.elapsed() >= timeout => break Err(timeout_error(command, timeout)),
-            Ok(None) => std::thread::sleep(Duration::from_millis(50)),
-            Err(source) => {
-                break Err(RunnerError::Io {
-                    command: command.to_string(),
-                    source,
-                })
-            }
-        }
-    };
-    if result.is_err() {
-        let _ = child.kill();
-        let _ = child.wait();
-    }
-    result
-}
-
-/// Builds the error reported when compilation exceeds `timeout`.
-fn timeout_error(command: &str, timeout: Duration) -> RunnerError {
-    RunnerError::CommandFailed {
-        command: command.to_string(),
-        code: None,
-        stderr: format!("compilation timed out after {} seconds", timeout.as_secs()),
-        help: format!(
-            "a cold autoroute of a large board takes minutes; raise FUSIBLE_BUILD_TIMEOUT_SECS \
-             (now {}) or set `routingDisabled` on <board>",
-            timeout.as_secs()
-        ),
     }
 }
 
@@ -163,14 +98,4 @@ fn fresh_circuit_json(
     } else {
         Err(RunnerError::OutputNotFound { path })
     }
-}
-
-/// Returns the tscircuit build timeout: `FUSIBLE_BUILD_TIMEOUT_SECS` when set to a positive integer, else 600 seconds.
-fn build_timeout() -> Duration {
-    let secs = std::env::var("FUSIBLE_BUILD_TIMEOUT_SECS")
-        .ok()
-        .and_then(|v| v.parse::<u64>().ok())
-        .filter(|s| *s > 0)
-        .unwrap_or(600);
-    Duration::from_secs(secs)
 }

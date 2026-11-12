@@ -5,6 +5,15 @@ All notable changes to this project are documented here. The format is
 follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 `0.x`, a breaking change bumps the minor.
 
+## [Unreleased]
+
+### Fixed
+
+- `fusible export` no longer hangs on a cold autoroute. `tsci export`, `add`, `install` and
+  `search`, the KiCad converter, the installs of `init` and `doctor --install` and the
+  occt-wasm install of the body generator now stop after `FUSIBLE_BUILD_TIMEOUT_SECS` (600 s
+  by default), like `tsci build`, with the same message. A timeout is a tool error (exit 2).
+
 ## [2.1.4] - 2026-11-11
 
 ### Fixed

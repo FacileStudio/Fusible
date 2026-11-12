@@ -10,8 +10,8 @@ use std::process::Command;
 use miette::Diagnostic;
 use thiserror::Error;
 
-use crate::tscircuit::bun_path;
 use crate::tscircuit::detect::resolve_program;
+use crate::tscircuit::{bun_path, process, RunnerError};
 
 /// The `hardware/tsconfig.json` every new workspace gets.
 pub(crate) const TSCONFIG: &str = templates::TSCONFIG_JSON;
@@ -143,10 +143,12 @@ pub(crate) fn install_hardware_deps(hw_dir: &Path) {
     for runner in [bun, resolve_program("npm")] {
         let mut cmd = Command::new(runner);
         cmd.arg("install").current_dir(hw_dir);
-        if let Ok(mut child) = cmd.spawn() {
-            let _ = child.wait();
-            return;
+        match process::status(&mut cmd) {
+            Err(RunnerError::Io { .. }) => continue,
+            Err(err) => println!("⚠️  {:?}", miette::Report::new(err)),
+            Ok(_) => {}
         }
+        return;
     }
     println!("⚠️  Neither bun nor npm found; run 'fusible doctor --install' or install dependencies manually.");
 }

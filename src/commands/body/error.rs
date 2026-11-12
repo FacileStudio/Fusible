@@ -30,6 +30,10 @@ pub enum BodyError {
     #[diagnostic(code(fusible::body::build_failed))]
     BuildFailed { name: String, command: String },
 
+    #[error(transparent)]
+    #[diagnostic(transparent)]
+    Runner(#[from] crate::tscircuit::RunnerError),
+
     #[error("failed to write body files: {0}")]
     #[diagnostic(code(fusible::body::io_error))]
     Io(#[from] std::io::Error),
