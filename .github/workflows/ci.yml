@@ -50,7 +50,11 @@ jobs:
         run: cargo build --release --locked
 
       - name: Install gerbv
-        run: sudo apt-get update && sudo apt-get install -y gerbv
+        timeout-minutes: 15
+        run: |
+          apt_get() { sudo timeout 180 apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 "$@"; }
+          install() { apt_get update && apt_get install -y gerbv; }
+          install || { sleep 15; install; }
 
       - name: Render Gerber layers in gerbv
         run: |
