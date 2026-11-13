@@ -79,7 +79,7 @@ MCP gains `apply_fix` (applies a `set_prop` fix) and `waive` (adds a reasoned wa
 - [x] **Fabrication and assembly.** Annular ring, drill to copper, hole spacing, via aspect ratio, edge clearance, silkscreen, mask slivers, acid traps, rotation-aware courtyards, fiducials, BOM completeness, IPC-D-356 netlist and centroid files.
 - [x] **Firmware bridge.** Generated STM32 pin tables, one bindings model rendered as Rust, a C header and a Zephyr overlay, `fusible flash`, `fusible bringup`.
 - [x] **Agent and human experience.** `fusible new` with four templates, `fusible rules` and `fusible explain`, generated `docs/rules/`, MCP `apply_fix` and `waive`, studio Checks grouped by category with zoom, waivers and Apply fix.
-- [ ] **Integration.** 2.0.0 shipped. Left: FieldCam acceptance, where the board runs `check`, `export`, `bringup`, `build` and `bom` with the real SIM7600G-H land pattern. The land pattern is drawn and checked against SIMCom's hardware design V1.03, but with it the board no longer routes: tscircuit's `beta_pipeline9` autorouter aborts on the hand-routed `VBAT_MODEM` feed ("cannot reconnect preloaded trace").
+- [x] **Integration.** 2.0.0 shipped. FieldCam (KonoLabs/FieldCam v0.13.0) passes the whole pipeline from a fresh clone with Fusible 2.1.6: `check` (fuse intact, no waivers), `export --preset all`, `bringup`, `bom`, `body` and `build`.
 
 The workspace split (`fusible-core` for `wasm32`) is dropped: `fusible` stays the only published crate.
 
