@@ -5,6 +5,19 @@ All notable changes to this project are documented here. The format is
 follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 `0.x`, a breaking change bumps the minor.
 
+## [2.2.0] - 2026-11-14
+
+### Changed
+
+- The site landing page is shorter: hero, three feature tiles, agents, downloads and a closing
+  call to action. The rules list, the screenshot sections and the suite links are gone; the docs
+  keep the details.
+- Downloads on the landing and on `/download` use the muse download section. It lists every
+  installer of the latest release (`.AppImage` and `.deb` on Linux, for example) with its size and
+  checksum, plus the `cargo` and `facile` install commands.
+- The site uses muse v0.22.0 (Magnetik for titles and text) and mise-en-scene v0.2.1; the feature
+  demos use the kit's `Tile`.
+
 ## [2.1.9] - 2026-11-14
 
 ### Added
