@@ -5,7 +5,7 @@ use super::status::KicadStates;
 use super::sync::{evaluate, sync_slot};
 use super::watch::start_kicad_watcher;
 use crate::commands::target::BoardTarget;
-use crate::dev::state::State;
+use crate::dev::live::state::State;
 
 const TSX: &str = r#"<board>
   <resistor name="R1" pcbX={0} pcbY={0} />

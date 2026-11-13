@@ -2,14 +2,14 @@
 
 use tiny_http::Request;
 
-use super::pair::{authorize_remote, is_lan_host, is_remote};
 use super::server::route_path;
-use super::state::State;
+use crate::dev::live::state::State;
+use crate::dev::pair::{authorize_remote, is_lan_host, is_remote};
 
 const LOOPBACK: [&str; 3] = ["localhost", "127.0.0.1", "[::1]"];
 
 /// Accepts only loopback Host headers bound to the dev server port, blocking DNS rebinding.
-pub(super) fn is_allowed_host(host: Option<&str>, port: u16) -> bool {
+pub(in crate::dev) fn is_allowed_host(host: Option<&str>, port: u16) -> bool {
     host.is_some_and(|h| {
         LOOPBACK
             .iter()
@@ -18,7 +18,7 @@ pub(super) fn is_allowed_host(host: Option<&str>, port: u16) -> bool {
 }
 
 /// Accepts a missing Origin, or one that is a loopback page served by this dev server.
-pub(super) fn is_allowed_origin(origin: Option<&str>, port: u16) -> bool {
+pub(in crate::dev) fn is_allowed_origin(origin: Option<&str>, port: u16) -> bool {
     origin.is_none_or(|o| {
         LOOPBACK
             .iter()
@@ -29,12 +29,12 @@ pub(super) fn is_allowed_origin(origin: Option<&str>, port: u16) -> bool {
 /// Rejects requests the browser marks as coming from another site, including another local port.
 ///
 /// A missing header (curl, older browsers) and `none` (the user typed the address) pass.
-pub(super) fn is_allowed_fetch_site(site: Option<&str>) -> bool {
+pub(in crate::dev) fn is_allowed_fetch_site(site: Option<&str>) -> bool {
     site.is_none_or(|s| s.eq_ignore_ascii_case("same-origin") || s.eq_ignore_ascii_case("none"))
 }
 
 /// Whether `request` comes from this dev server's own pages or from a non-browser client.
-pub(super) fn is_same_origin(request: &Request, port: u16) -> bool {
+pub(in crate::dev) fn is_same_origin(request: &Request, port: u16) -> bool {
     let header = |name: &'static str| {
         let found = request.headers().iter().find(|h| h.field.equiv(name));
         found.map(|h| h.value.as_str().to_string())
@@ -46,7 +46,7 @@ pub(super) fn is_same_origin(request: &Request, port: u16) -> bool {
 /// Decides whether `request` may be handled at all; the error is the status to answer with.
 ///
 /// A remote phone goes through the pairing gate. Everything else keeps the loopback rules.
-pub(super) fn admit(request: &Request, state: &State, port: u16) -> Result<(), u16> {
+pub(in crate::dev) fn admit(request: &Request, state: &State, port: u16) -> Result<(), u16> {
     let found = request.headers().iter().find(|h| h.field.equiv("Host"));
     let host = found.map(|h| h.value.as_str());
     let lan = is_lan_host(host, state.lan_host.as_deref());

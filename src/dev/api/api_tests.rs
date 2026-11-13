@@ -1,11 +1,11 @@
 use std::path::Path;
 
 use super::project::project_json;
-use super::run::request::parse;
-use super::server::query_param;
-use super::state::State;
 use crate::commands::target::BoardTarget;
 use crate::config::FusibleConfig;
+use crate::dev::http::server::query_param;
+use crate::dev::live::state::State;
+use crate::dev::run::request::parse;
 
 fn manifest() -> FusibleConfig {
     let yaml = concat!(
@@ -85,16 +85,16 @@ fn project_lists_served_items_with_relative_paths() {
 
 #[test]
 fn viewer_page_is_served_with_the_app_mount_point() {
-    let page = super::assets::static_response("/", None, false).unwrap();
+    let page = crate::dev::http::assets::static_response("/", None, false).unwrap();
     assert_eq!(page.status_code().0, 200);
-    let html = include_str!("../assets/viewer.html");
+    let html = include_str!("../../assets/viewer.html");
     assert!(html.contains(r#"<div id="app"></div>"#));
 }
 
 #[test]
 fn server_serves_the_stylesheet_the_viewer_links() {
-    let css = super::assets::static_response("/studio.css", None, false).unwrap();
+    let css = crate::dev::http::assets::static_response("/studio.css", None, false).unwrap();
     assert_eq!(css.status_code().0, 200);
-    let html = include_str!("../assets/viewer.html");
+    let html = include_str!("../../assets/viewer.html");
     assert!(html.contains(r#"<link rel="stylesheet" href="/studio.css">"#));
 }

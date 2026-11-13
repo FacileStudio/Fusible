@@ -21,7 +21,7 @@ const WATCHED_EXTENSIONS: [&str; 8] = [
 ///
 /// Only components below `watch_dir` are checked, so a project living under a
 /// dotted, `target` or `dist` parent still reloads.
-pub(super) fn is_relevant_change(watch_dir: &Path, path: &Path) -> bool {
+pub(in crate::dev) fn is_relevant_change(watch_dir: &Path, path: &Path) -> bool {
     let relative = path.strip_prefix(watch_dir).unwrap_or(path);
     let is_ignored = relative.components().any(|c| {
         let seg = c.as_os_str().to_string_lossy();

@@ -10,7 +10,7 @@ use serde_json::{json, Value};
 use crate::bom::{bodies_of, materials, resolve_material};
 use crate::commands::body::read_report;
 use crate::config::{BodyConfig, FusibleConfig};
-use crate::dev::project::shown;
+use crate::dev::api::project::shown;
 
 fn kind(body: &BodyConfig) -> &'static str {
     match (body.is_code(), body.source.is_some()) {

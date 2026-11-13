@@ -29,7 +29,7 @@ use std::time::Instant;
 
 use store::Devices;
 
-use super::state::State;
+use crate::dev::live::state::State;
 
 pub(in crate::dev) use lan::lan_ip;
 pub(in crate::dev) use remote::{authorize_remote, is_lan_host, is_remote};

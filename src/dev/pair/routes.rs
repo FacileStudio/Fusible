@@ -17,8 +17,8 @@ use super::PairState;
 
 const MAX_BODY: u64 = 4096;
 use crate::dev::api::{error_body, respond_json};
-use crate::dev::limiter::lock;
-use crate::dev::state::State;
+use crate::dev::http::limiter::lock;
+use crate::dev::live::state::State;
 use crate::project::Project;
 
 /// Whether the pairing module serves `path`.

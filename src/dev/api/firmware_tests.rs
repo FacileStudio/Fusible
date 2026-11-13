@@ -3,9 +3,9 @@ use std::path::Path;
 use serde_json::Value;
 
 use super::firmware::firmware_reply;
-use super::state::State;
 use crate::commands::target::BoardTarget;
 use crate::config::FusibleConfig;
+use crate::dev::live::state::State;
 
 const ESP32: &str = r#"[
   {"type":"source_component","component_id":"U1","name":"ESP32-S3","kind":"chip"},
@@ -21,7 +21,7 @@ const ESP32: &str = r#"[
 const NO_MCU: &str = r#"[
   {"type":"source_component","component_id":"R1","name":"R1","kind":"simple_resistor"}
 ]"#;
-const PIN_MUX: &str = include_str!("../../examples/circuit-pinmux-violation.json");
+const PIN_MUX: &str = include_str!("../../../examples/circuit-pinmux-violation.json");
 
 fn manifest(mcu: &str) -> FusibleConfig {
     let yaml = format!(

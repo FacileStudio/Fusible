@@ -4,13 +4,17 @@ use std::path::Path;
 
 use serde_json::{json, Value};
 
-use super::state::State;
 use crate::config::{BodyConfig, FirmwareConfig, FusibleConfig};
+use crate::dev::live::state::State;
 
 /// Describes the manifest items that belong to the served boards, with each board's fuse state.
 ///
 /// Paths are shown relative to `root`, the directory of the manifest.
-pub(super) fn project_json(state: &State, cfg: Option<&FusibleConfig>, root: &Path) -> String {
+pub(in crate::dev) fn project_json(
+    state: &State,
+    cfg: Option<&FusibleConfig>,
+    root: &Path,
+) -> String {
     let served = |board: Option<&String>| {
         board.is_none_or(|b| state.slots.iter().any(|s| s.name.as_deref() == Some(b)))
     };
@@ -42,7 +46,7 @@ pub(super) fn project_json(state: &State, cfg: Option<&FusibleConfig>, root: &Pa
     .to_string()
 }
 
-pub(super) fn shown(path: &Path, root: &Path) -> String {
+pub(in crate::dev) fn shown(path: &Path, root: &Path) -> String {
     path.strip_prefix(root)
         .unwrap_or(path)
         .to_string_lossy()
@@ -77,7 +81,7 @@ fn firmware_item(name: &str, fw: &FirmwareConfig, root: &Path) -> Value {
 }
 
 /// The JSON item of one manifest body.
-pub(super) fn body_item(name: &str, body: &BodyConfig, root: &Path) -> Value {
+pub(in crate::dev) fn body_item(name: &str, body: &BodyConfig, root: &Path) -> Value {
     let kind = if body.source.is_some() {
         "authored"
     } else {

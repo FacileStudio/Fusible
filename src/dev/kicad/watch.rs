@@ -7,8 +7,8 @@ use notify_debouncer_mini::notify::{RecommendedWatcher, RecursiveMode};
 use notify_debouncer_mini::{new_debouncer, DebounceEventResult, Debouncer};
 
 use super::sync::{kicad_path, sync_slot};
-use crate::dev::stamps::Stamps;
-use crate::dev::state::{Slot, State};
+use crate::dev::live::stamps::Stamps;
+use crate::dev::live::state::{Slot, State};
 
 const SETTLE: Duration = Duration::from_millis(600);
 

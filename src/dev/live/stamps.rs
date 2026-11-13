@@ -12,13 +12,13 @@ const CLOCK_SLACK: Duration = Duration::from_secs(2);
 type Stamp = (SystemTime, u64);
 
 /// The modification time and size last seen for each watched file.
-pub(super) struct Stamps {
+pub(in crate::dev) struct Stamps {
     started: SystemTime,
     seen: HashMap<PathBuf, Stamp>,
 }
 
 impl Stamps {
-    pub(super) fn new() -> Self {
+    pub(in crate::dev) fn new() -> Self {
         Self {
             started: SystemTime::now() - CLOCK_SLACK,
             seen: HashMap::new(),
@@ -30,7 +30,7 @@ impl Stamps {
     /// A file never seen before counts as written only if it changed shortly before watching
     /// began or later; file clocks lag the system clock by a few milliseconds.
     /// A file that cannot be read counts as written, so a deletion is not missed.
-    pub(super) fn is_written(&mut self, path: &Path) -> bool {
+    pub(in crate::dev) fn is_written(&mut self, path: &Path) -> bool {
         let Some(stamp) = stamp_of(path) else {
             self.seen.remove(path);
             return true;

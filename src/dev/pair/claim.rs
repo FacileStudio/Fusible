@@ -10,7 +10,7 @@ use super::clock::rfc3339;
 use super::store::Device;
 use super::token::{ct_eq, random_hex, sha256_hex};
 use super::{PairState, Pending};
-use crate::dev::limiter::lock;
+use crate::dev::http::limiter::lock;
 
 const TTL: Duration = Duration::from_secs(300);
 const WINDOW: Duration = Duration::from_secs(60);

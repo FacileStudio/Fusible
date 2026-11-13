@@ -5,18 +5,18 @@ use std::path::Path;
 use serde_json::{json, Value};
 use tiny_http::Request;
 
-use super::api::respond_json;
-use super::server::query_param;
-use super::state::State;
 use crate::codegen::{categorize_pins, extract_mcu_pins, field_names, McuInfo};
 use crate::config::{FirmwareConfig, FusibleConfig};
+use crate::dev::api::respond_json;
+use crate::dev::http::server::query_param;
+use crate::dev::live::state::State;
 use crate::linter::{LintContext, PinMuxRule, Rule};
 use crate::netlist::Netlist;
 use crate::parser;
 use crate::project::Project;
 
 /// A status code and JSON body for the response.
-pub(super) type Reply = (u16, String);
+pub(in crate::dev) type Reply = (u16, String);
 
 /// The `pin_mux` conflicts of a circuit as `(message, help)`.
 type Conflicts = Vec<(String, Option<String>)>;
@@ -26,7 +26,7 @@ fn failure(status: u16, message: String) -> Reply {
 }
 
 /// Serves the pin map of the firmware named by `?name=`.
-pub(super) fn serve(request: Request, state: &State, project: &Project) {
+pub(in crate::dev) fn serve(request: Request, state: &State, project: &Project) {
     let name = query_param(request.url(), "name").unwrap_or_default();
     let cfg = project.found().map(|(_, cfg)| cfg);
     let root = project.manifest_dir().unwrap_or(Path::new(""));
@@ -37,7 +37,7 @@ pub(super) fn serve(request: Request, state: &State, project: &Project) {
 /// Builds the pin map of firmware `name`, from the circuit of the board it runs on.
 ///
 /// Paths are shown relative to `root`, the directory of the manifest.
-pub(super) fn firmware_reply(
+pub(in crate::dev) fn firmware_reply(
     cfg: Option<&FusibleConfig>,
     state: &State,
     name: &str,

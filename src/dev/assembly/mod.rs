@@ -14,9 +14,9 @@ use serde_json::{json, Value};
 use tiny_http::{Method, Request};
 
 use super::api::{error_body, JSON};
-use super::assets::http_response;
 use super::bodies::body::no_store;
 use crate::config::FusibleConfig;
+use crate::dev::http::assets::http_response;
 use crate::project::Project;
 
 const GLB: &str = "model/gltf-binary";

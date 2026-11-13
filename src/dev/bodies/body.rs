@@ -11,8 +11,8 @@ use tiny_http::{Header, Request};
 
 use crate::commands::body::{preview, preview_config, BodyPreview};
 use crate::config::EnclosureConfig;
-use crate::dev::assets::{http_response, HttpResponse};
-use crate::dev::limiter::{conversions, lock};
+use crate::dev::http::assets::{http_response, HttpResponse};
+use crate::dev::http::limiter::{conversions, lock};
 use crate::project::Project;
 
 const JSON: &str = "application/json";

@@ -68,8 +68,8 @@ fn project_flags_a_missing_authored_source() {
     let present = dir.file("present.step", b"s");
     let absent = dir.0.join("absent.step");
     let cfg = manifest(&[("present", &present), ("absent", &absent)]);
-    let state = crate::dev::state::State::new(&[]);
-    let text = crate::dev::project::project_json(&state, Some(&cfg), &dir.0);
+    let state = crate::dev::live::state::State::new(&[]);
+    let text = crate::dev::api::project::project_json(&state, Some(&cfg), &dir.0);
     let json: serde_json::Value = serde_json::from_str(&text).unwrap();
     let exists = |name: &str| {
         let bodies = json["bodies"].as_array().unwrap();

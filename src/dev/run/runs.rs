@@ -10,8 +10,8 @@ use serde::Serialize;
 
 use super::exec::execute;
 pub(in crate::dev) use super::status::Status;
-use crate::dev::hub::ClientHub;
-use crate::dev::limiter::lock;
+use crate::dev::http::limiter::lock;
+use crate::dev::live::hub::ClientHub;
 
 const MAX_LINES: usize = 2000;
 const MAX_RUNS: usize = 10;

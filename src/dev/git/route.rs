@@ -12,7 +12,7 @@ use super::ops::{save, update, Outcome};
 use super::resolve::{resolve, Keep};
 use super::run::Git;
 use super::status::{status, Status};
-use crate::dev::limiter::lock;
+use crate::dev::http::limiter::lock;
 
 static BUSY: Mutex<()> = Mutex::new(());
 

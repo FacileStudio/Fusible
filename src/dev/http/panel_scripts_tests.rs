@@ -19,7 +19,7 @@ fn content_type(path: &str) -> String {
 
 #[test]
 fn viewer_mounts_the_studio_app_and_links_its_bundle_and_styles() {
-    let html = include_str!("../assets/viewer.html");
+    let html = include_str!("../../assets/viewer.html");
     assert!(html.contains(r#"<div id="app"></div>"#));
     assert!(html.contains("/studio.bundle.js"));
     assert!(html.contains("/studio.css"));
