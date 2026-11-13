@@ -5,6 +5,14 @@ All notable changes to this project are documented here. The format is
 follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 `0.x`, a breaking change bumps the minor.
 
+## [2.1.7] - 2026-11-13
+
+### Changed
+
+- The studio server code in `src/dev/` is grouped into `http/`, `live/` and `api/`. Behaviour
+  and the public API are unchanged.
+- CI caches the gerbv packages, so a run with a warm cache installs them without apt.
+
 ## [2.1.6] - 2026-11-13
 
 ### Fixed
