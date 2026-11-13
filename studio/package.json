@@ -11,7 +11,7 @@
     "icons": "bun scripts/solar-icons.ts"
   },
   "dependencies": {
-    "@facile/muse": "github:FacileStudio/muse#v0.16.1",
+    "@facile/muse": "github:FacileStudio/muse#v0.21.0",
     "@tscircuit/3d-viewer": "0.0.627",
     "@tscircuit/checks": "0.0.257",
     "@tscircuit/circuit-json-util": "^0.0.123",
