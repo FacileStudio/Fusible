@@ -57,6 +57,9 @@ pub struct PcbVia {
     pub layers: Vec<String>,
     pub from_layer: Option<String>,
     pub to_layer: Option<String>,
+    /// Ports of a standalone `<via>`, one per layer it connects.
+    #[serde(default)]
+    pub pcb_port_ids: Vec<String>,
 }
 
 /// A `pcb_plated_hole`. Which size fields are set depends on `shape`

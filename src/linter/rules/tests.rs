@@ -22,6 +22,7 @@ mod trace_current;
 mod trace_nets;
 mod unrouted;
 mod unrouted_nets;
+mod unrouted_vias;
 mod upstream;
 mod voltage_clearance;
 

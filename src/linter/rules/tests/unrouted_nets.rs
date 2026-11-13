@@ -7,11 +7,11 @@ use super::lint;
 use crate::linter::rules::UnroutedRule;
 use crate::linter::Diagnostic;
 
-fn wire(x: f64, y: f64) -> Value {
+pub(super) fn wire(x: f64, y: f64) -> Value {
     json!({"route_type": "wire", "x": x, "y": y, "width": 0.2, "layer": "top"})
 }
 
-fn trace(id: &str, source: &str, route: Value) -> Value {
+pub(super) fn trace(id: &str, source: &str, route: Value) -> Value {
     json!({"type": "pcb_trace", "pcb_trace_id": id, "source_trace_id": source, "route": route})
 }
 
@@ -24,7 +24,7 @@ fn named(id: &str, source: &str, from: &str, to: &str) -> Value {
     trace(id, source, json!([start, end]))
 }
 
-fn check(extra: Vec<Value>) -> Vec<Diagnostic> {
+pub(super) fn check(extra: Vec<Value>) -> Vec<Diagnostic> {
     let mut elements = vec![
         json!({"type": "pcb_board", "width": 30, "height": 30, "center": {"x": 5, "y": 5}}),
         json!({"type": "source_net", "source_net_id": "n1", "name": "GND"}),

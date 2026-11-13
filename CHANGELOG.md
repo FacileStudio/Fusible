@@ -5,6 +5,15 @@ All notable changes to this project are documented here. The format is
 follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 `0.x`, a breaking change bumps the minor.
 
+## [Unreleased]
+
+### Fixed
+
+- `unrouted` joins a standalone `<via>` to its own ports (`pcb_port_ids`). A trace ending on a
+  via port reached it only through the route's `end_pcb_port_id`, which tscircuit drops when it
+  replays routes from `.tscircuit/cache`, so the second build of a board reported nets such as
+  `VBAT_MODEM` unrouted and blocked `export`, `body` and `build`.
+
 ## [2.1.5] - 2026-11-12
 
 ### Fixed

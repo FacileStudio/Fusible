@@ -94,6 +94,11 @@ impl<'a> Graph<'a> {
                     (self.sets.add(), net)
                 }
             };
+            for port in &via.pcb_port_ids {
+                if let Some(&(node, _)) = self.pcb_ports.get(port.as_str()) {
+                    self.sets.union(owner.0, node);
+                }
+            }
             self.pieces.push(Piece {
                 owner,
                 layer: None,
