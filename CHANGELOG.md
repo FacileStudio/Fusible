@@ -5,6 +5,13 @@ All notable changes to this project are documented here. The format is
 follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 `0.x`, a breaking change bumps the minor.
 
+## [2.1.9] - 2026-11-14
+
+### Added
+
+- The site loads Vision's tracker (`https://vision.facile.studio/s.js`, with `data-mask`) on
+  `fusible.facile.studio` only.
+
 ## [2.1.8] - 2026-11-13
 
 ### Changed
