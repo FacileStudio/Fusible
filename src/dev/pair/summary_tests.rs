@@ -15,7 +15,7 @@ fn the_summary_lists_each_board_with_counts() {
         entry: std::path::PathBuf::from("/p/main/c.json"),
         ..Default::default()
     };
-    let state = crate::dev::state::State::new(&[board]);
+    let state = crate::dev::live::state::State::new(&[board]);
     let json: serde_json::Value =
         serde_json::from_str(&summary_json(&state, &crate::project::Project::current())).unwrap();
     assert_eq!(json["boards"][0]["name"], "main");

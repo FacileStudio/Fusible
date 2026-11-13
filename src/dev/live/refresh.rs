@@ -5,15 +5,15 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread;
 
-use super::assets::load_studio_bundle;
-use super::kicad::sync::evaluate;
 use super::pipeline::execute_pipeline;
 use super::state::{Health, Slot, State};
+use crate::dev::http::assets::load_studio_bundle;
+use crate::dev::kicad::sync::evaluate;
 use crate::project::Project;
 
 /// Loads the studio bundle: every time in debug builds, so a `bun run build` is picked up,
 /// and once in release builds, where it is embedded and never changes.
-pub(super) fn load_bundle(state: &State) {
+pub(in crate::dev) fn load_bundle(state: &State) {
     if let Ok(mut lock) = state.bundle.lock() {
         if cfg!(debug_assertions) || lock.is_none() {
             *lock = load_studio_bundle();
@@ -22,7 +22,7 @@ pub(super) fn load_bundle(state: &State) {
 }
 
 /// Tells the user on stderr when this build has no studio bundle to serve.
-pub(super) fn warn_if_bundle_missing(state: &State) {
+pub(in crate::dev) fn warn_if_bundle_missing(state: &State) {
     if state.bundle.lock().is_ok_and(|bundle| bundle.is_none()) {
         eprintln!(
             "⚠ This fusible build has no studio bundle: schematic, PCB and 3D fall back to native previews. \
@@ -35,7 +35,7 @@ Install a GitHub release binary, or run `bun install && bun run build` in studio
 ///
 /// The snapshot is stored before the broadcast, so a client that subscribes in between
 /// reads the new payload and at worst receives it twice.
-pub(super) fn refresh(slot: &Slot, state: &State) {
+pub(in crate::dev) fn refresh(slot: &Slot, state: &State) {
     let start = std::time::Instant::now();
     state.hub.broadcast(
         &serde_json::json!({
@@ -62,7 +62,7 @@ pub(super) fn refresh(slot: &Slot, state: &State) {
 }
 
 /// The directory to watch for changes to `entry`.
-pub(super) fn watch_dir(entry: &Path) -> PathBuf {
+pub(in crate::dev) fn watch_dir(entry: &Path) -> PathBuf {
     if entry.is_dir() {
         return entry.to_path_buf();
     }
@@ -73,7 +73,7 @@ pub(super) fn watch_dir(entry: &Path) -> PathBuf {
 }
 
 /// Coalesces file events so at most one rebuild of `slot` runs at a time and none is lost.
-pub(super) fn rebuild_trigger(slot: Slot, state: State) -> impl FnMut() + Send + 'static {
+pub(in crate::dev) fn rebuild_trigger(slot: Slot, state: State) -> impl FnMut() + Send + 'static {
     let rebuilding = Arc::new(AtomicBool::new(false));
     let pending = Arc::new(AtomicBool::new(false));
     move || {

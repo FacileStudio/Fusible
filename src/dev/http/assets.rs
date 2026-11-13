@@ -4,16 +4,16 @@ use std::path::PathBuf;
 
 use tiny_http::{Header, Response};
 
-const VIEWER_HTML: &str = include_str!("../assets/viewer.html");
-const FAVICON_SVG: &str = include_str!("../../assets/favicon.svg");
+const VIEWER_HTML: &str = include_str!("../../assets/viewer.html");
+const FAVICON_SVG: &str = include_str!("../../../assets/favicon.svg");
 const MISSING_BUNDLE: &str = "// studio.bundle.js not found — run `bun run build` in studio/";
 
 /// A buffered HTTP response as served by the dev server.
-pub(super) type HttpResponse = Response<Cursor<Vec<u8>>>;
+pub(in crate::dev) type HttpResponse = Response<Cursor<Vec<u8>>>;
 
 /// Returns the studio bundle embedded at compile time in release builds.
 #[cfg(all(studio_bundle, not(debug_assertions)))]
-pub(super) fn load_studio_bundle() -> Option<String> {
+pub(in crate::dev) fn load_studio_bundle() -> Option<String> {
     Some(
         include_str!(concat!(
             env!("CARGO_MANIFEST_DIR"),
@@ -25,14 +25,14 @@ pub(super) fn load_studio_bundle() -> Option<String> {
 
 /// Reads the studio bundle from the source tree so a `bun run build` is picked up without recompiling.
 #[cfg(not(all(studio_bundle, not(debug_assertions))))]
-pub(super) fn load_studio_bundle() -> Option<String> {
+pub(in crate::dev) fn load_studio_bundle() -> Option<String> {
     let bundle_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("src/assets/studio.bundle.js");
     std::fs::read_to_string(&bundle_path).ok()
 }
 
 /// Returns the studio stylesheet embedded at compile time in release builds.
 #[cfg(all(studio_bundle, not(debug_assertions)))]
-pub(super) fn load_studio_css() -> Option<String> {
+pub(in crate::dev) fn load_studio_css() -> Option<String> {
     Some(
         include_str!(concat!(
             env!("CARGO_MANIFEST_DIR"),
@@ -44,13 +44,17 @@ pub(super) fn load_studio_css() -> Option<String> {
 
 /// Reads the studio stylesheet from the source tree so a `bun run build` is picked up without recompiling.
 #[cfg(not(all(studio_bundle, not(debug_assertions))))]
-pub(super) fn load_studio_css() -> Option<String> {
+pub(in crate::dev) fn load_studio_css() -> Option<String> {
     let css_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("src/assets/studio.css");
     std::fs::read_to_string(&css_path).ok()
 }
 
 /// Builds a response with `status`, a `Content-Type` header and `body`.
-pub(super) fn http_response(status: u16, content_type: &str, body: Vec<u8>) -> HttpResponse {
+pub(in crate::dev) fn http_response(
+    status: u16,
+    content_type: &str,
+    body: Vec<u8>,
+) -> HttpResponse {
     let header = Header::from_bytes(&b"Content-Type"[..], content_type.as_bytes())
         .expect("content type is a valid header value");
     Response::from_data(body)
@@ -71,7 +75,7 @@ fn viewer_html(desktop: bool) -> String {
 }
 
 /// Serves the embedded viewer, favicon, studio stylesheet and studio bundle; `None` for other paths.
-pub(super) fn static_response(
+pub(in crate::dev) fn static_response(
     path: &str,
     bundle: Option<String>,
     desktop: bool,

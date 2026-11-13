@@ -4,8 +4,8 @@ use std::net::TcpStream;
 use tiny_http::{Method, Server};
 
 use super::{owns, reply};
-use crate::dev::server::handle;
-use crate::dev::state::State;
+use crate::dev::http::server::handle;
+use crate::dev::live::state::State;
 
 fn exchange(method: &str, target: &str, extra: &str) -> String {
     let server = Server::http("127.0.0.1:0").unwrap();

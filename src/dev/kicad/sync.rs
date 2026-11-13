@@ -3,8 +3,8 @@
 use std::path::PathBuf;
 
 use super::status::KicadStatus;
-use crate::dev::refresh::watch_dir;
-use crate::dev::state::{Slot, State};
+use crate::dev::live::refresh::watch_dir;
+use crate::dev::live::state::{Slot, State};
 use crate::kicad::{board_file, compare_board, sync_positions};
 
 /// The KiCad board file of `slot`, from the manifest or found next to its entry.

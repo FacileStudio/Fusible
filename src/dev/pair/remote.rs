@@ -6,8 +6,8 @@ use tiny_http::{Method, Request};
 
 use super::clock::unix_now;
 use super::PairState;
-use crate::dev::limiter::lock;
-use crate::dev::state::State;
+use crate::dev::http::limiter::lock;
+use crate::dev::live::state::State;
 
 pub(super) const CLAIM: &str = "/api/pair/claim";
 
@@ -87,7 +87,7 @@ fn bearer_of(request: &Request) -> Option<String> {
 /// Applies [`check`] to a live request.
 pub(in crate::dev) fn authorize_remote(request: &Request, state: &State) -> Result<(), u16> {
     let pair = state.pair.as_deref().ok_or(403u16)?;
-    let path = crate::dev::server::route_path(request.url());
+    let path = crate::dev::http::server::route_path(request.url());
     let bearer = bearer_of(request);
     check(
         pair,

@@ -22,9 +22,9 @@ use tiny_http::Request;
 
 use self::authored::{authored_glb, Failure};
 use self::body::no_store;
-use super::assets::http_response;
-use super::server::percent_decode;
 use crate::commands::body::{code_glb, convert_to_glb, generator_dir};
+use crate::dev::http::assets::http_response;
+use crate::dev::http::server::percent_decode;
 use crate::project::Project;
 
 use self::list::bodies_json;

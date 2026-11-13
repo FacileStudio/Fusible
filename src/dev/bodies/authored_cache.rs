@@ -8,7 +8,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::UNIX_EPOCH;
 
 use super::authored::{Failure, TIMEOUT_MARK};
-use crate::dev::limiter::{conversions, key_lock, lock};
+use crate::dev::http::limiter::{conversions, key_lock, lock};
 
 /// Hashes the path alone, then the path with its modification time and size.
 pub(in crate::dev) fn cache_key(path: &Path, meta: &Metadata) -> String {

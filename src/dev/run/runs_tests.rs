@@ -2,7 +2,7 @@ use std::process::Command;
 use std::time::{Duration, Instant};
 
 use super::runs::{Runs, Status};
-use crate::dev::hub::ClientHub;
+use crate::dev::live::hub::ClientHub;
 
 use crate::test_shell::{shell, sleeping};
 

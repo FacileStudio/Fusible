@@ -5,20 +5,22 @@ use tiny_http::{Request, Response};
 use super::bind::bind;
 use super::desktop::{announce_ready, exit_on_stdin_eof};
 use super::guard::admit;
-use super::hub::stream_events;
-use super::kicad::watch::start_kicad_watchers;
 use super::limiter::handlers;
-use super::pair::{enable_sharing, lan_ip};
-use super::refresh::{load_bundle, rebuild_trigger, refresh, warn_if_bundle_missing, watch_dir};
 use super::routes::api_route;
 use super::serve::serve_static;
-use super::state::{Slot, State};
-use super::watcher::start_file_watcher;
 use crate::commands::target::BoardTarget;
+use crate::dev::kicad::watch::start_kicad_watchers;
+use crate::dev::live::hub::stream_events;
+use crate::dev::live::refresh::{
+    load_bundle, rebuild_trigger, refresh, warn_if_bundle_missing, watch_dir,
+};
+use crate::dev::live::state::{Slot, State};
+use crate::dev::live::watcher::start_file_watcher;
+use crate::dev::pair::{enable_sharing, lan_ip};
 use crate::project::Project;
 
 /// Returns the percent-decoded value of `key` in the URL's query string; empty counts as absent.
-pub(super) fn query_param(url: &str, key: &str) -> Option<String> {
+pub(in crate::dev) fn query_param(url: &str, key: &str) -> Option<String> {
     let (_, query) = url.split_once('?')?;
     let value = query
         .split('&')
@@ -27,7 +29,7 @@ pub(super) fn query_param(url: &str, key: &str) -> Option<String> {
     percent_decode(value)
 }
 
-pub(super) fn percent_decode(value: &str) -> Option<String> {
+pub(in crate::dev) fn percent_decode(value: &str) -> Option<String> {
     let bytes = value.as_bytes();
     let mut out = Vec::with_capacity(bytes.len());
     let mut i = 0;
@@ -45,11 +47,11 @@ pub(super) fn percent_decode(value: &str) -> Option<String> {
 }
 
 /// Strips any `?query` from a request URL, leaving the path used for routing.
-pub(super) fn route_path(url: &str) -> &str {
+pub(in crate::dev) fn route_path(url: &str) -> &str {
     url.split_once('?').map_or(url, |(path, _)| path)
 }
 
-pub(super) fn handle(request: Request, state: &State, port: u16) {
+pub(in crate::dev) fn handle(request: Request, state: &State, port: u16) {
     if let Err(status) = admit(&request, state, port) {
         let _ = request.respond(Response::from_string("Forbidden").with_status_code(status));
         return;

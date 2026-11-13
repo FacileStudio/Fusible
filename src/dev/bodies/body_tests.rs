@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 use super::body::{meta_json, BodyCache};
 use crate::commands::body::BodyPreview;
-use crate::dev::pipeline::revision;
+use crate::dev::live::pipeline::revision;
 
 fn sample() -> BodyPreview {
     BodyPreview {

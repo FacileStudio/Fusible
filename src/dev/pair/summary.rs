@@ -5,9 +5,9 @@ use serde_json::{json, Value};
 use super::dirs::project_name;
 use super::token::sha256_hex;
 use crate::bom::BomFile;
-use crate::dev::bom::report_of;
-use crate::dev::project::body_item;
-use crate::dev::state::{Slot, State};
+use crate::dev::api::bom::report_of;
+use crate::dev::api::project::body_item;
+use crate::dev::live::state::{Slot, State};
 use crate::project::Project;
 
 fn payload_of(slot: &Slot) -> Value {

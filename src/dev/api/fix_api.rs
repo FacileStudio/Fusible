@@ -11,11 +11,11 @@ use serde::Deserialize;
 use serde_json::Value;
 use tiny_http::Request;
 
-use super::api::{error_body, respond_json};
-use super::run::api::forbidden;
-use super::state::State;
 use crate::commands::mcp::tsx_prop::set_prop;
 use crate::commands::target::is_tsx_target;
+use crate::dev::api::{error_body, respond_json};
+use crate::dev::live::state::State;
+use crate::dev::run::api::forbidden;
 
 const MAX_REQUEST: u64 = 16 * 1024;
 
@@ -63,7 +63,7 @@ fn parse(request: &mut Request) -> Result<FixRequest, String> {
 }
 
 /// Applies the requested fix after the origin, method and content-type checks.
-pub(super) fn serve(mut request: Request, state: &State, port: u16) {
+pub(in crate::dev) fn serve(mut request: Request, state: &State, port: u16) {
     if forbidden(&request, port) {
         return respond_json(request, 403, error_body("forbidden"));
     }

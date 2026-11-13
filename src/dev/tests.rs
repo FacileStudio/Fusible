@@ -1,8 +1,8 @@
 use std::path::Path;
 
-use super::pipeline::{execute_pipeline, revision};
-use super::server::route_path;
-use super::watcher::is_relevant_change;
+use crate::dev::http::server::route_path;
+use crate::dev::live::pipeline::{execute_pipeline, revision};
+use crate::dev::live::watcher::is_relevant_change;
 use crate::linter::Severity;
 use crate::project::Project;
 

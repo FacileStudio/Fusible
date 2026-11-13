@@ -2,9 +2,9 @@ use std::path::Path;
 
 use crate::commands::target::BoardTarget;
 use crate::config::FusibleConfig;
-use crate::dev::project::project_json;
+use crate::dev::api::project::project_json;
+use crate::dev::live::state::State;
 use crate::dev::run::request::parse;
-use crate::dev::state::State;
 
 fn manifest(assembly: bool) -> FusibleConfig {
     let tail = if assembly {

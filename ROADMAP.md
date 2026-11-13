@@ -85,7 +85,7 @@ The workspace split (`fusible-core` for `wasm32`) is dropped: `fusible` stays th
 
 ## After 2.0
 
-- Group the studio server modules in `src/dev/` by feature.
+- [x] Group the studio server modules in `src/dev/` by feature: `http/`, `live/` and `api/` beside the feature folders.
 - Render an exported Gerber set in a real viewer (`gerbv`) in CI. The Gerbers are checked against the Ucamco specification only.
 
 ## Done before 2.0

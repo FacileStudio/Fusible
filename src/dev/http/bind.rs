@@ -13,7 +13,10 @@ const PORT_TRIES: u16 = 20;
 ///
 /// A port in use moves on to the next one, up to `PORT_TRIES` ports. Any other bind
 /// error stops at once.
-pub(super) fn bind(port: u16, share: bool) -> Result<(Server, u16), Box<dyn std::error::Error>> {
+pub(in crate::dev) fn bind(
+    port: u16,
+    share: bool,
+) -> Result<(Server, u16), Box<dyn std::error::Error>> {
     let addr = if share { "0.0.0.0" } else { "127.0.0.1" };
     let last = port.saturating_add(PORT_TRIES - 1);
     for candidate in port..=last {

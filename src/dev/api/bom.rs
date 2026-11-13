@@ -5,11 +5,11 @@ use std::io::Read;
 use serde_json::json;
 use tiny_http::{Method, Request};
 
-use super::api::{error_body, respond_json};
 use super::bom_read::file_for_read;
-use super::run::api::forbidden;
-use super::state::State;
 use crate::bom::{self, BomError, BomFile, Part};
+use crate::dev::api::{error_body, respond_json};
+use crate::dev::live::state::State;
+use crate::dev::run::api::forbidden;
 use crate::project::Project;
 
 const MAX_REQUEST: u64 = 256 * 1024;
@@ -29,7 +29,11 @@ fn parts_of(state: &State) -> (Vec<Part>, usize) {
 }
 
 /// The priced report of every served board with `file` applied, and how many boards are still building.
-pub(super) fn report_of(state: &State, file: &BomFile, project: &Project) -> (bom::Report, usize) {
+pub(in crate::dev) fn report_of(
+    state: &State,
+    file: &BomFile,
+    project: &Project,
+) -> (bom::Report, usize) {
     let (parts, pending) = parts_of(state);
     let root = project.manifest_dir();
     let cfg = &project.config;
@@ -57,7 +61,7 @@ fn read_body(request: &mut Request) -> Result<String, String> {
         .map_err(|_| "unreadable request body".to_string())
 }
 
-pub(super) fn save(path: &std::path::Path, body: &str) -> Result<BomFile, (u16, String)> {
+pub(in crate::dev) fn save(path: &std::path::Path, body: &str) -> Result<BomFile, (u16, String)> {
     let file: BomFile = serde_json::from_str(body).map_err(|e| (400, format!("bad BOM: {e}")))?;
     file.save(path).map_err(|e| match e {
         BomError::Invalid(message) => (400, message),
@@ -99,7 +103,7 @@ fn read(request: Request, state: &State, project: &Project) {
 }
 
 /// Serves the report on GET and saves the edited file on POST.
-pub(super) fn serve(request: Request, state: &State, port: u16, project: &Project) {
+pub(in crate::dev) fn serve(request: Request, state: &State, port: u16, project: &Project) {
     match request.method() {
         Method::Get => read(request, state, project),
         Method::Post => update(request, state, port, project),

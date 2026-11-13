@@ -1,10 +1,10 @@
 use std::path::Path;
 
-use super::api::circuit_reply;
-use super::project::project_json;
 use super::state::{Health, State};
 use crate::commands::target::BoardTarget;
 use crate::config::FusibleConfig;
+use crate::dev::api::circuit_reply;
+use crate::dev::api::project::project_json;
 
 fn board(name: &str) -> BoardTarget {
     BoardTarget {

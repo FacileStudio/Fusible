@@ -2,22 +2,28 @@
 
 use tiny_http::Request;
 
-use super::api;
-use super::assembly;
-use super::bodies;
-use super::bom;
-use super::firmware;
-use super::fix_api;
-use super::git;
-use super::pair;
-use super::rules_api;
-use super::run;
 use super::serve::serve_static;
-use super::state::State;
+use crate::dev::api;
+use crate::dev::api::bom;
+use crate::dev::api::firmware;
+use crate::dev::api::fix_api;
+use crate::dev::api::rules_api;
+use crate::dev::assembly;
+use crate::dev::bodies;
+use crate::dev::git;
+use crate::dev::live::state::State;
+use crate::dev::pair;
+use crate::dev::run;
 use crate::project::Project;
 
 /// Routes one API request with the project loaded for it, since the manifest can change on disk.
-pub(super) fn api_route(request: Request, state: &State, port: u16, path: &str, project: &Project) {
+pub(in crate::dev) fn api_route(
+    request: Request,
+    state: &State,
+    port: u16,
+    path: &str,
+    project: &Project,
+) {
     match path {
         "/api/mechanical" => api::body_preview(request, state, project, false),
         "/api/mechanical.glb" => api::body_preview(request, state, project, true),
