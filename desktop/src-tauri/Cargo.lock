@@ -1073,7 +1073,7 @@ dependencies = [
 
 [[package]]
 name = "fusible-studio"
-version = "2.1.7"
+version = "2.1.8"
 dependencies = [
  "serde",
  "serde_json",

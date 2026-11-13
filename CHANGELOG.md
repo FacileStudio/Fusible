@@ -5,6 +5,15 @@ All notable changes to this project are documented here. The format is
 follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 `0.x`, a breaking change bumps the minor.
 
+## [2.1.8] - 2026-11-13
+
+### Changed
+
+- muse v0.21.0 in the studio, the desktop app, the phone app and the site. Every icon-only
+  control shows its label as a muse tooltip on hover and keyboard focus, and no control uses the
+  native `title` tooltip any more. The bottom view toolbar shows its tooltips only when the
+  labels are hidden (narrow windows).
+
 ## [2.1.7] - 2026-11-13
 
 ### Changed
