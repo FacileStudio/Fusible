@@ -39,7 +39,7 @@
               variant="ghost"
               class="size-9"
               disabled={isBusy()}
-              title={group.hint}
+              tooltip={group.hint}
               aria-label={`${group.hint}: ${item.name}`}
               onclick={() => launch(group.action, item.name)}
             >

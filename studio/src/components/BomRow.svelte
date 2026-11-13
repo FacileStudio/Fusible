@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Checkbox, Icon, IconButton, Input } from "@facile/muse";
+  import { Checkbox, Icon, IconButton, Input, Tooltip } from "@facile/muse";
   import { editLine, removePart, saveLater, saveBom } from "../lib/bom.svelte";
   import type { BomLine } from "../lib/types";
 
@@ -60,16 +60,17 @@
     {#if line.kind !== "print"}
       <Input class={field} value={line.url ?? ""} placeholder="https://" aria-label="Link" onchange={(e) => text(e, "url")} />
       {#if safeUrl(line.url)}
-        <a
-          class="inline-flex size-9 shrink-0 items-center justify-center rounded-fc-pill hover:bg-fc-field focus-visible:outline-2 focus-visible:outline-fc-ring"
-          href={line.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Open link"
-          title="Open link"
-        >
-          <Icon icon="solar:link-linear" size={16} />
-        </a>
+        <Tooltip text="Open link" describe={false} class="contents">
+          <a
+            class="inline-flex size-9 shrink-0 items-center justify-center rounded-fc-pill hover:bg-fc-field focus-visible:outline-2 focus-visible:outline-fc-ring"
+            href={line.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Open link"
+          >
+            <Icon icon="solar:link-linear" size={16} />
+          </a>
+        </Tooltip>
       {/if}
     {/if}
   </div>
@@ -102,7 +103,7 @@
   <div role="cell" class="text-right">{line.estimated && line.total != null ? "~" : ""}{price(line.total)}</div>
   <div role="cell">
     {#if line.kind === "manual"}
-      <IconButton variant="ghost" class="size-9" aria-label="Remove part" title="Remove part" onclick={() => removePart(line.id)}>
+      <IconButton variant="ghost" class="size-9" aria-label="Remove part" onclick={() => removePart(line.id)}>
         <Icon icon="solar:trash-bin-2-linear" />
       </IconButton>
     {/if}

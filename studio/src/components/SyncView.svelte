@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Alert, Button, Collapsible, Textarea } from "@facile/muse";
+  import { Alert, Button, Collapsible, Textarea, Tooltip } from "@facile/muse";
   import { actGit, ago, git, recheckGit, summary } from "../lib/git.svelte";
 
   const s = $derived(git.status);
@@ -59,9 +59,11 @@
       {#if s.last_saves.length}
         <Collapsible title="Saves ({s.last_saves.length})">
           {#each s.last_saves as save (save.when + save.message)}
-            <div class="py-1 text-fc-xs" title={save.files.join("\n")}>
-              {save.message}<span class="block text-fc-fg-muted">{save.author} &middot; {ago(save.when)}</span>
-            </div>
+            <Tooltip text={save.files.join("\n")} class="contents">
+              <div class="py-1 text-fc-xs">
+                {save.message}<span class="block text-fc-fg-muted">{save.author} &middot; {ago(save.when)}</span>
+              </div>
+            </Tooltip>
           {/each}
         </Collapsible>
       {/if}

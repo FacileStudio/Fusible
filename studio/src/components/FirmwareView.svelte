@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Alert, Button, EmptyState, Icon } from "@facile/muse";
+  import { Alert, Button, EmptyState, Icon, Tooltip } from "@facile/muse";
   import { launch } from "../lib/dispatch.svelte";
   import { firmware, lastBuild, selectPin } from "../lib/firmware.svelte";
   import { isBusy } from "../lib/runs.svelte";
@@ -45,28 +45,29 @@
       <div class="px-2 pt-2 text-fc-xs text-fc-fg-muted">{group} · {pins.length}</div>
       {#each pins as pin (pin.pin)}
         {@const part = pin.remote ? pin.remote.split(".")[0] : ""}
-        <button
-          type="button"
-          class="flex flex-col gap-0.5 rounded-fc-lg px-3 py-2 text-left hover:bg-fc-surface focus-visible:outline-2 focus-visible:outline-fc-ring {firmware.picked === pin.pin
-            ? 'bg-fc-surface'
-            : ''}"
-          title={pin.net}
-          onclick={() => selectPin(pin.pin, pin.net, part)}
-        >
-          <span class="flex items-center justify-between gap-3">
-            <span class="font-medium {pin.violation ? 'text-fc-danger' : ''}">{pin.pin}</span>
-            <span class="text-fc-xs text-fc-fg-muted">{pin.const.replace(/^gpio::/, "")}</span>
-          </span>
-          <span class="flex items-center justify-between gap-3 text-fc-xs text-fc-fg-muted">
-            <span>{pin.remote || ""}</span>
-            <span class="font-fc-mono">{pin.field}</span>
-          </span>
-          {#if pin.violation}
-            <span class="flex items-center gap-1 text-fc-xs text-fc-danger">
-              <Icon icon="solar:danger-triangle-bold-duotone" size={14} />{pin.violation}
+        <Tooltip text={pin.net} class="contents">
+          <button
+            type="button"
+            class="flex flex-col gap-0.5 rounded-fc-lg px-3 py-2 text-left hover:bg-fc-surface focus-visible:outline-2 focus-visible:outline-fc-ring {firmware.picked === pin.pin
+              ? 'bg-fc-surface'
+              : ''}"
+            onclick={() => selectPin(pin.pin, pin.net, part)}
+          >
+            <span class="flex items-center justify-between gap-3">
+              <span class="font-medium {pin.violation ? 'text-fc-danger' : ''}">{pin.pin}</span>
+              <span class="text-fc-xs text-fc-fg-muted">{pin.const.replace(/^gpio::/, "")}</span>
             </span>
-          {/if}
-        </button>
+            <span class="flex items-center justify-between gap-3 text-fc-xs text-fc-fg-muted">
+              <span>{pin.remote || ""}</span>
+              <span class="font-fc-mono">{pin.field}</span>
+            </span>
+            {#if pin.violation}
+              <span class="flex items-center gap-1 text-fc-xs text-fc-danger">
+                <Icon icon="solar:danger-triangle-bold-duotone" size={14} />{pin.violation}
+              </span>
+            {/if}
+          </button>
+        </Tooltip>
       {/each}
     {:else}
       <EmptyState bare title="No GPIO pins mapped" />

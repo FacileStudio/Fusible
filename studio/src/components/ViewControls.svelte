@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Button } from "@facile/muse";
+  import { Button, Tooltip } from "@facile/muse";
+  import { MediaQuery } from "svelte/reactivity";
   import { launch } from "../lib/dispatch.svelte";
   import { mech, toggleMechanical } from "../lib/mechanical.svelte";
   import { studio } from "../lib/studio.svelte";
@@ -18,6 +19,7 @@
   const host = $derived(studio.view === "bom" ? undefined : hosts[studio.view]);
   const camera = $derived(studio.view === "3d" || studio.view === "mechanical" || studio.view === "assembly");
   const on = "bg-fc-component text-fc-fg";
+  const wide = new MediaQuery("min-width: 48rem");
 </script>
 
 {#if studio.view !== "bom"}
@@ -27,62 +29,78 @@
     aria-label="View controls"
   >
     {#if flat}
-      <Button variant="ghost" size="sm" icon="solar:magnifer-zoom-out-linear" aria-label="Zoom out" onclick={() => zoomBy(host, 120)}>
-        <span class="max-md:hidden">Zoom out</span>
-      </Button>
-      <Button variant="ghost" size="sm" icon="solar:magnifer-zoom-in-linear" aria-label="Zoom in" onclick={() => zoomBy(host, -120)}>
-        <span class="max-md:hidden">Zoom in</span>
-      </Button>
-      <Button variant="ghost" size="sm" icon="solar:restart-linear" aria-label="Fit to view" onclick={onfit}>
-        <span class="max-md:hidden">Fit</span>
-      </Button>
+      <Tooltip text="Zoom out" describe={false} disabled={wide.current} class="contents">
+        <Button variant="ghost" size="sm" icon="solar:magnifer-zoom-out-linear" aria-label="Zoom out" onclick={() => zoomBy(host, 120)}>
+          <span class="max-md:hidden">Zoom out</span>
+        </Button>
+      </Tooltip>
+      <Tooltip text="Zoom in" describe={false} disabled={wide.current} class="contents">
+        <Button variant="ghost" size="sm" icon="solar:magnifer-zoom-in-linear" aria-label="Zoom in" onclick={() => zoomBy(host, -120)}>
+          <span class="max-md:hidden">Zoom in</span>
+        </Button>
+      </Tooltip>
+      <Tooltip text="Fit to view" describe={false} disabled={wide.current} class="contents">
+        <Button variant="ghost" size="sm" icon="solar:restart-linear" aria-label="Fit to view" onclick={onfit}>
+          <span class="max-md:hidden">Fit</span>
+        </Button>
+      </Tooltip>
     {/if}
     {#if camera}
       {#each PRESETS as preset (preset.id)}
-        <Button
-          variant="ghost"
-          size="sm"
-          icon={preset.icon}
-          aria-label={`${preset.label} view`}
-          onclick={() => cameraPreset(studio.view, hosts, preset.id)}
-        >
-          <span class="max-md:hidden">{preset.label}</span>
-        </Button>
+        <Tooltip text={`${preset.label} view`} describe={false} disabled={wide.current} class="contents">
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={preset.icon}
+            aria-label={`${preset.label} view`}
+            onclick={() => cameraPreset(studio.view, hosts, preset.id)}
+          >
+            <span class="max-md:hidden">{preset.label}</span>
+          </Button>
+        </Tooltip>
       {/each}
     {/if}
     {#if studio.view === "3d"}
-      <Button
-        variant="ghost"
-        size="sm"
-        icon="solar:box-minimalistic-linear"
-        aria-label="Enclosure"
-        aria-pressed={mech.overlay}
-        class={mech.overlay ? on : ""}
-        onclick={() => toggleMechanical("overlay", hosts["3d"] ?? null)}
-      >
-        <span class="max-md:hidden">Enclosure</span>
-      </Button>
+      <Tooltip text="Enclosure" describe={false} disabled={wide.current} class="contents">
+        <Button
+          variant="ghost"
+          size="sm"
+          icon="solar:box-minimalistic-linear"
+          aria-label="Enclosure"
+          aria-pressed={mech.overlay}
+          class={mech.overlay ? on : ""}
+          onclick={() => toggleMechanical("overlay", hosts["3d"] ?? null)}
+        >
+          <span class="max-md:hidden">Enclosure</span>
+        </Button>
+      </Tooltip>
     {/if}
     {#if studio.view === "mechanical" && mech.lidAvailable}
-      <Button variant="ghost" size="sm" icon="solar:eye-linear" aria-label="Lid" aria-pressed={mech.lid} class={mech.lid ? on : ""} onclick={() => toggleMechanical("lid", null)}>
-        <span class="max-md:hidden">Lid</span>
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        icon="solar:maximize-square-2-linear"
-        aria-label="Explode"
-        aria-pressed={mech.explode}
-        class={mech.explode ? on : ""}
-        onclick={() => toggleMechanical("explode", null)}
-      >
-        <span class="max-md:hidden">Explode</span>
-      </Button>
+      <Tooltip text="Lid" describe={false} disabled={wide.current} class="contents">
+        <Button variant="ghost" size="sm" icon="solar:eye-linear" aria-label="Lid" aria-pressed={mech.lid} class={mech.lid ? on : ""} onclick={() => toggleMechanical("lid", null)}>
+          <span class="max-md:hidden">Lid</span>
+        </Button>
+      </Tooltip>
+      <Tooltip text="Explode" describe={false} disabled={wide.current} class="contents">
+        <Button
+          variant="ghost"
+          size="sm"
+          icon="solar:maximize-square-2-linear"
+          aria-label="Explode"
+          aria-pressed={mech.explode}
+          class={mech.explode ? on : ""}
+          onclick={() => toggleMechanical("explode", null)}
+        >
+          <span class="max-md:hidden">Explode</span>
+        </Button>
+      </Tooltip>
     {/if}
     {#if studio.view === "assembly"}
-      <Button variant="ghost" size="sm" icon="solar:layers-linear" aria-label="Build assembly" onclick={() => launch("assembly")}>
-        <span class="max-md:hidden">Build assembly</span>
-      </Button>
+      <Tooltip text="Build assembly" describe={false} disabled={wide.current} class="contents">
+        <Button variant="ghost" size="sm" icon="solar:layers-linear" aria-label="Build assembly" onclick={() => launch("assembly")}>
+          <span class="max-md:hidden">Build assembly</span>
+        </Button>
+      </Tooltip>
     {/if}
   </div>
 {/if}
