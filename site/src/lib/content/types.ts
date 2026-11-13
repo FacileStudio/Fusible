@@ -11,18 +11,6 @@ export interface Meta {
   imageAlt: string;
 }
 
-export interface Card {
-  icon: string;
-  title: string;
-  text: string;
-}
-
-export interface RuleItem {
-  id: string;
-  summary: string;
-  standard?: Link;
-}
-
 export type Block =
   | { kind: "p"; text: string }
   | { kind: "code"; code: string }
@@ -52,7 +40,6 @@ export interface Ui {
 export interface NavContent {
   features: string;
   agents: string;
-  mobile: string;
   docs: string;
   download: string;
 }
@@ -64,38 +51,13 @@ export interface HeroContent {
   copyLabel: string;
 }
 
-export interface LoopContent {
-  title: string;
-  steps: Card[];
-}
-
-export interface RulesContent {
-  title: string;
-  intro: string;
-  items: RuleItem[];
-  disclaimer: string;
-}
-
 export interface AgentsContent {
   title: string;
   text: string;
-  evidence: string;
-  sources: Link[];
-  snippetLabel: string;
-  snippet: string;
 }
 
-export interface ShotContent {
+export interface ClosingContent {
   title: string;
-  text: string;
-  alt: string;
-  cta?: Link;
-}
-
-export interface SuiteContent {
-  title: string;
-  text: string;
-  links: Link[];
 }
 
 export interface FooterContent {
@@ -105,25 +67,13 @@ export interface FooterContent {
   studio: string;
 }
 
-export interface PlatformCard {
-  key: "windows" | "macos" | "linux" | "android";
-  title: string;
-  hint: string;
-}
-
 export interface DownloadContent {
   title: string;
   intro: string;
-  platforms: PlatformCard[];
-  button: string;
-  checksum: string;
-  allReleases: string;
-  versionLabel: string;
-  cliTitle: string;
-  cliLines: string[];
+  heading: string;
+  note: string;
+  cli: { label: string; command: string }[];
   actionLine: string;
-  androidNote: string;
-  desktopNote: string;
 }
 
 export interface DocsContent {
@@ -163,7 +113,6 @@ export interface DemosContent {
   hero: HeroDemoCopy;
   agent: AgentDemoCopy;
   title: string;
-  intro: string;
   check: DemoTile;
   firmware: DemoTile;
   cost: DemoTile;
@@ -179,14 +128,8 @@ export interface Content {
   nav: NavContent;
   meta: { home: Meta; download: Meta; docs: Meta };
   hero: HeroContent;
-  loop: LoopContent;
-  rules: RulesContent;
   agents: AgentsContent;
-  board3d: ShotContent;
-  bodies: ShotContent;
-  mobile: ShotContent;
-  desktop: ShotContent;
-  suite: SuiteContent;
+  closing: ClosingContent;
   footer: FooterContent;
   download: DownloadContent;
   docs: DocsContent;

@@ -20,7 +20,7 @@ export const fr: Content = {
     menuTitle: "Menu",
     primaryNav: "Principale",
   },
-  nav: { features: "Fonctions", agents: "Agents", mobile: "Mobile", docs: "Docs", download: "Télécharger" },
+  nav: { features: "Fonctions", agents: "Agents", docs: "Docs", download: "Télécharger" },
   meta: {
     home: {
       title: "Fusible : cartes, firmware et boîtiers dans un seul projet vérifié",
@@ -47,27 +47,17 @@ export const fr: Content = {
   ...frLanding,
   download: {
     title: "Télécharger Fusible",
-    intro:
-      "Choisissez votre système. Chaque bouton fonctionne aussi sans données de version : " +
-      "il ouvre la dernière version sur GitHub.",
-    platforms: [
-      { key: "windows", title: "Windows", hint: "Installeur (.msi ou .exe)" },
-      { key: "macos", title: "macOS", hint: "Image disque universelle (.dmg)" },
-      { key: "linux", title: "Linux", hint: "AppImage, .deb ou .rpm" },
-      { key: "android", title: "Android", hint: "Application compagnon en lecture seule (.apk)" },
-    ],
-    button: "Télécharger",
-    checksum: "SHA-256",
-    allReleases: "Toutes les versions sur GitHub",
-    versionLabel: "Dernière version",
-    cliTitle: "Ligne de commande",
-    cliLines: ["cargo install fusible", "facile install fusible"],
-    actionLine: "GitHub Action : uses: FacileStudio/Fusible@v1",
-    androidNote: "Autorisez les installations depuis cette source quand Android le demande.",
-    desktopNote:
-      "Les installateurs ne sont pas signés avec des certificats Apple ou Microsoft : " +
-      "votre système vous avertira. " +
+    intro: "Le studio de bureau, l'application Android en lecture seule et l'outil en ligne de commande.",
+    heading: "Installer Fusible",
+    note:
+      "Les installateurs ne sont pas signés avec des certificats Apple ou Microsoft, " +
+      "donc votre système vous avertira. " +
       "Les mises à jour intégrées sont vérifiées avec la clé de signature de Fusible.",
+    cli: [
+      { label: "Cargo", command: "cargo install fusible" },
+      { label: "CLI Facile", command: "facile install fusible" },
+    ],
+    actionLine: "GitHub Action : uses: FacileStudio/Fusible@v1",
   },
   docs: frDocs,
 };

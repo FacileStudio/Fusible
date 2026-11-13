@@ -35,12 +35,12 @@
 
     <article class="flex min-w-0 flex-col gap-10">
       <header class="flex max-w-2xl flex-col gap-3">
-        <h1 class="text-fc-2xl font-semibold tracking-tight text-fc-fg sm:text-fc-3xl">{docs.title}</h1>
+        <h1 class="text-fc-2xl font-bold tracking-tight text-fc-fg sm:text-fc-3xl">{docs.title}</h1>
         <p class="text-fc-md text-fc-fg-muted">{docs.intro}</p>
       </header>
       {#each docs.sections as section (section.id)}
         <section id={section.id} aria-labelledby="{section.id}-title" class="flex scroll-mt-24 flex-col gap-4">
-          <h2 id="{section.id}-title" class="text-fc-xl font-semibold tracking-tight text-fc-fg">{section.title}</h2>
+          <h2 id="{section.id}-title" class="text-fc-xl font-bold tracking-tight text-fc-fg">{section.title}</h2>
           {#each section.blocks as block, i (i)}
             {#if block.kind === "p"}
               <p class="max-w-2xl text-fc-sm text-fc-fg-muted"><Rich text={block.text} /></p>

@@ -1,7 +1,6 @@
 <script lang="ts">
-  import { Stage, grow, type Act } from "@facile/mise-en-scene";
+  import { Stage, Tile, grow, type Act } from "@facile/mise-en-scene";
   import type { DemoTile as Copy } from "$lib/content/types";
-  import DemoTile from "./DemoTile.svelte";
 
   let { copy }: { copy: Copy } = $props();
 
@@ -40,7 +39,7 @@
   }
 </script>
 
-<DemoTile title={copy.title} text={copy.text}>
+<Tile title={copy.title} body={copy.text}>
   <Stage width={320} height={240} {script} {reset} {poster} label={copy.title}>
     {#snippet children()}
       <div class="bt-total">
@@ -59,7 +58,7 @@
       </div>
     {/snippet}
   </Stage>
-</DemoTile>
+</Tile>
 
 <style>
   .bt-total {

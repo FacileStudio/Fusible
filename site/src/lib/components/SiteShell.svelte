@@ -17,7 +17,6 @@
   const links = $derived([
     { label: content.nav.features, href: `${home}#features` },
     { label: content.nav.agents, href: `${home}#agents` },
-    { label: content.nav.mobile, href: `${home}#mobile` },
     { label: content.nav.docs, href: `${content.prefix}/docs`, active: path.endsWith("/docs") },
     { label: content.nav.download, href: `${content.prefix}/download`, active: path.endsWith("/download") },
   ]);

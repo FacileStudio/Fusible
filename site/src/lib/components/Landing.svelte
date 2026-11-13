@@ -1,29 +1,22 @@
 <script lang="ts">
-  import { icons } from "@facile/muse";
   import type { Content } from "$lib/content/types";
+  import type { Release } from "$lib/release";
   import Seo from "./Seo.svelte";
   import SiteShell from "./SiteShell.svelte";
   import Agents from "./sections/Agents.svelte";
-  import FuseLoop from "./sections/FuseLoop.svelte";
-  import Hero from "./sections/Hero.svelte";
+  import Closing from "./sections/Closing.svelte";
   import Demos from "./sections/Demos.svelte";
-  import Rules from "./sections/Rules.svelte";
-  import ShotSection from "./sections/ShotSection.svelte";
-  import Suite from "./sections/Suite.svelte";
+  import Download from "./sections/Download.svelte";
+  import Hero from "./sections/Hero.svelte";
 
-  let { content }: { content: Content } = $props();
+  let { content, release }: { content: Content; release: Release } = $props();
 </script>
 
 <Seo {content} meta={content.meta.home} page="" jsonLd />
 <SiteShell {content}>
   <Hero {content} />
-  <FuseLoop {content} />
   <Demos {content} />
-  <ShotSection id="board3d" data={content.board3d} {content} src="/screenshots/studio-3d.png" width={1600} height={1000} />
-  <Rules {content} />
   <Agents {content} />
-  <ShotSection id="bodies" data={content.bodies} {content} src="/screenshots/studio-bodies.png" width={1600} height={1000} />
-  <ShotSection id="mobile" data={content.mobile} {content} src="/screenshots/mobile.png" width={600} height={1300} phone icon={icons.android} />
-  <ShotSection id="desktop" data={content.desktop} {content} src="/screenshots/desktop.png" width={1600} height={1000} reverse icon={icons.monitor} />
-  <Suite {content} />
+  <Download {content} {release} />
+  <Closing {content} />
 </SiteShell>

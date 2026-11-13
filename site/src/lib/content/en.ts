@@ -20,19 +20,20 @@ export const en: Content = {
     menuTitle: "Menu",
     primaryNav: "Primary",
   },
-  nav: { features: "Features", agents: "Agents", mobile: "Mobile", docs: "Docs", download: "Download" },
+  nav: { features: "Features", agents: "Agents", docs: "Docs", download: "Download" },
   meta: {
     home: {
       title: "Fusible · Boards, firmware and enclosures, verified",
       description:
-        "Electrical and physical linting, generated Rust firmware pins, 3D parts in code and fabrication files.",
+        "Fusible checks boards, firmware and enclosures against electrical, physical and mechanical rules. " +
+        "When the fuse blows, nothing gets exported or flashed.",
       imageAlt: "Fusible: Boards, firmware and enclosures, verified",
     },
     download: {
       title: "Download Fusible",
       description:
         "Download Fusible for Windows, macOS, Linux and Android, or install the command line tool with cargo. " +
-        "Free and open source under the GPL-3.0 license, signed updates.",
+        "Free and open source under GPL-3.0, with signed updates.",
       imageAlt: "Download Fusible",
     },
     docs: {
@@ -46,23 +47,16 @@ export const en: Content = {
   ...enLanding,
   download: {
     title: "Download Fusible",
-    intro: "Pick your system. Every button also works without release data: it opens the latest release on GitHub.",
-    platforms: [
-      { key: "windows", title: "Windows", hint: "Installer (.msi or .exe)" },
-      { key: "macos", title: "macOS", hint: "Universal disk image (.dmg)" },
-      { key: "linux", title: "Linux", hint: "AppImage, .deb or .rpm" },
-      { key: "android", title: "Android", hint: "Read-only companion app (.apk)" },
-    ],
-    button: "Download",
-    checksum: "SHA-256",
-    allReleases: "All releases on GitHub",
-    versionLabel: "Latest release",
-    cliTitle: "Command line",
-    cliLines: ["cargo install fusible", "facile install fusible"],
-    actionLine: "GitHub Action: uses: FacileStudio/Fusible@v1",
-    androidNote: "Allow installs from this source when Android asks.",
-    desktopNote: "Installers are not code-signed with Apple or Microsoft certificates, so your OS will warn you. " +
+    intro: "The desktop studio, the Android viewer and the command line tool.",
+    heading: "Get Fusible",
+    note:
+      "Installers are not code-signed with Apple or Microsoft certificates, so your OS will warn you. " +
       "In-app updates are verified against Fusible's own signing key.",
+    cli: [
+      { label: "Cargo", command: "cargo install fusible" },
+      { label: "Facile CLI", command: "facile install fusible" },
+    ],
+    actionLine: "GitHub Action: uses: FacileStudio/Fusible@v1",
   },
   docs: enDocs,
 };

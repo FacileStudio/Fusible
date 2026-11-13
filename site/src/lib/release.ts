@@ -1,16 +1,13 @@
-export interface ReleaseAsset {
-  name: string;
-  url: string;
-  size: number;
-  checksum: string | null;
-}
+import type { DownloadEntry } from "@facile/muse";
+
+type Platform = DownloadEntry["platform"];
 
 export interface Release {
   version: string | null;
-  assets: Record<string, ReleaseAsset | undefined>;
+  downloads: DownloadEntry[];
 }
 
-export const EMPTY_RELEASE: Release = { version: null, assets: {} };
+export const EMPTY_RELEASE: Release = { version: null, downloads: [] };
 
 interface GithubAsset {
   name: string;
@@ -18,8 +15,8 @@ interface GithubAsset {
   size: number;
 }
 
-/** Maps a release asset file name to the platform card it belongs to. */
-export function platformOf(name: string): string | null {
+/** Maps a release asset file name to the platform it installs on. */
+export function platformOf(name: string): Platform | null {
   if (/^Fusible-Studio-.*\.(msi|exe)$/i.test(name)) return "windows";
   if (/^Fusible-Studio-.*\.dmg$/i.test(name)) return "macos";
   if (/^Fusible-Studio-.*\.(AppImage|deb|rpm)$/i.test(name)) return "linux";
@@ -27,17 +24,30 @@ export function platformOf(name: string): string | null {
   return null;
 }
 
-/** Builds the page data from the GitHub latest-release payload. */
+/** Reads the CPU architecture from an installer name, such as `x64` or `universal`. */
+function archOf(name: string): string | undefined {
+  return /-(x64|arm64|aarch64|universal)[-.]/i.exec(name)?.[1];
+}
+
+/** Builds the download entries from the GitHub latest-release payload. */
 export function parseRelease(payload: { tag_name?: string; assets?: GithubAsset[] }): Release {
   const all = payload.assets ?? [];
   const urls = new Map(all.map((asset) => [asset.name, asset.browser_download_url]));
-  const release: Release = { version: payload.tag_name ?? null, assets: {} };
+  const version = payload.tag_name ?? null;
+  const downloads: DownloadEntry[] = [];
   for (const asset of all) {
-    const key = platformOf(asset.name);
-    if (!key || release.assets[key]) continue;
-    const shared = key === "android" ? null : (urls.get("desktop-checksums.txt") ?? null);
-    const checksum = urls.get(`${asset.name}.sha256`) ?? shared;
-    release.assets[key] = { name: asset.name, url: asset.browser_download_url, size: asset.size, checksum };
+    const platform = platformOf(asset.name);
+    if (!platform) continue;
+    const shared = platform === "android" ? undefined : urls.get("desktop-checksums.txt");
+    downloads.push({
+      platform,
+      href: asset.browser_download_url,
+      label: asset.name.slice(asset.name.lastIndexOf(".")),
+      arch: archOf(asset.name),
+      version: version ?? undefined,
+      size: asset.size,
+      checksumHref: urls.get(`${asset.name}.sha256`) ?? shared,
+    });
   }
-  return release;
+  return { version, downloads };
 }
