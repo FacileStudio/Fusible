@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Badge, Button, Icon, IconButton } from "@facile/muse";
+  import { Badge, Button, Icon, IconButton, Tooltip } from "@facile/muse";
   import { shortenPath } from "../lib/path";
   import { projects } from "../lib/projects.svelte";
   import { relativeTime } from "../lib/time";
@@ -18,7 +18,9 @@
 <article class="flex items-center gap-4 rounded-fc-lg bg-fc-surface p-5">
   <div class="flex min-w-0 flex-1 flex-col gap-1.5">
     <h2 class="truncate text-fc-md font-semibold">{project.name}</h2>
-    <p class="truncate text-fc-xs text-fc-fg-muted" title={project.path}>{shortenPath(project.path, 64)}</p>
+    <Tooltip text={project.path} class="contents">
+      <p class="truncate text-fc-xs text-fc-fg-muted">{shortenPath(project.path, 64)}</p>
+    </Tooltip>
     <div class="flex flex-wrap items-center gap-1.5">
       {#if project.missing}
         <Badge tone="danger">Folder missing</Badge>

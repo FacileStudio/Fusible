@@ -33,7 +33,7 @@
 		"@capacitor/barcode-scanner": "^3.1.3",
 		"@capacitor/core": "8.6.0",
 		"@capacitor/preferences": "8.0.1",
-		"@facile/muse": "github:FacileStudio/muse#v0.16.1",
+		"@facile/muse": "github:FacileStudio/muse#v0.21.0",
 		"buffer": "^6.0.3",
 		"circuit-json-to-gltf": "^0.0.164",
 		"circuit-to-svg": "^0.0.456",

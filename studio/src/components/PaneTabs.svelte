@@ -21,7 +21,7 @@
 <div role="tablist" aria-label="Panels" class="grid shrink-0 auto-cols-fr grid-flow-col gap-1 rounded-fc-pill bg-fc-surface p-1">
   {#each items as item, index (item.id)}
     {@const active = studio.pane === item.id}
-    <Tooltip text={item.label}>
+    <Tooltip text={item.label} describe={false} class="contents">
       <button
         type="button"
         role="tab"

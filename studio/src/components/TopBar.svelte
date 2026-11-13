@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Icon, IconButton, Select } from "@facile/muse";
+  import { Button, Icon, IconButton, Select, Tooltip } from "@facile/muse";
   import FusePill from "./FusePill.svelte";
   import KicadPanel from "./KicadPanel.svelte";
   import LiveDot from "./LiveDot.svelte";
@@ -20,20 +20,21 @@
   data-tauri-drag-region
 >
   {#if studio.desktop}
-    <Button
-      variant="secondary"
-      size="sm"
-      id="btn-projects"
-      class="h-9 shrink-0"
-      icon="solar:alt-arrow-left-linear"
-      aria-label="Back to projects"
-      title="Back to projects"
-      onclick={openProjects}
-    >
-      <span class="max-lg:hidden">Projects</span>
-    </Button>
+    <Tooltip text="Back to projects" describe={false} class="contents">
+      <Button
+        variant="secondary"
+        size="sm"
+        id="btn-projects"
+        class="h-9 shrink-0"
+        icon="solar:alt-arrow-left-linear"
+        aria-label="Back to projects"
+        onclick={openProjects}
+      >
+        <span class="max-lg:hidden">Projects</span>
+      </Button>
+    </Tooltip>
   {/if}
-  <IconButton variant="ghost" aria-label="Show project" aria-pressed={studio.treeOpen} title="Show project ([)" onclick={toggleTree}>
+  <IconButton variant="ghost" aria-label="Show project" aria-pressed={studio.treeOpen} tooltip="Show project ([)" onclick={toggleTree}>
     <Icon icon="solar:folder-linear" />
   </IconButton>
   <div class="flex shrink-0 items-center gap-2">
@@ -60,7 +61,7 @@
   <FusePill />
   <KicadPanel />
   <LiveDot />
-  <IconButton variant="ghost" class="max-md:hidden" aria-label="Pair a phone" title="Pair a phone" onclick={() => (studio.pairOpen = true)}>
+  <IconButton variant="ghost" class="max-md:hidden" aria-label="Pair a phone" onclick={() => (studio.pairOpen = true)}>
     <Icon icon="solar:qr-code-linear" />
   </IconButton>
   <IconButton
@@ -70,7 +71,7 @@
   >
     <Icon icon={studio.theme === "dark" ? "solar:sun-linear" : "solar:moon-linear"} />
   </IconButton>
-  <IconButton variant="ghost" aria-label="Toggle panel" title="Toggle panel (\)" onclick={toggleSidebar}>
+  <IconButton variant="ghost" aria-label="Toggle panel" tooltip="Toggle panel (\)" onclick={toggleSidebar}>
     <Icon icon="solar:sidebar-code-linear" />
   </IconButton>
   {#if studio.desktop && !mac}

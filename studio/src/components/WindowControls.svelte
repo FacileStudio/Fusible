@@ -5,7 +5,7 @@
 
 <div class="flex shrink-0 items-center gap-1" role="group" aria-label="Window controls">
   {#each WINDOW_BUTTONS as button (button.name)}
-    <IconButton variant="ghost" class="size-8" title={button.label} aria-label={button.label} onclick={() => invoke(button.cmd, { label: LABEL })}>
+    <IconButton variant="ghost" class="size-8" aria-label={button.label} onclick={() => invoke(button.cmd, { label: LABEL })}>
       <Icon icon={button.icon} size={16} />
     </IconButton>
   {/each}
