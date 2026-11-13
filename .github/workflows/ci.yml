@@ -49,12 +49,29 @@ jobs:
       - name: Build the release binary
         run: cargo build --release --locked
 
+      - name: Name the gerbv cache
+        id: gerbv-cache
+        run: echo "key=gerbv-$ImageOS-$(uname -m)-v1" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/gerbv-debs
+          key: ${{ steps.gerbv-cache.outputs.key }}
+
       - name: Install gerbv
         timeout-minutes: 15
         run: |
-          apt_get() { sudo timeout 180 apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 "$@"; }
-          install() { apt_get update && apt_get install -y gerbv; }
+          debs="$HOME/gerbv-debs"
+          if compgen -G "$debs/*.deb" > /dev/null && sudo dpkg -i "$debs"/*.deb; then exit 0; fi
+          mkdir -p "$debs/partial"
+          apt_get() {
+            sudo timeout 180 apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=30 \
+              -o Dir::Cache::Archives="$debs" -o APT::Keep-Downloaded-Packages=true "$@"
+          }
+          install() { apt_get update && apt_get install -y -f --no-install-recommends gerbv; }
           install || { sleep 15; install; }
+          sudo rm -rf "$debs/partial" "$debs/lock"
+          sudo chown -R "$USER" "$debs"
 
       - name: Render Gerber layers in gerbv
         run: |
