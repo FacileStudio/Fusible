@@ -5,6 +5,14 @@ All notable changes to this project are documented here. The format is
 follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 `0.x`, a breaking change bumps the minor.
 
+## [2.4.1] - 2026-11-14
+
+### Fixed
+
+- The landing 3D viewer is now the same as Pastille's: the same scene, camera, lights and
+  framing, a 3D PCB and Enclosure switch (`/models/pastille_assembly.glb`, loaded on demand),
+  and the same view, auto-rotate and Explore in 3D controls.
+
 ## [2.4.0] - 2026-11-14
 
 ### Changed
