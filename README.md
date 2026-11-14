@@ -292,12 +292,14 @@ CI can tell a bad design (1) from a broken setup (2).
 ## CI
 
 The repository is also a GitHub Action. It installs a release binary, sets up bun, runs
-`fusible check`, and fails the job when the fuse blows:
+`fusible check`, and fails the job when the fuse blows. Pin it to a release tag; there is no
+floating `v1` or `v2` tag. The latest one is on
+[the releases page](https://github.com/FacileStudio/Fusible/releases/latest).
 
 ```yaml
 - uses: actions/checkout@v7
 - id: fuse
-  uses: FacileStudio/Fusible@v1
+  uses: FacileStudio/Fusible@v2.5.1
   with:
     target: ""        # optional board name or file; empty checks every board
     version: latest   # or a version such as 1.0.0
