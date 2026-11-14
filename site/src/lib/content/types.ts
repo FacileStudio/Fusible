@@ -116,6 +116,29 @@ export interface DemosContent {
   check: DemoTile;
   firmware: DemoTile;
   cost: DemoTile;
+  loop: LoopContent;
+  board: BoardContent;
+}
+
+export interface LoopContent {
+  title: string;
+  short: DemoTile;
+  route: DemoTile;
+  sync: DemoTile;
+}
+
+export interface BoardContent {
+  title: string;
+  text: string;
+  presets: { iso: string; top: string; side: string };
+  auto: string;
+  explore: string;
+  done: string;
+  hint: string;
+  loading: string;
+  failed: string;
+  failedText: string;
+  status: string;
 }
 
 export interface Content {

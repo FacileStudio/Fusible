@@ -42,6 +42,31 @@ export const frLanding: Landing = {
       text: "Composants, impressions et prix dans une seule nomenclature.",
       label: "Total",
     },
+    loop: {
+      title: "Repéré dans le schéma, pas sur le banc",
+      short: {
+        title: "Les courts-circuits n'atteignent pas la fab",
+        text: "Deux nets qui se touchent font sauter le fusible avant tout routage.",
+      },
+      route: { title: "Les pistes se routent seules", text: "fusible route transforme le chevelu en cuivre." },
+      sync: {
+        title: "Les retouches KiCad reviennent",
+        text: "Déplacez un composant dans KiCad, fusible sync le reporte.",
+      },
+    },
+    board: {
+      title: "Une carte, en 3D",
+      text: "Touchez Explorer en 3D, puis faites-la tourner.",
+      presets: { iso: "Iso", top: "Dessus", side: "Côté" },
+      auto: "Auto",
+      explore: "Explorer en 3D",
+      done: "Terminé",
+      hint: "Glissez pour tourner, pincez ou défilez pour zoomer",
+      loading: "Chargement de la carte 3D",
+      failed: "Aperçu 3D indisponible",
+      failedText: "Ce navigateur n'a pas pu démarrer WebGL.",
+      status: "Fusible intact, 0 violation",
+    },
   },
   agents: {
     title: "Des agents sur vos cartes",

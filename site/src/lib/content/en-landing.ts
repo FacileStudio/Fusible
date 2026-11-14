@@ -38,6 +38,28 @@ export const enLanding: Landing = {
       text: "Move a pin in the TSX and the Rust constants follow.",
     },
     cost: { title: "Costs stay current", text: "Parts, prints and prices roll up into one BOM.", label: "Total" },
+    loop: {
+      title: "Caught in the design, not on the bench",
+      short: {
+        title: "Shorts never reach the fab",
+        text: "Two nets that touch blow the fuse before anything is routed.",
+      },
+      route: { title: "Traces route themselves", text: "fusible route turns the ratsnest into copper." },
+      sync: { title: "KiCad edits come back", text: "Move a part in KiCad, and fusible sync writes it back." },
+    },
+    board: {
+      title: "A board, in 3D",
+      text: "Tap Explore in 3D, then drag to turn it.",
+      presets: { iso: "Iso", top: "Top", side: "Side" },
+      auto: "Auto",
+      explore: "Explore in 3D",
+      done: "Done",
+      hint: "Drag to orbit, pinch or scroll to zoom",
+      loading: "Loading 3D board",
+      failed: "3D preview unavailable",
+      failedText: "This browser could not start WebGL.",
+      status: "Fuse intact, 0 violations",
+    },
   },
   agents: {
     title: "Agents work on your boards",

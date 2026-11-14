@@ -36,6 +36,22 @@ export function scrollReveal(node: HTMLElement, opts: { delay?: number; stagger?
 
 
 /**
+ * Calls `onNear` once, when the node comes within one viewport of the screen.
+ */
+export function whenNear(node: Element, onNear: () => void) {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      observer.disconnect();
+      onNear();
+    },
+    { rootMargin: "100% 0px 100% 0px" },
+  );
+  observer.observe(node);
+  return () => observer.disconnect();
+}
+
+/**
  * Smoothly scrolls to a section id on the current page.
  */
 export function scrollToSection(id: string, event?: MouseEvent) {
