@@ -1,11 +1,14 @@
 import type { Content } from "./types";
 
-type Landing = Pick<Content, "hero" | "demos" | "agents" | "closing" | "footer">;
+type Landing = Pick<Content, "hero" | "demos" | "agents" | "suite" | "dev" | "closing" | "footer">;
 
 export const frLanding: Landing = {
   hero: {
-    title: "Un seul projet pour vos cartes, votre firmware et votre boîtier.",
-    sub: "Quand une règle échoue, le fusible saute et rien ne part.",
+    title: "Vérifiez votre carte avant de la commander.",
+    sub:
+      "Décrivez votre carte électronique en code. Fusible vérifie chaque règle et bloque l'export " +
+      "tant qu'une erreur reste.",
+    note: "Gratuit et open source (GPL-3.0). Aucun compte Facile nécessaire.",
     download: "Télécharger",
     copyLabel: "Copier la commande d'installation",
   },
@@ -57,6 +60,7 @@ export const frLanding: Landing = {
     board: {
       title: "Pastille, en 3D",
       text: "La vraie carte Pastille, conçue avec Fusible. Touchez Explorer en 3D, puis faites-la tourner.",
+      link: "Voir Pastille",
       pcb: "PCB 3D",
       enclosure: "Boîtier",
       presets: { iso: "iso", top: "dessus", side: "côté" },
@@ -74,6 +78,27 @@ export const frLanding: Landing = {
     title: "Des agents sur vos cartes",
     text: "Fusible parle MCP : Bulle, Claude Code et Codex reçoivent le verdict du fusible à chaque modification.",
   },
-  closing: { title: "Vérifiez votre prochaine carte avant de la commander." },
-  footer: { license: "Licence GPL-3.0", github: "GitHub", crates: "crates.io", studio: "Facile Studio" },
+  suite: {
+    description: "Fusible se branche sur trois apps Facile.",
+    nuage: "Envoyez les fichiers de fabrication à l'équipe en une commande.",
+    bulle: "Un assistant qui modifie et vérifie votre carte.",
+    pastille: "Une vraie carte conçue avec Fusible.",
+    suite: "Fusible fait partie de la suite Facile.",
+    suiteLink: "Voir toutes les apps",
+  },
+  dev: {
+    description: "Installez l'app de bureau ou passez par cargo, et branchez Bulle ou vos agents via MCP.",
+    mcp: "Bulle, Claude Code et Codex lisent le verdict du fusible et modifient la carte avec 15 outils.",
+    actionTitle: "GitHub Action",
+    action: "Le fusible saute dans la CI, à chaque pull request.",
+    source: "GPL-3.0. Lisez le code, ouvrez un ticket, proposez un correctif.",
+  },
+  closing: { title: "Votre prochaine carte, vérifiée avant la fab." },
+  footer: {
+    tagline: "Vérifiez votre carte électronique avant de la commander.",
+    license: "Licence GPL-3.0",
+    github: "GitHub",
+    crates: "crates.io",
+    studio: "Facile Studio",
+  },
 };

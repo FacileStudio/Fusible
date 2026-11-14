@@ -1,4 +1,4 @@
-export type Locale = "en" | "fr";
+export type Locale = "en" | "fr" | "es" | "de";
 
 export interface Link {
   label: string;
@@ -47,8 +47,26 @@ export interface NavContent {
 export interface HeroContent {
   title: string;
   sub: string;
+  note: string;
   download: string;
   copyLabel: string;
+}
+
+export interface SuiteContent {
+  description: string;
+  nuage: string;
+  bulle: string;
+  pastille: string;
+  suite: string;
+  suiteLink: string;
+}
+
+export interface DevContent {
+  description: string;
+  mcp: string;
+  actionTitle: string;
+  action: string;
+  source: string;
 }
 
 export interface AgentsContent {
@@ -61,6 +79,7 @@ export interface ClosingContent {
 }
 
 export interface FooterContent {
+  tagline: string;
   license: string;
   github: string;
   crates: string;
@@ -130,6 +149,7 @@ export interface LoopContent {
 export interface BoardContent {
   title: string;
   text: string;
+  link: string;
   pcb: string;
   enclosure: string;
   presets: { iso: string; top: string; side: string };
@@ -149,11 +169,14 @@ export interface Content {
   htmlLang: string;
   ogLocale: string;
   prefix: string;
+  docsPrefix: string;
   ui: Ui;
   nav: NavContent;
   meta: { home: Meta; download: Meta; docs: Meta };
   hero: HeroContent;
   agents: AgentsContent;
+  suite: SuiteContent;
+  dev: DevContent;
   closing: ClosingContent;
   footer: FooterContent;
   download: DownloadContent;

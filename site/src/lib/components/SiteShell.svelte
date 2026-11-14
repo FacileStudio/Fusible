@@ -4,7 +4,7 @@
   import { Button, LandingFooter, LandingHeader, Page, icons, provideLocale } from "@facile/muse";
   import type { Content } from "$lib/content/types";
   import { LOGO } from "$lib/icons";
-  import { CRATES_URL, REPO_URL } from "$lib/site";
+  import { CRATES_URL, REPO_URL, localeHref, type SiteLocale } from "$lib/site";
   import LangSwitch from "./LangSwitch.svelte";
   import ThemeButton from "./ThemeButton.svelte";
 
@@ -17,14 +17,14 @@
   const links = $derived([
     { label: content.nav.features, href: `${home}#features` },
     { label: content.nav.agents, href: `${home}#agents` },
-    { label: content.nav.docs, href: `${content.prefix}/docs`, active: path.endsWith("/docs") },
+    { label: content.nav.docs, href: `${content.docsPrefix}/docs`, active: path.endsWith("/docs") },
     { label: content.nav.download, href: `${content.prefix}/download`, active: path.endsWith("/download") },
   ]);
   const columns = $derived([
     {
       title: "Fusible",
       links: [
-        { label: content.nav.docs, href: `${content.prefix}/docs` },
+        { label: content.nav.docs, href: `${content.docsPrefix}/docs` },
         { label: content.nav.download, href: `${content.prefix}/download` },
       ],
     },
@@ -37,6 +37,9 @@
       ],
     },
   ]);
+  const legal = $derived({
+    onLocaleChange: (locale: string) => window.location.assign(localeHref(locale as SiteLocale, page.url.pathname)),
+  });
 </script>
 
 <div class="flex min-h-dvh w-full flex-col bg-fc-page text-fc-fg">
@@ -48,5 +51,5 @@
     {/snippet}
   </LandingHeader>
   <main id="main" class="flex-1"><Page width="xl">{@render children()}</Page></main>
-  <LandingFooter appName="Fusible" icon={LOGO} homeHref={home} tagline={content.hero.title} {columns} />
+  <LandingFooter appName="Fusible" icon={LOGO} homeHref={home} tagline={content.footer.tagline} {columns} {legal} />
 </div>

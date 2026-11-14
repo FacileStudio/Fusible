@@ -1,5 +1,5 @@
 <script lang="ts">
-  let { blown, wide }: { blown: boolean; wide: boolean } = $props();
+  let { blown, wide, drawn = true }: { blown: boolean; wide: boolean; drawn?: boolean } = $props();
 
   const TRACES = [
     "M212 120 H254 Q262 120 262 112 V100 Q262 92 270 92 H300",
@@ -17,7 +17,7 @@
 <svg viewBox="0 0 400 280" class="board" aria-hidden="true">
   <rect x="24" y="20" width="352" height="240" rx="14" class="plate" />
   {#each TRACES as d (d)}<path {d} class="trace" />{/each}
-  <path d="M64 134 H86 Q92 134 92 128 V122 Q92 116 98 116 H120" class="vbus" class:blown class:wide />
+  <path d="M64 134 H86 Q92 134 92 128 V122 Q92 116 98 116 H120" class="vbus" class:blown class:wide class:hidden={!drawn} />
   {#each PADS as [x, y] (`${x}-${y}`)}
     <rect {x} {y} width="14" height="10" rx="2" class="pad-base" />
     <rect {x} {y} width="14" height="10" rx="2" class="pad" />
@@ -62,7 +62,10 @@
     stroke-width: 2;
     stroke-linejoin: round;
     stroke-linecap: round;
-    transition: stroke 0.25s ease, stroke-width 0.5s ease;
+    transition: stroke 0.25s ease, stroke-width 0.5s ease, opacity 0.35s ease;
+  }
+  .vbus.hidden {
+    opacity: 0;
   }
   .vbus.blown {
     stroke: var(--color-fc-danger);

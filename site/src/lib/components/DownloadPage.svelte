@@ -4,6 +4,7 @@
   import Downloads from "./Downloads.svelte";
   import Seo from "./Seo.svelte";
   import SiteShell from "./SiteShell.svelte";
+  import { actionUses } from "$lib/site";
 
   let { content, release }: { content: Content; release: Release } = $props();
   const dl = $derived(content.download);
@@ -18,6 +19,6 @@
     </div>
     <Downloads {content} {release} headingLevel={2} />
     <p class="max-w-2xl text-fc-xs text-fc-fg-muted">{dl.note}</p>
-    <p class="font-fc-mono text-fc-xs text-fc-fg-muted">{dl.actionLine}</p>
+    <p class="font-fc-mono text-fc-xs text-fc-fg-muted">{dl.actionLine} {actionUses(release.version)}</p>
   </section>
 </SiteShell>

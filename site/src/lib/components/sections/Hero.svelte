@@ -24,6 +24,7 @@
       <code class="truncate font-fc-mono text-fc-sm text-fc-fg">{command}</code>
       <CopyButton text={command} {content} label={content.hero.copyLabel} />
     </div>
+    <p class="basis-full text-fc-sm text-fc-fg-muted">{content.hero.note}</p>
   </div>
 
   <div data-reveal-item>

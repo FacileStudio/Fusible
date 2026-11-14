@@ -1,11 +1,12 @@
 import type { Content } from "./types";
 
-type Landing = Pick<Content, "hero" | "demos" | "agents" | "closing" | "footer">;
+type Landing = Pick<Content, "hero" | "demos" | "agents" | "suite" | "dev" | "closing" | "footer">;
 
 export const enLanding: Landing = {
   hero: {
-    title: "One project for your boards, firmware and enclosure.",
-    sub: "When a rule fails, the fuse blows and nothing ships.",
+    title: "Check your board before you order it.",
+    sub: "Describe your circuit board in code. Fusible checks every rule and blocks the export while an error remains.",
+    note: "Free and open source (GPL-3.0). No Facile account needed.",
     download: "Download",
     copyLabel: "Copy the install command",
   },
@@ -50,6 +51,7 @@ export const enLanding: Landing = {
     board: {
       title: "Pastille, in 3D",
       text: "The real Pastille board, designed with Fusible. Tap Explore in 3D, then drag to turn it.",
+      link: "See Pastille",
       pcb: "3D PCB",
       enclosure: "Enclosure",
       presets: { iso: "iso", top: "top", side: "side" },
@@ -67,6 +69,27 @@ export const enLanding: Landing = {
     title: "Agents work on your boards",
     text: "Fusible speaks MCP, so Bulle, Claude Code and Codex get the fuse verdict on every edit.",
   },
-  closing: { title: "Check your next board before you order it." },
-  footer: { license: "GPL-3.0 licensed", github: "GitHub", crates: "crates.io", studio: "Facile Studio" },
+  suite: {
+    description: "Fusible plugs into three Facile apps.",
+    nuage: "Send the fab files to your team in one command.",
+    bulle: "An assistant that edits and checks your board.",
+    pastille: "A real board built with Fusible.",
+    suite: "Fusible is part of the Facile suite.",
+    suiteLink: "See every app",
+  },
+  dev: {
+    description: "Install the desktop app or use cargo, and plug in Bulle or your agents over MCP.",
+    mcp: "Bulle, Claude Code and Codex read the fuse verdict and edit the board through 15 tools.",
+    actionTitle: "GitHub Action",
+    action: "Blow the fuse in CI on every pull request.",
+    source: "GPL-3.0. Read the code, file an issue, send a fix.",
+  },
+  closing: { title: "Your next board, checked before the fab." },
+  footer: {
+    tagline: "Check your circuit board before you order it.",
+    license: "GPL-3.0 licensed",
+    github: "GitHub",
+    crates: "crates.io",
+    studio: "Facile Studio",
+  },
 };

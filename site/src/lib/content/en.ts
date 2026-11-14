@@ -7,6 +7,7 @@ export const en: Content = {
   htmlLang: "en",
   ogLocale: "en_US",
   prefix: "",
+  docsPrefix: "",
   ui: {
     skip: "Skip to content",
     themeToLight: "Switch to light theme",
@@ -23,11 +24,11 @@ export const en: Content = {
   nav: { features: "Features", agents: "Agents", docs: "Docs", download: "Download" },
   meta: {
     home: {
-      title: "Fusible · Boards, firmware and enclosures, verified",
+      title: "Fusible · Check your board before you order it",
       description:
-        "Fusible checks boards, firmware and enclosures against electrical, physical and mechanical rules. " +
-        "When the fuse blows, nothing gets exported or flashed.",
-      imageAlt: "Fusible: Boards, firmware and enclosures, verified",
+        "Describe your circuit board in code. Fusible checks every rule and blocks the export while an error " +
+        "remains. Free and open source, for desktop and terminal.",
+      imageAlt: "Fusible: check your board before you order it",
     },
     download: {
       title: "Download Fusible",
@@ -56,7 +57,7 @@ export const en: Content = {
       { label: "Cargo", command: "cargo install fusible" },
       { label: "Facile CLI", command: "facile install fusible" },
     ],
-    actionLine: "GitHub Action: uses: FacileStudio/Fusible@v1",
+    actionLine: "GitHub Action:",
   },
   docs: enDocs,
 };

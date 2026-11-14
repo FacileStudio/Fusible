@@ -1,8 +1,8 @@
 import type { Handle } from "@sveltejs/kit";
+import { splitPath } from "$lib/site";
 
-/** Writes the page language into the root element so French pages ship lang="fr". */
+/** Writes the page language into the root element so each locale ships its own lang attribute. */
 export const handle: Handle = ({ event, resolve }) => {
-  const path = event.url.pathname;
-  const lang = path === "/fr" || path.startsWith("/fr/") ? "fr" : "en";
+  const lang = splitPath(event.url.pathname).locale;
   return resolve(event, { transformPageChunk: ({ html }) => html.replace("%lang%", lang) });
 };

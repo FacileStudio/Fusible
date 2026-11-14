@@ -57,3 +57,7 @@ export const MCP_TOOLS: string[][] = [
   ["export", "Fab, CAD or docs files. Refused while the fuse is blown."],
   ["render", "SVG of the PCB or the schematic."],
 ];
+
+export const PASTILLE_URL = "https://pastille.facile.studio";
+export const NUAGE_URL = "https://nuage.facile.studio";
+export const SUITE_URL = "https://suite.facile.studio";

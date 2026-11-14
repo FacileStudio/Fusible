@@ -23,4 +23,7 @@ export const ICON_NAMES = [
   "solar:qr-code-linear",
   "solar:arrow-right-linear",
   "solar:arrow-up-linear",
+  "solar:cloud-bold-duotone",
+  "solar:smile-circle-bold-duotone",
+  "solar:circle-dot-bold-duotone",
 ] as const;

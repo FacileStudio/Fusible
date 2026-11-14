@@ -1,17 +1,18 @@
 <script lang="ts">
   import type { Content, Meta } from "$lib/content/types";
-  import { SITE_URL, pageUrl } from "$lib/site";
+  import { LOCALE_PREFIXES, SITE_URL, localesFor, pageUrl } from "$lib/site";
 
   let { content, meta, page, jsonLd = false }: { content: Content; meta: Meta; page: string; jsonLd?: boolean } =
     $props();
 
   const url = $derived(pageUrl(content.prefix, page));
+  const OG = { en: "en_US", fr: "fr_FR", es: "es_ES", de: "de_DE" };
+  const locales = $derived(localesFor(page));
   const alternates = $derived([
-    { lang: "en", href: pageUrl("", page) },
-    { lang: "fr", href: pageUrl("/fr", page) },
+    ...locales.map((lang) => ({ lang, href: pageUrl(LOCALE_PREFIXES[lang], page) })),
     { lang: "x-default", href: pageUrl("", page) },
   ]);
-  const altLocale = $derived(content.locale === "en" ? "fr_FR" : "en_US");
+  const altLocales = $derived(locales.filter((lang) => lang !== content.locale).map((lang) => OG[lang]));
   const image = `${SITE_URL}/og-image.png`;
   const structured = $derived(
     JSON.stringify({
@@ -50,7 +51,9 @@
   <meta property="og:image:height" content="630" />
   <meta property="og:image:alt" content={meta.imageAlt} />
   <meta property="og:locale" content={content.ogLocale} />
-  <meta property="og:locale:alternate" content={altLocale} />
+  {#each altLocales as alt (alt)}
+    <meta property="og:locale:alternate" content={alt} />
+  {/each}
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content={meta.title} />
   <meta name="twitter:description" content={meta.description} />

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { tick } from "svelte";
-  import { Bar, Cursor, Roll, Stage, Window, cursorAt, grow, type Act } from "@facile/mise-en-scene";
+  import { Bar, Caret, Cursor, Roll, Stage, Window, cursorAt, grow, type Act } from "@facile/mise-en-scene";
   import { Icon } from "@facile/muse";
   import type { HeroDemoCopy } from "$lib/content/types";
   import Board from "./Board.svelte";
@@ -8,12 +8,31 @@
   let { copy }: { copy: HeroDemoCopy } = $props();
 
   const FILES = ["gerbers.zip", "board.step", "pins.rs"];
+  const LINE = [
+    { text: "<", tone: "text-fc-fg-muted" },
+    { text: "trace", tone: "text-fc-info font-medium" },
+    { text: " " },
+    { text: "net", tone: "text-fc-admin font-medium" },
+    { text: "=", tone: "text-fc-fg-muted" },
+    { text: '"VBUS"', tone: "text-fc-success" },
+    { text: " " },
+    { text: "width", tone: "text-fc-admin font-medium" },
+    { text: "=", tone: "text-fc-fg-muted" },
+    { text: '"', tone: "text-fc-success" },
+    { value: true, text: "0.2mm" },
+    { text: '"', tone: "text-fc-success" },
+    { text: " " },
+    { text: "/>", tone: "text-fc-fg-muted" },
+  ];
+  const STARTS = LINE.map((_, i) => LINE.slice(0, i).reduce((sum, token) => sum + token.text.length, 0));
+  const FULL = LINE.reduce((sum, token) => sum + token.text.length, 0);
 
   let blown = $state(false);
   let wide = $state(false);
   let width = $state("0.2");
   let refused = $state(false);
   let files = $state(0);
+  let typed = $state(0);
   let cursor = $state(cursorAt());
   let check = $state<HTMLElement>();
   let exportButton = $state<HTMLElement>();
@@ -25,6 +44,7 @@
     width = "0.2";
     refused = false;
     files = 0;
+    typed = 0;
     cursor.visible = false;
   }
 
@@ -32,6 +52,13 @@
     wide = true;
     width = "0.8";
     files = FILES.length;
+    typed = FULL;
+  }
+
+  function shown(i: number): string {
+    const token = LINE[i];
+    const text = token.value ? `${width}mm` : token.text;
+    return text.slice(0, Math.max(0, typed - STARTS[i]));
   }
 
   async function press(act: Act, target: HTMLElement | undefined, onPress?: () => void) {
@@ -40,7 +67,9 @@
   }
 
   async function script(act: Act) {
-    await act.wait(700);
+    await act.wait(500);
+    await act.count(FULL, (v) => (typed = v), 45);
+    await act.wait(600);
     await tick();
     cursor.visible = true;
     await press(act, check);
@@ -76,7 +105,11 @@
 
 {#snippet code()}
   <span class="hd-file">hardware/index.tsx</span>
-  <code><span class="text-fc-fg-muted">&lt;</span><span class="text-fc-info font-medium">trace</span> <span class="text-fc-admin font-medium">net</span><span class="text-fc-fg-muted">=</span><span class="text-fc-success">"VBUS"</span> <span class="text-fc-admin font-medium">width</span><span class="text-fc-fg-muted">=</span><span class="text-fc-success">"<span bind:this={value} class="hd-value">{width}mm</span>"</span> <span class="text-fc-fg-muted">/&gt;</span></code>
+  <code
+    >{#each LINE as token, i (i)}{#if token.value}{#if typed > STARTS[i]}<span class="text-fc-success"
+            ><span bind:this={value} class="hd-value">{shown(i)}</span></span
+          >{/if}{:else}<span class={token.tone}>{shown(i)}</span>{/if}{/each}{#if typed < FULL}<Caret />{/if}</code
+  >
 {/snippet}
 
 {#snippet panel()}
@@ -114,7 +147,7 @@
       <Window title="fieldcam" style="top:12px;left:12px;width:334px;height:576px">
         <div class="hd-compact">
           {@render pill()}
-          <div class="hd-board"><Board {blown} {wide} /></div>
+          <div class="hd-board"><Board {blown} {wide} drawn={typed >= FULL} /></div>
           <div class="hd-inline">{@render code()}</div>
           {@render panel()}
         </div>
@@ -127,7 +160,7 @@
             <div class="hd-tabs">
               {#each copy.views as view, i (view)}<span class:hd-on={i === 1}>{view}</span>{/each}
             </div>
-            <div class="hd-board"><Board {blown} {wide} /></div>
+            <div class="hd-board"><Board {blown} {wide} drawn={typed >= FULL} /></div>
             <div class="hd-inline">{@render code()}</div>
           </div>
           <aside class="hd-side">

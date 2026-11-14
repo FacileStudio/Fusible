@@ -7,6 +7,7 @@ export const fr: Content = {
   htmlLang: "fr",
   ogLocale: "fr_FR",
   prefix: "/fr",
+  docsPrefix: "/fr",
   ui: {
     skip: "Aller au contenu",
     themeToLight: "Passer au thème clair",
@@ -23,11 +24,11 @@ export const fr: Content = {
   nav: { features: "Fonctions", agents: "Agents", docs: "Docs", download: "Télécharger" },
   meta: {
     home: {
-      title: "Fusible : cartes, firmware et boîtiers dans un seul projet vérifié",
+      title: "Fusible : vérifiez votre carte avant de la commander",
       description:
-        "Fusible vérifie cartes, firmware et boîtiers selon des règles électriques, physiques et mécaniques. " +
-        "Quand le fusible saute, rien n'est exporté ni flashé.",
-      imageAlt: "Fusible : un seul projet pour vos cartes, votre firmware et votre boîtier",
+        "Décrivez votre carte électronique en code. Fusible vérifie chaque règle et bloque l'export tant " +
+        "qu'une erreur reste. Gratuit et open source, sous GPL-3.0.",
+      imageAlt: "Fusible : vérifiez votre carte avant de la commander",
     },
     download: {
       title: "Télécharger Fusible",
@@ -57,7 +58,7 @@ export const fr: Content = {
       { label: "Cargo", command: "cargo install fusible" },
       { label: "CLI Facile", command: "facile install fusible" },
     ],
-    actionLine: "GitHub Action : uses: FacileStudio/Fusible@v1",
+    actionLine: "GitHub Action :",
   },
   docs: frDocs,
 };

@@ -1,14 +1,14 @@
 <script lang="ts">
   import { page } from "$app/state";
   import type { Content } from "$lib/content/types";
+  import { LOCALE_PREFIXES, localeHref, type SiteLocale } from "$lib/site";
 
   let { content }: { content: Content } = $props();
 
-  const rest = $derived(page.url.pathname.replace(/^\/fr(?=\/|$)/, "") || "/");
-  const options = $derived([
-    { code: "en", label: "EN", href: rest },
-    { code: "fr", label: "FR", href: rest === "/" ? "/fr" : `/fr${rest}` },
-  ]);
+  const codes = Object.keys(LOCALE_PREFIXES) as SiteLocale[];
+  const options = $derived(
+    codes.map((code) => ({ code, label: code.toUpperCase(), href: localeHref(code, page.url.pathname) })),
+  );
 </script>
 
 <div role="group" aria-label={content.ui.language} class="inline-flex gap-1 rounded-fc-pill bg-fc-surface p-1">
