@@ -10,5 +10,5 @@
   <h2 id="download-title" class="text-fc-xl font-bold tracking-tight text-fc-fg sm:text-fc-2xl">
     {content.download.heading}
   </h2>
-  <Downloads {content} {release} />
+  <Downloads {content} {release} mode="device" allHref="{content.prefix}/download" />
 </section>
