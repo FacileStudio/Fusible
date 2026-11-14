@@ -5,6 +5,15 @@ All notable changes to this project are documented here. The format is
 follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 `0.x`, a breaking change bumps the minor.
 
+## [2.3.0] - 2026-11-14
+
+### Added
+
+- The landing (`/`, `/fr`) shows three demo cards under the hero: `shorted_nets` catching a
+  short, `fusible route` routing the ratsnest, and `fusible sync` bringing a KiCad move back.
+- The landing has a 3D board viewer with iso, top and side views and auto-rotation. three.js
+  loads only when the viewer nears the screen, and the board stays still under reduced motion.
+
 ## [2.2.1] - 2026-11-14
 
 ### Changed
