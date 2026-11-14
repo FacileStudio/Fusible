@@ -5,6 +5,30 @@ All notable changes to this project are documented here. The format is
 follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 `0.x`, a breaking change bumps the minor.
 
+## [2.5.0] - 2026-11-14
+
+### Added
+
+- The site ships in Spanish (`/es`, `/es/download`) and German (`/de`, `/de/download`). The docs
+  stay in English and French; the language switches in the header and footer go to the same page
+  in the chosen language, or to its home when the page does not exist there.
+- The landing shows the Facile apps Fusible works with (Nuage, Bulle, Pastille), a line that links
+  to the whole suite, a "See Pastille" link on the 3D board, and a "For developers" block (MCP
+  server, GitHub Action, source code).
+- The hero demo starts by typing the `<trace>` line, so the board is visibly described in code
+  before the fuse blows.
+
+### Changed
+
+- New headline, subtitle, title and description in every language: "Check your board before you
+  order it." The hero adds "Free and open source (GPL-3.0). No Facile account needed."
+- The site uses muse v0.24.0.
+
+### Fixed
+
+- The GitHub Action line on the download page named `FacileStudio/Fusible@v1`, a tag that does not
+  exist. It now names the latest release tag.
+
 ## [2.4.1] - 2026-11-14
 
 ### Fixed
