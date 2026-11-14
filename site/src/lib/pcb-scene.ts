@@ -1,7 +1,5 @@
 import { createViewport, demandLoop, stepTransition, type Transition } from "$lib/pcb-viewport";
-import { enrichBoard } from "$lib/pcb-overlays";
-
-const BOARD_URL = "/models/pastille.glb";
+import { disposeMaterial, enrichBoard } from "$lib/pcb-components";
 
 export type Preset = "iso" | "top" | "side";
 
@@ -9,6 +7,7 @@ export interface SceneControl {
   applyPreset: (preset: Preset) => void;
   setRotating: (value: boolean) => void;
   setInteractive: (value: boolean) => void;
+  loadUrl: (url: string) => Promise<void>;
   dispose: () => void;
 }
 
@@ -22,7 +21,7 @@ type Vec3 = import("three").Vector3;
 /**
  * Configures three-point studio lighting on a Three.js scene.
  */
-function addLights(THREE: typeof import("three"), scene: import("three").Scene) {
+export function addLights(THREE: typeof import("three"), scene: import("three").Scene) {
   scene.add(new THREE.HemisphereLight(0xffffff, 0x181818, 1.6));
   const key = new THREE.DirectionalLight(0xffffff, 2.5);
   key.position.set(70, 130, 90);
@@ -36,23 +35,15 @@ function addLights(THREE: typeof import("three"), scene: import("three").Scene) 
 }
 
 /**
- * Releases a material and every texture it holds.
- */
-function disposeMaterial(material: unknown) {
-  if (!material || typeof material !== "object") return;
-  for (const val of Object.values(material as Record<string, unknown>)) {
-    const tex = val as { isTexture?: boolean; dispose?: () => void };
-    if (tex?.isTexture && tex.dispose) tex.dispose();
-  }
-  (material as { dispose?: () => void }).dispose?.();
-}
-
-/**
  * Releases geometry, material, and texture allocations for a Three.js object tree.
  */
-function disposeObject(root: import("three").Object3D) {
+export function disposeObject(root: import("three").Object3D) {
   root.traverse((obj: unknown) => {
-    const mesh = obj as { isMesh?: boolean; geometry?: { dispose: () => void }; material?: unknown };
+    const mesh = obj as {
+      isMesh?: boolean;
+      geometry?: { dispose: () => void };
+      material?: unknown;
+    };
     if (!mesh.isMesh) return;
     mesh.geometry?.dispose();
     (Array.isArray(mesh.material) ? mesh.material : [mesh.material]).forEach(disposeMaterial);
@@ -60,10 +51,11 @@ function disposeObject(root: import("three").Object3D) {
 }
 
 /**
- * Mounts an interactive Three.js view of the Pastille board that renders only while something moves on screen.
+ * Mounts an interactive Three.js glTF PCB viewer that renders only while something moves on screen.
  */
 export async function mountPcbScene(
   host: HTMLDivElement,
+  initialUrl: string,
   initialRotate: boolean,
   hooks: SceneHooks,
 ): Promise<SceneControl> {
@@ -83,15 +75,12 @@ export async function mountPcbScene(
     side: new THREE.Vector3(1, 0.34, 0.08).normalize(),
   };
 
+  let currentModel: import("three").Object3D | null = null;
+  let center = new THREE.Vector3();
+  let distance = 60;
   let transition: Transition | null = null;
-
-  function fit() {
-    const { clientWidth: w, clientHeight: h } = host;
-    if (!w || !h || Math.abs(camera.aspect - w / h) < 0.001) return;
-    renderer.setSize(w, h, false);
-    camera.aspect = w / h;
-    camera.updateProjectionMatrix();
-  }
+  const loader = new GLTFLoader();
+  let loadSeq = 0;
 
   function setInteractive(on: boolean) {
     controls.enabled = on;
@@ -103,7 +92,6 @@ export async function mountPcbScene(
     renderer,
     host,
     () => {
-      fit();
       if (transition && !stepTransition(transition, camera, controls.target)) transition = null;
       const moved = controls.update();
       renderer.render(scene, camera);
@@ -117,35 +105,41 @@ export async function mountPcbScene(
   controls.addEventListener("change", loop.wake);
   setInteractive(false);
 
-  let board: import("three").Object3D;
-  try {
-    board = (await new GLTFLoader().loadAsync(BOARD_URL)).scene;
-  } catch (err) {
-    loop.dispose();
-    controls.dispose();
-    renderer.dispose();
-    renderer.domElement.remove();
-    throw err;
+  function frameModel(model: import("three").Object3D) {
+    const sphere = new THREE.Box3().setFromObject(model).getBoundingSphere(new THREE.Sphere());
+    center = sphere.center.clone();
+    const radius = Math.max(sphere.radius, 1);
+    camera.near = radius / 100;
+    camera.far = radius * 100;
+    camera.updateProjectionMatrix();
+    distance = (radius / Math.sin(((camera.fov / 2) * Math.PI) / 180)) * 0.88;
+    controls.minDistance = distance * 0.35;
+    controls.maxDistance = distance * 3;
+    controls.target.copy(center);
+    camera.position.copy(center).add(directions.iso.clone().multiplyScalar(distance));
+    controls.update();
   }
-  enrichBoard(THREE, board);
-  fit();
-  scene.add(board);
-  const sphere = new THREE.Box3().setFromObject(board).getBoundingSphere(new THREE.Sphere());
-  const center = sphere.center.clone();
-  const radius = Math.max(sphere.radius, 1);
-  camera.near = radius / 100;
-  camera.far = radius * 100;
-  camera.updateProjectionMatrix();
-  const vertical = (camera.fov / 2) * (Math.PI / 180);
-  const half = Math.min(vertical, Math.atan(Math.tan(vertical) * camera.aspect));
-  const distance = (radius / Math.sin(half)) * (camera.aspect < 1 ? 0.95 : 0.8);
-  controls.minDistance = distance * 0.35;
-  controls.maxDistance = distance * 3;
-  controls.target.copy(center);
-  camera.position.copy(center).add(directions.iso.clone().multiplyScalar(distance));
-  controls.update();
-  controls.autoRotate = initialRotate;
-  loop.wake();
+
+  async function loadUrl(url: string) {
+    const seq = ++loadSeq;
+    const gltf = await loader.loadAsync(url);
+    if (seq !== loadSeq) {
+      disposeObject(gltf.scene);
+      return;
+    }
+    if (currentModel) {
+      scene.remove(currentModel);
+      disposeObject(currentModel);
+    }
+    currentModel = gltf.scene;
+    if (url.includes("pastille.glb")) {
+      enrichBoard(THREE, currentModel);
+    }
+    scene.add(currentModel);
+    transition = null;
+    frameModel(currentModel);
+    loop.wake();
+  }
 
   function applyPreset(next: Preset) {
     transition = {
@@ -158,6 +152,18 @@ export async function mountPcbScene(
     loop.wake();
   }
 
+  try {
+    await loadUrl(initialUrl);
+  } catch (err) {
+    loop.dispose();
+    controls.dispose();
+    renderer.dispose();
+    renderer.domElement.remove();
+    throw err;
+  }
+  controls.autoRotate = initialRotate;
+  loop.wake();
+
   return {
     applyPreset,
     setRotating: (val: boolean) => {
@@ -165,10 +171,11 @@ export async function mountPcbScene(
       loop.wake();
     },
     setInteractive,
+    loadUrl,
     dispose: () => {
       loop.dispose();
       controls.dispose();
-      disposeObject(board);
+      if (currentModel) disposeObject(currentModel);
       renderer.dispose();
       renderer.domElement.remove();
     },

@@ -130,6 +130,8 @@ export interface LoopContent {
 export interface BoardContent {
   title: string;
   text: string;
+  pcb: string;
+  enclosure: string;
   presets: { iso: string; top: string; side: string };
   auto: string;
   explore: string;
