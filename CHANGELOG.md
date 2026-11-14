@@ -5,6 +5,16 @@ All notable changes to this project are documented here. The format is
 follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 `0.x`, a breaking change bumps the minor.
 
+## [2.4.0] - 2026-11-14
+
+### Changed
+
+- The landing 3D viewer shows the real Pastille board, designed with Fusible, loaded from
+  `/models/pastille.glb` (1.6 MB, about 460 KB gzipped) instead of a board drawn in code.
+  nginx now serves `.glb` as `model/gltf-binary` so it is gzipped and revalidated.
+- The landing alternates its section layouts: the 3D board now sits between the two card
+  grids.
+
 ## [2.3.0] - 2026-11-14
 
 ### Added
