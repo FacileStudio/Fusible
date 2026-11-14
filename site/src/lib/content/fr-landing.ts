@@ -55,8 +55,8 @@ export const frLanding: Landing = {
       },
     },
     board: {
-      title: "Une carte, en 3D",
-      text: "Touchez Explorer en 3D, puis faites-la tourner.",
+      title: "Pastille, en 3D",
+      text: "La vraie carte Pastille, conçue avec Fusible. Touchez Explorer en 3D pour la tourner.",
       presets: { iso: "Iso", top: "Dessus", side: "Côté" },
       auto: "Auto",
       explore: "Explorer en 3D",

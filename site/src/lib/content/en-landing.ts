@@ -48,8 +48,8 @@ export const enLanding: Landing = {
       sync: { title: "KiCad edits come back", text: "Move a part in KiCad, and fusible sync writes it back." },
     },
     board: {
-      title: "A board, in 3D",
-      text: "Tap Explore in 3D, then drag to turn it.",
+      title: "Pastille, in 3D",
+      text: "The real Pastille board, designed with Fusible. Tap Explore in 3D to turn it.",
       presets: { iso: "Iso", top: "Top", side: "Side" },
       auto: "Auto",
       explore: "Explore in 3D",

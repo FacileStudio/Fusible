@@ -18,8 +18,8 @@
 <SiteShell {content}>
   <Hero {content} />
   <Loop {content} />
-  <Demos {content} />
   <Board3D {content} />
+  <Demos {content} />
   <Agents {content} />
   <Download {content} {release} />
   <Closing {content} />

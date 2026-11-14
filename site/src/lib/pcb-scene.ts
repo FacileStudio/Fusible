@@ -1,5 +1,7 @@
 import { createViewport, demandLoop, stepTransition, type Transition } from "$lib/pcb-viewport";
-import { buildBoard } from "$lib/pcb-board";
+import { enrichBoard } from "$lib/pcb-overlays";
+
+const BOARD_URL = "/models/pastille.glb";
 
 export type Preset = "iso" | "top" | "side";
 
@@ -58,16 +60,17 @@ function disposeObject(root: import("three").Object3D) {
 }
 
 /**
- * Mounts an interactive Three.js view of the demo board that renders only while something moves on screen.
+ * Mounts an interactive Three.js view of the Pastille board that renders only while something moves on screen.
  */
 export async function mountPcbScene(
   host: HTMLDivElement,
   initialRotate: boolean,
   hooks: SceneHooks,
 ): Promise<SceneControl> {
-  const [THREE, { OrbitControls }] = await Promise.all([
+  const [THREE, { OrbitControls }, { GLTFLoader }] = await Promise.all([
     import("three"),
     import("three/examples/jsm/controls/OrbitControls.js"),
+    import("three/examples/jsm/loaders/GLTFLoader.js"),
   ]);
 
   const { renderer, camera, controls } = createViewport(THREE, OrbitControls, host, hooks.onUserInteract);
@@ -114,8 +117,18 @@ export async function mountPcbScene(
   controls.addEventListener("change", loop.wake);
   setInteractive(false);
 
+  let board: import("three").Object3D;
+  try {
+    board = (await new GLTFLoader().loadAsync(BOARD_URL)).scene;
+  } catch (err) {
+    loop.dispose();
+    controls.dispose();
+    renderer.dispose();
+    renderer.domElement.remove();
+    throw err;
+  }
+  enrichBoard(THREE, board);
   fit();
-  const board = buildBoard(THREE);
   scene.add(board);
   const sphere = new THREE.Box3().setFromObject(board).getBoundingSphere(new THREE.Sphere());
   const center = sphere.center.clone();
