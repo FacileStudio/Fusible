@@ -1,7 +1,7 @@
 {
   "name": "Fusible",
   "short_name": "Fusible",
-  "description": "Electrical and physical linting, generated Rust firmware pins, 3D parts in code and fabrication files.",
+  "description": "Describe your circuit board in code. Fusible checks every rule and blocks the export while an error remains.",
   "icons": [
     {
       "src": "/icon-192.png",
