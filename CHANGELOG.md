@@ -5,6 +5,20 @@ All notable changes to this project are documented here. The format is
 follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 `0.x`, a breaking change bumps the minor.
 
+## [2.5.1] - 2026-11-14
+
+### Changed
+
+- The site's share image and web manifest carry the new description: "Describe your circuit board
+  in code. Fusible checks every rule and blocks the export while an error remains."
+- The site uses muse v0.25.1: long commands such as the GitHub Action line wrap between words and
+  path segments on narrow screens.
+
+### Fixed
+
+- The README's GitHub Action example pinned `FacileStudio/Fusible@v1`, a tag that does not exist.
+  It now pins a release tag and links to the latest release.
+
 ## [2.5.0] - 2026-11-14
 
 ### Added
