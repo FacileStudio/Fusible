@@ -5,6 +5,16 @@ All notable changes to this project are documented here. The format is
 follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 `0.x`, a breaking change bumps the minor.
 
+## [2.2.1] - 2026-11-14
+
+### Changed
+
+- The landing download section (`/`, `/fr`) shows only the visitor's platform, with the install
+  commands on a desktop, and an "All downloads" link to `/download` (`/fr/download`). The
+  download page still lists every installer.
+- The site uses muse v0.23.0 and mise-en-scene v0.2.2. The kit no longer needs a Vite
+  `optimizeDeps` entry.
+
 ## [2.2.0] - 2026-11-14
 
 ### Changed
