@@ -12,7 +12,7 @@ use super::spec::Spec;
 use super::BodyError;
 use crate::tscircuit::bun_path;
 
-const SCRIPT_TIMEOUT: Duration = Duration::from_secs(120);
+const DEFAULT_TIMEOUT_SECS: u64 = 120;
 const MAX_OUTPUT: u64 = 64 * 1024;
 
 /// Returns the cache directory of the generator, keyed by the occt-wasm version so upgrades reuse the install.
@@ -33,9 +33,18 @@ pub(super) fn run_generator(spec: &Spec) -> Result<Option<PartReport>, BodyError
     run_capture("generator.ts", &payload).map(|out| PartReport::from_output(&out))
 }
 
+/// Returns the deadline of one script: `value` (`FUSIBLE_BODY_TIMEOUT_SECS`) as positive seconds, else 120.
+pub(super) fn timeout_from(value: Option<&str>) -> Duration {
+    let secs = value
+        .and_then(|v| v.trim().parse::<u64>().ok())
+        .filter(|s| *s > 0)
+        .unwrap_or(DEFAULT_TIMEOUT_SECS);
+    Duration::from_secs(secs)
+}
+
 /// Runs the embedded script `script` under bun with `payload` on stdin; stdout is discarded.
 ///
-/// Bun is killed when it runs longer than [`SCRIPT_TIMEOUT`].
+/// Bun is killed when it runs longer than [`timeout_from`] allows.
 pub(crate) fn run_script(script: &str, payload: &[u8]) -> Result<(), BodyError> {
     run_capture(script, payload).map(|_| ())
 }
@@ -59,13 +68,14 @@ pub(crate) fn run_capture(script: &str, payload: &[u8]) -> Result<String, BodyEr
         .take()
         .expect("stdin is piped")
         .write_all(payload);
-    let status = wait_or_kill(&mut child, SCRIPT_TIMEOUT);
+    let timeout = timeout_from(std::env::var("FUSIBLE_BODY_TIMEOUT_SECS").ok().as_deref());
+    let status = wait_or_kill(&mut child, timeout);
     let joined = |reader: Option<thread::JoinHandle<String>>| {
         reader.and_then(|r| r.join().ok()).unwrap_or_default()
     };
     let (stdout, stderr) = (joined(stdout), joined(stderr));
     let command = format!("bun {}", dir.join(script).display());
-    outcome(status, wrote.is_ok(), command, stderr).map(|()| stdout)
+    outcome(status, wrote.is_ok(), command, stderr, timeout).map(|()| stdout)
 }
 
 /// Maps how bun ended to the result of the script: killed, failed, or done.
@@ -74,11 +84,12 @@ fn outcome(
     wrote: bool,
     command: String,
     stderr: String,
+    timeout: Duration,
 ) -> Result<(), BodyError> {
     match status {
         None => Err(BodyError::GeneratorTimeout {
             command,
-            seconds: SCRIPT_TIMEOUT.as_secs(),
+            seconds: timeout.as_secs(),
         }),
         Some(status) if status.success() && wrote => Ok(()),
         Some(status) => Err(BodyError::GeneratorFailed {

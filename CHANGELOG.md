@@ -7,7 +7,16 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 
 ## [Unreleased]
 
+### Added
+
+- `FUSIBLE_BODY_TIMEOUT_SECS` raises the 120 second limit of one body or assembly script, for
+  models too detailed to build or measure in that time. The timeout message names it.
+
 ### Fixed
+
+- The assembly check intersected every probe with every body. It now skips a body whose bounding
+  box the probe does not reach, which halves the time on a two-board project where each board has
+  its own case.
 
 - Assembly treated every non-plated hole as a mounting hole. `board.holes` handed a key switch's
   shaft and peg holes to code parts, the generated enclosure raised a screw boss under each one,

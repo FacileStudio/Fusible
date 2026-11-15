@@ -264,7 +264,8 @@ The command is fuse-gated: every board it draws, and every board a generated bod
 to, passes `check` first (`--skip-lint` skips it). A board needs its `.tsx` entry and a
 tscircuit runner; a generated body is rebuilt, an authored body read from its `source:` after
 its `build:` runs. Models land in `dist/assembly/`. Like `body`, it needs `bun` and
-`occt-wasm`.
+`occt-wasm`. One body or assembly script stops after 120 seconds; set
+`FUSIBLE_BODY_TIMEOUT_SECS` to give a detailed model more time.
 
 Three rules compare the boards with the bodies and blow the fuse (exit 1, no `assembly.*`
 written):

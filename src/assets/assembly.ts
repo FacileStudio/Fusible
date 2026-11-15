@@ -83,6 +83,12 @@ const overlap = (a: ShapeHandle, b: ShapeHandle) => {
   return { common, volume, at };
 };
 
+type Box = ReturnType<typeof k.getBoundingBox>;
+
+/** True when two bounding boxes share no volume, so the solids inside them cannot overlap. */
+const apart = (a: Box, b: Box) =>
+  a.xmax < b.xmin || b.xmax < a.xmin || a.ymax < b.ymin || b.ymax < a.ymin || a.zmax < b.zmin || b.zmax < a.zmin;
+
 const measure = () => {
   const { bodies, invalid } = loadBodies();
   const doc = job.preview ? k.createXCAFDocument() : null;
@@ -94,13 +100,16 @@ const measure = () => {
     return { volume: found.volume, at: found.at, collision: name };
   };
 
+  const boxes = new Map([...bodies].map(([name, solid]) => [name, k.getBoundingBox(solid)]));
   const hits = [];
   const measured: string[] = [];
   for (const probe of job.probes) {
     measured.push(probe.id);
     const shape = k.transform(buildProbe(k, probe), probe.matrix);
     if (probe.show) doc?.addShape(shape, { name: probe.id, color: COLORS.board });
+    const reach = k.getBoundingBox(shape);
     for (const [body, solid] of bodies) {
+      if (apart(reach, boxes.get(body)!)) continue;
       const found = overlap(shape, solid);
       if (found.volume > NO_VOLUME) hits.push({ probe: probe.id, body, ...hit(probe.collide, found) });
     }
