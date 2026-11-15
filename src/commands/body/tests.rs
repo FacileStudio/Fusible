@@ -69,6 +69,18 @@ fn bosses_raise_the_board_and_use_pilot_holes() {
 }
 
 #[test]
+fn bosses_skip_the_holes_of_a_footprint() {
+    let model = PcbModel::parse(
+        r#"[{"type":"pcb_board","width":80,"height":60,"thickness":1.4},
+            {"type":"pcb_hole","x":-36,"y":26,"hole_diameter":2.2},
+            {"type":"pcb_hole","pcb_component_id":"pc1","x":0,"y":0,"hole_diameter":4.2}]"#,
+    );
+    let spec = build_spec(&model, &settings(Ventilation::None), Vec::new()).unwrap();
+    let at: Vec<_> = spec.bosses.iter().map(|b| (b.x, b.y)).collect();
+    assert_eq!(at, [(-36.0, 26.0)]);
+}
+
+#[test]
 fn height_must_clear_the_board_stack() {
     let model = PcbModel::parse(r#"[{"type":"pcb_board","width":20,"height":20}]"#);
     let s = Settings {

@@ -14,7 +14,7 @@ export type Process = "fdm" | "sla" | "mjf" | "injection" | "cnc";
 export type Board = {
   outline: [number, number][];
   thickness: number;
-  /** Non-plated holes only: the mounting holes. */
+  /** The mounting holes: non-plated holes of the board itself. Holes inside a part's footprint are left out. */
   holes: { x: number; y: number; d: number }[];
   /** Wall openings a connector needs. `z` is the bottom of the opening, `w` runs along the board edge. */
   openings: { name: string; x: number; y: number; z: number; w: number; h: number; side: string }[];

@@ -33,7 +33,7 @@ pub const CROSS_WORLD: &[RuleMeta] = &[
     ),
     mech(
         "hole_misaligned",
-        "Every non-plated hole of a fitted board meets a boss and an empty bore.",
+        "Every mounting hole of a fitted board meets a boss, and no hole holds body material.",
     ),
     mech(
         "connector_blocked",

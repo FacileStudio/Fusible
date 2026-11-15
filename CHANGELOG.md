@@ -5,6 +5,18 @@ All notable changes to this project are documented here. The format is
 follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 `0.x`, a breaking change bumps the minor.
 
+## [Unreleased]
+
+### Fixed
+
+- Assembly treated every non-plated hole as a mounting hole. `board.holes` handed a key switch's
+  shaft and peg holes to code parts, the generated enclosure raised a screw boss under each one,
+  and `hole_misaligned` guessed from part outlines: a footprint hole outside its part's outline
+  needed a boss, and a board hole under a part did not. A mounting hole is now a `<hole>` on the
+  board itself (a `pcb_hole` with no `pcb_component_id`), and each one from
+  `assembly.hole_min_diameter` up needs a boss. Footprint holes need none but still blow the fuse
+  when a body fills them. `fusible body kit` marks each hole with `mounting`.
+
 ## [2.5.1] - 2026-11-14
 
 ### Changed

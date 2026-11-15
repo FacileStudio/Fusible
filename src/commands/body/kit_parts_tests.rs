@@ -64,3 +64,15 @@ fn an_unknown_part_keeps_the_model_height() {
         kit.keep_out[0].z1
     );
 }
+
+#[test]
+fn kit_marks_only_the_board_holes_as_mounting() {
+    let json = board(
+        r#"{"type":"pcb_hole","pcb_component_id":null,"x":-15,"y":10,"hole_diameter":2.2},
+  {"type":"pcb_hole","pcb_component_id":"pc1","x":0,"y":0,"hole_diameter":4.2},
+  {"type":"pcb_plated_hole","x":5,"y":5,"shape":"circle","hole_diameter":1.0,"outer_diameter":1.6}"#,
+    );
+    let kit = build_kit(&json, None).unwrap();
+    let mounting: Vec<_> = kit.holes.iter().map(|h| (h.diameter, h.mounting)).collect();
+    assert_eq!(mounting, [(2.2, true), (4.2, false), (1.0, false)]);
+}

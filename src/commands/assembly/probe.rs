@@ -195,7 +195,7 @@ fn openings(frame: &Frame, kit: &Kit) -> Vec<Probe> {
 
 /// Builds every probe of the board `board`, placed by `frame` in the assembly frame.
 ///
-/// A hole narrower than `min_hole` or under a component needs no boss.
+/// Only a mounting hole of at least `min_hole` needs a boss; a footprint hole keeps its bore probe.
 pub fn probes(board: &str, kit: &Kit, frame: &Matrix, min_hole: f64) -> Vec<Probe> {
     let frame = Frame {
         board,

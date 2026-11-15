@@ -5,7 +5,7 @@ type KitOpening = { component: string; side: string; from: [number, number]; to:
 export type Kit = {
   outline: [number, number][];
   thickness: number;
-  holes: { x: number; y: number; diameter: number; plated: boolean }[];
+  holes: { x: number; y: number; diameter: number; plated: boolean; mounting: boolean }[];
   components: KitComponent[];
   keep_out: { component: string; x: number; y: number; w: number; h: number; z0: number; z1: number }[];
   openings: KitOpening[];
@@ -34,7 +34,7 @@ export const toBoard = (kit: Kit | null): Board | null => {
   return {
     outline: kit.outline,
     thickness,
-    holes: kit.holes.filter((h) => !h.plated).map((h) => ({ x: h.x, y: h.y, d: h.diameter })),
+    holes: kit.holes.filter((h) => h.mounting).map((h) => ({ x: h.x, y: h.y, d: h.diameter })),
     openings: kit.openings.map((o) => opening(o, kit.components, half)),
     components: measured.map((c) => ({ name: c.name, x: c.x, y: c.y, bottom: c.z!, top: c.z! + c.height! })),
   };

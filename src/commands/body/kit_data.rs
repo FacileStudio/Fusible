@@ -8,12 +8,14 @@ use super::spec::open_ring;
 use super::{BodyError, CLEARANCE, DEFAULT_BOARD_THICKNESS, EDGE_TOLERANCE, NOTCH_MARGIN};
 use crate::gerber::PcbModel;
 
+/// A drilled hole; `mounting` marks a non-plated hole of the board itself, not of a footprint.
 #[derive(Debug, Serialize)]
 pub(crate) struct KitHole {
     pub x: f64,
     pub y: f64,
     pub diameter: f64,
     pub plated: bool,
+    pub mounting: bool,
 }
 
 /// A component footprint: `x`, `y` is its center, `w` and `h` its size.
@@ -84,24 +86,30 @@ pub(crate) struct Kit {
 
 /// The holes with a usable diameter, and how many had none and were left out.
 fn holes(model: &PcbModel) -> (Vec<KitHole>, usize) {
-    let plain = model
-        .holes
-        .iter()
-        .map(|h| (h.x, h.y, h.hole_diameter.or(h.hole_width), false));
+    let plain = model.holes.iter().map(|h| {
+        (
+            h.x,
+            h.y,
+            h.hole_diameter.or(h.hole_width),
+            false,
+            h.is_mounting(),
+        )
+    });
     let plated = model
         .plated_holes
         .iter()
-        .map(|h| (h.x, h.y, h.hole_diameter.or(h.hole_width), true));
+        .map(|h| (h.x, h.y, h.hole_diameter.or(h.hole_width), true, false));
     let all: Vec<_> = plain.chain(plated).collect();
     let holes: Vec<KitHole> = all
         .iter()
-        .filter_map(|&(x, y, d, plated)| {
+        .filter_map(|&(x, y, d, plated, mounting)| {
             let diameter = d.filter(|d| d.is_finite() && *d > 0.0)?;
             Some(KitHole {
                 x,
                 y,
                 diameter,
                 plated,
+                mounting,
             })
         })
         .collect();

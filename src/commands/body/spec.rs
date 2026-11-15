@@ -166,6 +166,7 @@ pub(super) fn bounds_of(points: &[PcbPoint]) -> Bounds {
 fn bosses(holes: &[PcbHoleElm]) -> Vec<Boss> {
     holes
         .iter()
+        .filter(|h| h.is_mounting())
         .filter_map(|h| {
             let d = h.hole_diameter.filter(|d| *d > 0.0)?;
             Some(Boss {

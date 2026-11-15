@@ -24,6 +24,7 @@ pub struct PcbBoardElm {
 
 #[derive(Debug, Deserialize, Default)]
 pub struct PcbHoleElm {
+    pub pcb_component_id: Option<String>,
     pub x: f64,
     pub y: f64,
     pub hole_shape: Option<String>,
@@ -31,6 +32,16 @@ pub struct PcbHoleElm {
     pub hole_width: Option<f64>,
     pub hole_height: Option<f64>,
     pub ccw_rotation: Option<f64>,
+}
+
+impl PcbHoleElm {
+    /// Whether this is a mounting hole: drilled in the board itself, not in a part's footprint.
+    ///
+    /// A board-level `<hole>` has no `pcb_component_id`; a footprint hole names its part, even
+    /// when that part has no pads (a switch shaft hole drawn as its own chip).
+    pub fn is_mounting(&self) -> bool {
+        self.pcb_component_id.is_none()
+    }
 }
 
 #[derive(Debug, Deserialize, Default)]

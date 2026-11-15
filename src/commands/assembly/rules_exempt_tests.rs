@@ -1,5 +1,5 @@
 use super::place::IDENTITY;
-use super::probe::probes;
+use super::probe::{probes, Role};
 use super::rules::{missing_bosses, HOLE_MISALIGNED};
 use super::rules_support::rules;
 use crate::commands::body::build_kit;
@@ -21,9 +21,25 @@ fn probes_of(holes: &str, min_hole: f64) -> Vec<super::probe::Probe> {
 }
 
 #[test]
-fn a_hole_under_a_component_needs_no_boss() {
-    let hole = r#"{"type":"pcb_hole","x":10,"y":1,"hole_diameter":3.2}"#;
-    assert!(missing_bosses(&probes_of(hole, 1.0), &[], &fitted()).is_empty());
+fn a_footprint_hole_needs_no_boss_but_keeps_its_bore() {
+    let hole = r#"{"type":"pcb_hole","pcb_component_id":"pc1","x":-10,"y":1,"hole_diameter":3.0}"#;
+    let probes = probes_of(hole, 1.0);
+    assert!(missing_bosses(&probes, &[], &fitted()).is_empty());
+    let hole = |r: &&Role| {
+        matches!(
+            r,
+            Role::HoleBore { .. } | Role::HoleNear { .. } | Role::HoleQuadrant { .. }
+        )
+    };
+    let roles: Vec<_> = probes.iter().map(|p| &p.role).filter(hole).collect();
+    assert!(matches!(roles[..], [Role::HoleBore { .. }]), "{roles:?}");
+}
+
+#[test]
+fn a_board_hole_under_a_component_still_needs_a_boss() {
+    let hole = r#"{"type":"pcb_hole","pcb_component_id":null,"x":10,"y":1,"hole_diameter":3.2}"#;
+    let found = missing_bosses(&probes_of(hole, 1.0), &[], &fitted());
+    assert_eq!(rules(&found), [HOLE_MISALIGNED]);
 }
 
 #[test]

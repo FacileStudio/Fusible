@@ -216,7 +216,7 @@ fusible body --wall-thickness 2.5 --height 25 --no-cutouts --no-mounting
 ```
 
 A board without a body gets a default enclosure. `mechanical`, `case` and `housing` are
-aliases of `body`. The enclosure comes from `pcb_board`: each `pcb_hole` gets a screw boss, and
+aliases of `body`. The enclosure comes from `pcb_board`: each mounting hole gets a screw boss, and
 components that reach the board edge get a wall notch. Flags override `fusible.yml`, which
 overrides defaults. It needs `bun`; the first run installs `occt-wasm` into
 `~/.cache/fusible/`.
@@ -233,7 +233,7 @@ fusible body kit sensor                   # reference kit in bodies/kit/sensor/
 replaces an existing file, and edits `fusible.yml` in one step, keeping your comments. If the
 entry has a shape it cannot edit safely, it leaves the manifest alone and exits 2 with the
 lines to change by hand. `kit` writes `kit.json` for people who model from scratch: the board
-`outline` and `thickness`, every `hole`, every component footprint (with `z` and `height` when
+`outline` and `thickness`, every `hole` (`mounting: true` on the board's own mounting holes), every component footprint (with `z` and `height` when
 the part has a 3D model), a `keep_out` box per modeled part, and the wall `openings` where a
 component reaches an edge — mm, in the PCB frame. `board.step` is added for TSX entries when a
 runner is installed. `eject` and `kit` are reserved: a body with either name is rejected.
@@ -270,7 +270,7 @@ Three rules compare the boards with the bodies and blow the fuse (exit 1, no `as
 written):
 
 - `body_interference`: a body overlaps the board slab or a component's volume, or two bodies overlap.
-- `hole_misaligned`: a body has material near a board hole but no boss around it (fewer than 2 of 4 ring quadrants), or material inside the bore (a pilot hole up to 0.5 mm narrower in radius is fine). A body fitted to a board must also have a boss for every non-plated hole of that board; plated holes need none.
+- `hole_misaligned`: a body has material near a board hole but no boss around it (fewer than 2 of 4 ring quadrants), or material inside the bore (a pilot hole up to 0.5 mm narrower in radius is fine). A body fitted to a board must also have a boss for every mounting hole of that board. A mounting hole is a non-plated `<hole>` placed on the board itself (in Circuit JSON, a `pcb_hole` with no `pcb_component_id`). A hole inside a part's footprint, such as a key switch's shaft and peg holes, needs no boss, but it must still stay free of body material. Plated holes need none.
 - `connector_blocked`: a body stands in front of the opening a connector at the board edge needs.
 
 Parts that only touch do not fire. Two bodies overlapping by more than 0.01 mm³ blow the fuse,
@@ -343,7 +343,7 @@ bodies:
     process: fdm          # fdm, sla, mjf, injection or cnc
 ```
 
-The part receives the board outline, holes, component heights and openings, plus helpers for
+The part receives the board outline, mounting holes, component heights and openings, plus helpers for
 shells, screw bosses, standoffs, vents and cut-outs. Builds are reproducible: STEP files carry
 a fixed timestamp. Materials feed `fusible bom` with mass and cost, and the `mech.*` rules
 read the features the helpers record — the process decides the limits (a 2 mm wall on FDM, 1.5

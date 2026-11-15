@@ -1,6 +1,6 @@
 # `hole_misaligned`
 
-Every non-plated hole of a fitted board meets a boss and an empty bore.
+Every mounting hole of a fitted board meets a boss, and no hole holds body material.
 
 | Field | Value |
 | --- | --- |
