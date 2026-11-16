@@ -5,6 +5,14 @@ All notable changes to this project are documented here. The format is
 follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 `0.x`, a breaking change bumps the minor.
 
+## [Unreleased]
+
+### Security
+
+- The site served the Vision tracker from `https://vision.facile.studio/s.js`, so a script from
+  another service ran on the page with its visitors' session. The site now serves a pinned copy
+  at `/vision-tracker.js` and loads nothing from that origin.
+
 ## [2.5.2] - 2026-11-15
 
 ### Added
