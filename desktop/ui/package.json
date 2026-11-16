@@ -23,7 +23,7 @@
     "vite": "^7"
   },
   "dependencies": {
-    "@facile/muse": "github:FacileStudio/muse#v0.21.0",
+    "@facile/muse": "github:FacileStudio/muse#v0.32.0",
     "gsap": "^3.13"
   }
 }
