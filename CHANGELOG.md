@@ -7,6 +7,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 
 ## [Unreleased]
 
+## [2.5.3] - 2026-11-16
+
+### Changed
+
+- The site, Studio, the desktop app and the phone app use muse v0.32.0. Tabs and option cards are 36px tall on pointer devices and 44px on touch.
+
 ### Security
 
 - The site served the Vision tracker from `https://vision.facile.studio/s.js`, so a script from
