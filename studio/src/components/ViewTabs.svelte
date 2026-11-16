@@ -19,6 +19,6 @@
   {items}
   value={studio.view}
   label="Views"
-  class="min-w-0 border-0"
+  class="min-w-0"
   onChange={(id) => setView(id as ViewName)}
 />
