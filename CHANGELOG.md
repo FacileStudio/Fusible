@@ -7,6 +7,12 @@ follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). While on
 
 ## [Unreleased]
 
+## [2.5.5] - 2026-11-17
+
+### Changed
+
+- `fusible opus` says `install it with: kit add opus` when the opus CLI is missing, and the site and docs install Fusible with `kit add fusible`. kit is the new Facile package manager.
+
 ## [2.5.4] - 2026-11-17
 
 ### Changed
