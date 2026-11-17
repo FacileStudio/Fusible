@@ -118,7 +118,7 @@ Use one component per section in `src/lib/components/sections/`, each at most 25
 
 - Each card: `bg-fc-surface rounded-3xl`, a Solar icon (`solar:monitor-linear`, `solar:smartphone-linear`), file size and a SHA-256 link when a `.sha256` or `desktop-checksums.txt` asset exists.
 - **Runtime fallback:** every button also works with no data. It links `https://github.com/FacileStudio/Fusible/releases/latest`.
-- CLI block: `cargo install fusible`, `facile install fusible`, and "GitHub Action: `uses: FacileStudio/Fusible@v1`".
+- CLI block: `cargo install fusible`, `kit add fusible`, and "GitHub Action: `uses: FacileStudio/Fusible@v1`".
 - Note for Android: "Allow installs from this source when Android asks."
 - Note for macOS/Windows: "The installers are not code-signed yet; your OS will ask to confirm." This matches the README.
 

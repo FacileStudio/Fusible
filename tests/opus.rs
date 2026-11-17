@@ -69,7 +69,7 @@ fn a_missing_opus_keeps_the_exit_code_and_prints_the_hint() {
 
     assert_eq!(out.status.code(), Some(1));
     let stderr = String::from_utf8_lossy(&out.stderr);
-    assert!(stderr.contains("opus CLI not found; install it with: facile install opus"));
+    assert!(stderr.contains("opus CLI not found; install it with: kit add opus"));
 }
 
 #[test]

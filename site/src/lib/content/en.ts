@@ -55,7 +55,7 @@ export const en: Content = {
       "In-app updates are verified against Fusible's own signing key.",
     cli: [
       { label: "Cargo", command: "cargo install fusible" },
-      { label: "Facile CLI", command: "facile install fusible" },
+      { label: "kit", command: "kit add fusible" },
     ],
     actionLine: "GitHub Action:",
   },

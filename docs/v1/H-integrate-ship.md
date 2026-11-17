@@ -135,7 +135,7 @@ gh repo edit FacileStudio/Fusible \
   This must list the CLI archives for every target in `release.yml`, `Fusible-Studio-*` installers plus `.sig`, `latest.json`, `desktop-checksums.txt`, `Fusible-android.apk` and its `.sha256`.
 - Mark the release latest: `gh release edit v1.0.0 --latest`.
 - crates.io: confirm the release workflow published it (`cargo search fusible --limit 1` shows `1.0.0`). If it didn't, run `cargo publish` locally (the crate owner is saravenpi; ask before publishing by hand).
-- Run `facile install fusible` (or `facile doctor`) to confirm the catalog resolves `FacileStudio/Fusible`.
+- Run `kit add fusible` (or `kit doctor`) to confirm the catalog resolves `FacileStudio/Fusible`.
 
 ## 8. Deploy fusible.facile.studio
 

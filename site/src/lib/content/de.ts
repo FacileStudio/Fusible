@@ -55,7 +55,7 @@ export const de: Content = {
       "Updates in der App werden mit Fusibles eigenem Signaturschlüssel geprüft.",
     cli: [
       { label: "Cargo", command: "cargo install fusible" },
-      { label: "Facile CLI", command: "facile install fusible" },
+      { label: "kit", command: "kit add fusible" },
     ],
     actionLine: "GitHub Action:",
   },

@@ -1,6 +1,6 @@
 # mise configuration for Fusible
 # Only plain tool versions are declared here so mise treats this as a safe config,
-# preventing untrusted-config prompts during automated builds (e.g. facile install).
+# preventing untrusted-config prompts during automated builds (e.g. kit add).
 [tools]
 lefthook = "latest"
 bun = "latest"

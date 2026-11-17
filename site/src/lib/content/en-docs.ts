@@ -10,7 +10,7 @@ export const enDocs: DocsContent = {
       id: "install",
       title: "Install",
       blocks: [
-        { kind: "code", code: "cargo install fusible\nfacile install fusible" },
+        { kind: "code", code: "cargo install fusible\nkit add fusible" },
         {
           kind: "p",
           text:
