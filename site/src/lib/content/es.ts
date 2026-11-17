@@ -55,7 +55,7 @@ export const es: Content = {
       "Las actualizaciones integradas se verifican con la clave de firma de Fusible.",
     cli: [
       { label: "Cargo", command: "cargo install fusible" },
-      { label: "CLI de Facile", command: "facile install fusible" },
+      { label: "kit", command: "kit add fusible" },
     ],
     actionLine: "GitHub Action:",
   },

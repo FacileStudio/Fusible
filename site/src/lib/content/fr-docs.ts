@@ -11,7 +11,7 @@ export const frDocs: DocsContent = {
       id: "install",
       title: "Installation",
       blocks: [
-        { kind: "code", code: "cargo install fusible\nfacile install fusible" },
+        { kind: "code", code: "cargo install fusible\nkit add fusible" },
         {
           kind: "p",
           text:

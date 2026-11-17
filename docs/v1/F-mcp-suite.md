@@ -125,7 +125,7 @@ Prints a snippet and exits 0.
 
 ## Part 2: Opus (`fusible check --opus`, `fusible bom --opus`)
 
-- Detect `opus` on PATH. If it's missing, print to stderr `opus CLI not found; install it with: facile install opus`. **Keep the check's own exit code.** The Opus side is best effort and never changes the fuse verdict.
+- Detect `opus` on PATH. If it's missing, print to stderr `opus CLI not found; install it with: kit add opus`. **Keep the check's own exit code.** The Opus side is best effort and never changes the fuse verdict.
 - **`check --opus`:**
   - For each blown-fuse **error** diagnostic, the key is `sha256` of `rule + "\n" + sorted elements + "\n" + board`. If track D's `elements` isn't merged yet, use the message.
   - Without a crypto crate: use `std::hash::DefaultHasher` hashed twice with different seeds, formatted as 32 hex chars. It's only for dedup.

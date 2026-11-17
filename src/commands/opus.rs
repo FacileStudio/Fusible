@@ -17,7 +17,7 @@ use crate::project::Project;
 use dedup::{fuse_key, Store};
 use task::{clean_title, create};
 
-const MISSING: &str = "opus CLI not found; install it with: facile install opus";
+const MISSING: &str = "opus CLI not found; install it with: kit add opus";
 
 fn on_path() -> bool {
     let path = std::env::var_os("PATH").unwrap_or_default();
